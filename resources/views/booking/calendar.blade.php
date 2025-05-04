@@ -30,18 +30,18 @@
 
     {{-- Modal Bootstrap --}}
     <div class="modal fade" id="bookingModal" tabindex="-1" aria-labelledby="bookingModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="bookingModalLabel">Booking Wizard</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-              {{-- Livewire Wizard --}}
-              @livewire('booking-wizard')
-          </div>
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="bookingModalLabel">Booking Wizard</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {{-- Livewire Wizard --}}
+                    @livewire('booking-wizard')
+                </div>
+            </div>
         </div>
-      </div>
     </div>
 
     {{-- Livewire Scripts --}}
@@ -56,28 +56,28 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-    // Tunggu hingga Livewire dimuat
-    setTimeout(function() {
-        let calendarEl = document.getElementById('calendar');
-        let calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth',
-            validRange: {
-                start: new Date().toISOString().split('T')[0]
-            },
-            dateClick: function(info) {
-                Livewire.dispatch('setDate', { date: info.dateStr });
+        setTimeout(function() {
+            let calendarEl = document.getElementById('calendar');
+            let calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                validRange: {
+                    start: new Date().toISOString().split('T')[0]
+                },
+                dateClick: function(info) {
+                    Livewire.dispatch('setDate', { date: info.dateStr });
 
-                // Tampilkan modal atau aksi lainnya
-                let modalEl = document.getElementById('bookingModal');
-                let modal = new bootstrap.Modal(modalEl);
-                modal.show();
-            }
-        });
-        calendar.render();
-    }, 100); // Tunda 100ms untuk memberi waktu Livewire dimuat
-});
-
+                    // Tampilkan modal atau aksi lainnya
+                    let modalEl = document.getElementById('bookingModal');
+                    let modal = new bootstrap.Modal(modalEl);
+                    modal.show();
+                }
+            });
+            calendar.render();
+        }, 100); // Tunda 100ms untuk memberi waktu Livewire dimuat
+    });
     </script>
+
+    {{-- SweetAlert2 --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
@@ -92,5 +92,6 @@
             });
         });
     </script>
+
 </body>
 </html>

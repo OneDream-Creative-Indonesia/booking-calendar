@@ -1,107 +1,80 @@
 <?php
 
-// namespace App\Services;
+namespace App\Services;
 
-// use Carbon\Carbon;
-// use Google_Client;
-// use Google_Service_Calendar;
-// use Google_Service_Calendar_Event;
-// use App\Models\GoogleCredential;
+use App\Models\GoogleCredential;
+use Google_Client;
+use Google_Service_Calendar;
+use Google_Service_Calendar_Event;
 
-// class GoogleCalendarService
-// {
-//     protected $client;
+class GoogleCalendarService
+{
+    protected $client;
 
-//     public function __construct()
-//     {
-//         $this->client = new Google_Client();
-//         $this->client->setClientId(env('GOOGLE_CLIENT_ID'));
-//         $this->client->setClientSecret(env('GOOGLE_CLIENT_SECRET'));
-//         $this->client->setRedirectUri(env('GOOGLE_REDIRECT_URI'));
-//         $this->client->addScope(Google_Service_Calendar::CALENDAR);
+    public function __construct()
+    {
+        $this->client = new Google_Client();
+        $this->client->setClientId(config('services.google.client_id'));
+        $this->client->setClientSecret(config('services.google.client_secret'));
+    }
 
-//         $this->authenticate();
-//     }
+    // Menyegarkan token jika sudah expired
+    public function refreshTokenIfNeeded()
+    {
+        $credential = GoogleCredential::latest()->first();
 
-//     protected function authenticate()
-//     {
-//         $credential = GoogleCredential::first();
+        // Cek apakah token sudah expired
+        if ($this->isTokenExpired($credential->expires_in)) {
+            $newToken = $this->refreshAccessToken($credential->refresh_token);
+            $credential->update([
+                'access_token' => $newToken['access_token'],
+                'expires_in' => $newToken['expires_in'],
+            ]);
+        }
+    }
 
-//         if ($credential) {
-//             $this->client->setAccessToken([
-//                 'access_token' => $credential->access_token,
-//                 'refresh_token' => $credential->refresh_token,
-//                 'expires_in' => $credential->expires_in,
-//                 'token_type' => $credential->token_type,
-//                 'created' => strtotime($credential->created_at),
-//             ]);
+    // Cek apakah token sudah expired
+    private function isTokenExpired($expiresIn)
+    {
+        return $expiresIn < now()->timestamp;
+    }
 
-//             if ($this->client->isAccessTokenExpired()) {
-//                 $newToken = $this->client->fetchAccessTokenWithRefreshToken($credential->refresh_token);
+    // Refresh token
+    private function refreshAccessToken($refreshToken)
+    {
+        $this->client->fetchAccessTokenWithRefreshToken($refreshToken);
+        return $this->client->getAccessToken();
+    }
 
-//                 $credential->update([
-//                     'access_token' => $newToken['access_token'],
-//                     'expires_in' => $newToken['expires_in'],
-//                     'token_type' => $newToken['token_type'],
-//                 ]);
-//             }
-//         }
-//     }
-//     public function getClient()
-//     {
-//         return $this->client;
-//     }
+    // Menambahkan event ke Google Calendar
+    public function createEvent($booking)
+    {
+        $credential = GoogleCredential::latest()->first();
+        $this->client->setAccessToken($credential->access_token);
 
-//     public function refreshTokenIfNeeded()
-//     {
-//         if ($this->client->isAccessTokenExpired()) {
-//             $credential = GoogleCredential::first();
-//             if ($credential && $credential->refresh_token) {
-//                 $newToken = $this->client->fetchAccessTokenWithRefreshToken($credential->refresh_token);
+        if ($this->client->isAccessTokenExpired()) {
+            $this->refreshTokenIfNeeded();
+            $this->client->setAccessToken($credential->access_token);
+        }
 
-//                 $credential->update([
-//                     'access_token' => $newToken['access_token'],
-//                     'expires_in' => $newToken['expires_in'],
-//                     'token_type' => $newToken['token_type'],
-//                 ]);
+        $service = new Google_Service_Calendar($this->client);
 
-//                 $this->client->setAccessToken($newToken);
-//             }
-//         }
-//     }
-//     public function createEvent($booking)
-//     {
-//         $calendarService = new Google_Service_Calendar($this->client);
+        $event = new Google_Service_Calendar_Event([
+            'summary' => 'Booking for ' . $booking->name,
+            'location' => 'Fotostudio',
+            'start' => [
+                'dateTime' => $booking->date . 'T' . $booking->time . ':00',
+                'timeZone' => 'Asia/Jakarta',
+            ],
+            'end' => [
+                'dateTime' => $booking->date . 'T' . (Carbon\Carbon::parse($booking->time)->addMinutes(30))->format('H:i') . ':00',
+                'timeZone' => 'Asia/Jakarta',
+            ],
+            'attendees' => [
+                ['email' => $booking->email],
+            ],
+        ]);
 
-//         if (empty($booking->date) || empty($booking->time)) {
-//             throw new \Exception('Date and time are required.');
-//         }
-
-//         try {
-//             $startTime = Carbon::createFromFormat('Y-m-d H:i', $booking->date . ' ' . $booking->time);
-//         } catch (\Exception $e) {
-//             throw new \Exception('Invalid date or time format. Expected format: Y-m-d and H:i');
-//         }
-
-//         $endTime = $startTime->copy()->addHour();
-
-//         $event = new Google_Service_Calendar_Event([
-//             'summary' => 'Booking: ' . $booking->name,
-//             'description' => 'Booking details: ' . $booking->package,
-//             'start' => [
-//                 'dateTime' => $startTime->toIso8601String(),
-//                 'timeZone' => 'Asia/Jakarta',
-//             ],
-//             'end' => [
-//                 'dateTime' => $endTime->toIso8601String(),
-//                 'timeZone' => 'Asia/Jakarta',
-//             ],
-//             'attendees' => [
-//                 ['email' => $booking->email],
-//             ],
-//         ]);
-
-//         $calendarService->events->insert('primary', $event);
-//     }
-
-// }
+        $service->events->insert('primary', $event);
+    }
+}

@@ -101,7 +101,7 @@ class BookingWizard extends Component implements HasForms
                             ->label('Jumlah Orang (Lebih dari 2 orang +25k/orang)')
                             ->options(array_combine(range(1, 15), range(1, 15)))
                             ->required(),
-                            Placeholder::make('dp_info')
+                        Placeholder::make('dp_info')
                             ->label('Down Payment (DP)')
                             ->content(new HtmlString('Rp. 30.000')),
 
@@ -168,7 +168,7 @@ class BookingWizard extends Component implements HasForms
     }
 
 
-    public function submit(GoogleCalendarService $googleCalendarService)
+    public function submit()
     {
         $this->validate([
             'date' => 'required|date',
@@ -199,9 +199,9 @@ class BookingWizard extends Component implements HasForms
             'confirmation' => $this->confirmation,
             'status' => 'pending',
         ]);
-        $googleCalendarService->refreshTokenIfNeeded();
+        // $googleCalendarService->refreshTokenIfNeeded();
+        // $googleCalendarService->createEvent($booking);
 
-        $googleCalendarService->createEvent($booking);
         $this->dispatch('bookingSuccess', 'Silakan kirim bukti booking ke admin kami.');
         return redirect()->route('booking.calendar');
     }
