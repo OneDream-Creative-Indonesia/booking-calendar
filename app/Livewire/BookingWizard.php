@@ -29,7 +29,8 @@ class BookingWizard extends Component implements HasForms
     public $email;
     public $people_count;
     protected $listeners = ['setDate'];
-
+    protected static ?string $title = 'My Custom Wizard Title';  // Or use getTitle()
+    protected static ?string $heading = 'Custom Wizard Heading';
 
     public function setDate($date)
     {
