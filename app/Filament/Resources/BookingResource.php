@@ -24,7 +24,7 @@
         protected static ?string $model = Booking::class;
 
         protected static ?string $navigationIcon = 'heroicon-o-camera';
-
+        protected static ?string $navigationLabel = 'List Booking';
         public static function form(Form $form): Form
         {
             return $form
@@ -33,42 +33,42 @@
                     ->label('Name')
                     ->required()
                     ->maxLength(255)
-                    ->disabled(!auth()->user()->hasRole('admin')),  // Hanya admin yang bisa edit
+                    ->disabled(!auth()->user()->hasRole('admin')),
 
                 Forms\Components\TextInput::make('whatsapp')
                     ->label('WhatsApp')
                     ->required()
                     ->maxLength(15)
-                    ->disabled(!auth()->user()->hasRole('admin')),  // Hanya admin yang bisa edit
+                    ->disabled(!auth()->user()->hasRole('admin')),
 
                 Forms\Components\TextInput::make('people_count')
                     ->label('Jumlah Orang')
                     ->numeric()
                     ->required()
-                    ->disabled(!auth()->user()->hasRole('admin')),  // Hanya admin yang bisa edit
+                    ->disabled(!auth()->user()->hasRole('admin')),
 
                 Forms\Components\DatePicker::make('date')
                     ->label('Tanggal')
                     ->required()
-                    ->disabled(!auth()->user()->hasRole('admin')),  // Hanya admin yang bisa edit
+                    ->disabled(!auth()->user()->hasRole('admin')),
 
                 Forms\Components\TimePicker::make('time')
                     ->label('Waktu')
                     ->required()
-                    ->disabled(!auth()->user()->hasRole('admin')),  // Hanya admin yang bisa edit
+                    ->disabled(!auth()->user()->hasRole('admin')),
 
                 Forms\Components\Select::make('package_id')
                     ->label('Paket')
                     ->relationship('package', 'title')
                     ->searchable()
                     ->required()
-                    ->disabled(!auth()->user()->hasRole('admin')),  // Hanya admin yang bisa edit
+                    ->disabled(!auth()->user()->hasRole('admin')),
 
                 Forms\Components\TextInput::make('email')
                     ->label('Email')
                     ->email()
                     ->required()
-                    ->disabled(!auth()->user()->hasRole('admin')),  // Hanya admin yang bisa edit
+                    ->disabled(!auth()->user()->hasRole('admin')),
 
                 Forms\Components\Toggle::make('confirmation')
                     ->label('Confirmed')

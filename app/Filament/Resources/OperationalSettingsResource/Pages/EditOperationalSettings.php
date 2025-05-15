@@ -1,0 +1,19 @@
+<?php
+
+namespace App\Filament\Resources\OperationalSettingsResource\Pages;
+
+use App\Filament\Resources\OperationalSettingsResource;
+use Filament\Actions;
+use Filament\Resources\Pages\EditRecord;
+
+class EditOperationalSettings extends EditRecord
+{
+    protected static string $resource = OperationalSettingsResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\DeleteAction::make(),
+        ];
+    }
+}

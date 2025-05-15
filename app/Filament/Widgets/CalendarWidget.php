@@ -10,8 +10,6 @@ class CalendarWidget extends FullCalendarWidget
 {
     public Model | string | null $model = Booking::class;
 
-    protected string $calendarView = 'resourceTimeGridWeek';
-
     protected function headerActions(): array
     {
         return [];
@@ -23,15 +21,25 @@ class CalendarWidget extends FullCalendarWidget
             ->where('date', '<=', $fetchInfo['end'])
             ->get()
             ->map(function (Booking $booking) {
+                $formattedTime = date('H:i', strtotime($booking->time));
                 return [
-                    'id'      => $booking->id,
-                    'title'   => $booking->name,
-                    'start'   => $booking->date . ' ' . $booking->time,
-                    'end'     => $booking->date . ' ' . $booking->time,
-                    'status'  => $booking->status,
+                    'id' => $booking->id,
+                    'title'   => "{$formattedTime} | {$booking->name}",
+                    'start'   => $booking->date,
+                    'end'     => $booking->date,
                 ];
             })
             ->toArray();
+    }
+    public function config(): array
+    {
+        return [
+            'eventDidMount' => \Saade\FilamentFullCalendar\JS::from(<<<'JS'
+                        function(info) {
+                            info.el.style.cursor = 'pointer';
+                        }
+                    JS),
+        ];
     }
 
     public static function canView(): bool

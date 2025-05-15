@@ -3,18 +3,20 @@
 namespace App\Livewire;
 
 use Livewire\Component;
+use App\Models\OperationalHour;
+use Illuminate\Support\HtmlString;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Wizard;
-use Filament\Forms\Concerns\InteractsWithForms;
+use Illuminate\Support\Facades\Blade;
 use Filament\Forms\Contracts\HasForms;
+use App\Services\GoogleCalendarService;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TimePicker;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Placeholder;
-use Filament\Forms\Components\Toggle;
-use Illuminate\Support\HtmlString;
-use Illuminate\Support\Facades\Blade;
-use App\Services\GoogleCalendarService;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Illuminate\Support\Facades\Log;
 class BookingWizard extends Component implements HasForms
 {
     use InteractsWithForms;
@@ -44,6 +46,14 @@ class BookingWizard extends Component implements HasForms
             'email' => '',
             'people_count' => '',
             "confirmation" => false
+        ]);
+    }
+    public function render()
+    {
+        $disabledDates = OperationalHour::pluck('day')->toArray(); // asumsi ada kolom 'date'
+
+        return view('livewire.booking-wizard', [
+            'disabledDates' => $disabledDates,
         ]);
     }
 
@@ -130,16 +140,19 @@ class BookingWizard extends Component implements HasForms
 
     protected function getTimeOptions(): array
     {
-        if (!$this->date) {
+        $dayOfWeek = \Carbon\Carbon::parse($this->date)->locale('id')->translatedFormat('l');// 'l' untuk nama hari lengkap, e.g., 'Monday'
+
+        // Cek apakah hari ini buka atau tidak
+        $operationalHour = \App\Models\OperationalHour::where('day', $dayOfWeek)->first();
+        if (!$operationalHour || !$operationalHour->is_open) {
             return [];
         }
 
         $times = [];
-        $start = \Carbon\Carbon::createFromTime(9, 0); // Mulai dari jam 9 pagi
-        $end = \Carbon\Carbon::createFromTime(17, 0);  // Sampai jam 5 sore
+        $start = \Carbon\Carbon::createFromTimeString($operationalHour->open_time);
+        $end = \Carbon\Carbon::createFromTimeString($operationalHour->close_time);
         $now = \Carbon\Carbon::now();
 
-        // Ambil semua jam yang sudah dipesan di tanggal yang dipilih
         $bookedTimes = \App\Models\Booking::where('date', $this->date)
             ->pluck('time')
             ->map(fn ($time) => \Carbon\Carbon::parse($time)->format('H:i'))
@@ -163,7 +176,6 @@ class BookingWizard extends Component implements HasForms
             $times[$time] = $time;
             $start->addMinutes(30);
         }
-
         return $times;
     }
 
@@ -204,9 +216,5 @@ class BookingWizard extends Component implements HasForms
 
         $this->dispatch('bookingSuccess', 'Silakan kirim bukti booking ke admin kami.');
         return redirect()->route('booking.calendar');
-    }
-    public function render()
-    {
-        return view('livewire.booking-wizard');
     }
 }
