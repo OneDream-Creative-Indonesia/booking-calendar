@@ -76,24 +76,24 @@ class BookingWizard extends Component implements HasForms
                     ->schema([
                         Select::make('package')
                             ->label('Pilih Paket')
-                            ->options(\App\Models\Package::pluck('title', 'title')->toArray())
+                            ->options(\App\Models\Package::pluck('title', 'id')->toArray())
                             ->required()
                             ->reactive(),
-                            Placeholder::make('basic_package')
-                            ->visible(fn ($get) => $get('package') === 'Basic')
-                            ->label('Paket Basic')
-                            ->content('Paket ini mencakup sesi foto 30 menit dengan 5 hasil edit terbaik.'),
-
-                        Placeholder::make('premium_package')
-                            ->visible(fn ($get) => $get('package') === 'Premium')
-                            ->label('Paket Premium')
-                            ->content('Paket ini mencakup sesi foto 1 jam dengan 10 hasil edit terbaik + cetak 4R.'),
-
-                        Placeholder::make('exclusive_package')
-                            ->visible(fn ($get) => $get('package') === 'Exclusive')
-                            ->label('Paket Exclusive')
-                            ->content('Paket ini mencakup sesi foto 2 jam dengan 20 hasil edit terbaik + cetak 10R & album.'),
-                    ]),
+                            Placeholder::make('package_info')
+                            ->visible(fn ($get) => $get('package'))
+                            ->label('Detail Paket')
+                            ->content(function ($get) {
+                                $package = \App\Models\Package::find($get('package'));
+                                return $package
+                                    ? new HtmlString("
+                                        <strong>{$package->title}</strong><br>
+                                        Durasi: {$package->duration_minutes} menit<br>
+                                        Harga: Rp " . number_format($package->price, 0, ',', '.') . "<br>
+                                        " . nl2br($package->description) . "
+                                    ")
+                                    : '';
+                            }),
+                        ]),
 
                 Wizard\Step::make('Data Pemesan')
                     ->schema([
@@ -193,8 +193,7 @@ class BookingWizard extends Component implements HasForms
             'people_count' => 'required|integer|min:1|max:15',
             'confirmation' => 'required|boolean',
         ]);
-
-        $package = \App\Models\Package::where('title', $this->package)->first();
+        $package = \App\Models\Package::find($this->package);
 
         if (!$package) {
             session()->flash('error', 'Paket tidak ditemukan.');

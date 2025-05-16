@@ -20,6 +20,8 @@ return new class extends Migration
             $table->string('whatsapp');
             $table->integer('people_count');
             $table->enum('status', ['pending', 'confirmed', 'cancelled','success'])->default('pending');
+            $table->boolean('confirmation')->default(false);
+            $table->string('email');
             $table->timestamps();
         });
     }
