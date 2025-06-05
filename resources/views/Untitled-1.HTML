@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snap Fun - Photobox Booking</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/6.1.8/index.global.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: white;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            min-height: calc(100vh - 80px);
+            background: white;
+            border-radius: 20px;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 50px;
+            padding: 20px 0;
+            border-bottom: 2px solid #f0f8ff;
+        }
+
+        .logo {
+            font-size: 36px;
+            font-weight: bold;
+            color: #2563eb;
+            text-shadow: none;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #666;
+            cursor: pointer;
+        }
+
+        .settings-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: #666;
+            cursor: pointer;
+        }
+
+        .progress-bar {
+            width: 60%;
+            height: 4px;
+            background: #2563eb;
+            border-radius: 2px;
+        }
+
+        /* Section visibility */
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        /* Home Page Styles */
+        .services-grid {
+            display: flex;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            max-width: 800px;
+            margin: 0 auto;
+            height: 500px;
+        }
+
+        .service-card {
+            background: linear-gradient(135deg, #f0f8ff 0%, #e0f2fe 100%);
+            border-radius: 20px;
+            padding: 40px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            border: 3px solid transparent;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
+            border-color: #2563eb;
+        }
+
+        .service-card.selected {
+            border-color: #2563eb;
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            transform: translateY(-3px);
+        }
+
+        .service-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2563eb;
+        }
+
+        .elephant-icon {
+            width: 100px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .elephant-svg {
+            width: 100px;
+            height: 80px;
+        }
+
+        /* Detail Page Styles */
+        .detail-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .service-info {
+            background: linear-gradient(135deg, #f0f8ff 0%, #e0f2fe 100%);
+            border-radius: 20px;
+            padding: 40px;
+            position: relative;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);
+        }
+
+        .service-info h2 {
+            color: #2563eb;
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 24px;
+        }
+
+        .info-list {
+            list-style: none;
+            margin-bottom: 30px;
+        }
+
+        .info-list li {
+            color: #2563eb;
+            margin-bottom: 12px;
+            padding-left: 20px;
+            position: relative;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .info-list li:before {
+            content: "•";
+            color: #2563eb;
+            position: absolute;
+            left: 0;
+        }
+
+        .elephant-detail {
+            position: absolute;
+            bottom: 16px;
+            right: 16px;
+            width: 70px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .background-section {
+            background: linear-gradient(135deg, #f0f8ff 0%, #e0f2fe 100%);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);
+        }
+
+        .background-section h3 {
+            color: #2563eb;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .background-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .background-option {
+            aspect-ratio: 1;
+            background: #e91e63;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            border: 4px solid transparent;
+            box-shadow: 0 2px 8px rgba(233, 30, 99, 0.15);
+        }
+
+        .background-option:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(233, 30, 99, 0.2);
+        }
+
+        .background-option.selected {
+            border-color: #2563eb;
+            transform: scale(1.08);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+
+        .continue-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            padding: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
+        }
+
+        .continue-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+
+        .continue-btn:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Calendar Page Styles */
+        .calendar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .month-navigation {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: #666;
+            cursor: pointer;
+        }
+
+        .month-year {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .calendar-container {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+
+        .calendar-header-cell {
+            text-align: center;
+            font-weight: bold;
+            color: #666;
+            padding: 12px 0;
+            font-size: 14px;
+        }
+
+        .calendar-cell {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .calendar-cell:hover {
+            background: #f0f8ff;
+        }
+
+        .calendar-cell.selected {
+            background: #2563eb;
+            color: white;
+        }
+
+        .calendar-cell.other-month {
+            color: #ccc;
+        }
+
+        .calendar-cell.today {
+            background: #e0e7ff;
+            color: #2563eb;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 20px;
+                border-radius: 0;
+            }
+
+            .logo {
+                font-size: 28px;
+            }
+
+            .services-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .service-card {
+                padding: 30px 20px;
+            }
+
+            .service-title {
+                font-size: 20px;
+            }
+
+            .detail-content {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .elephant-icon {
+                width: 80px;
+                height: 60px;
+            }
+
+            .elephant-svg {
+                width: 80px;
+                height: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Home Section -->
+    <div id="home" class="section active">
+        <div class="container">
+            <div class="header">
+                <div class="logo">Snap Fun</div>
+            </div>
+
+            <div class="services-grid">
+                <div class="service-card" onclick="selectService('photobox')">
+                    <div class="service-title">Snap Photobox</div>
+                    <p>7 Menit sesi foto photobox
+                                    Untuk 2 orang (Bisa tambahan
+                                    orang +15k/orang maks. 5 orang)
+                                    GRATIS 2 cetak foto
+                                    GRATIS Semua softfile</p>
+                    <div class="elephant-icon">
+                       <svg width="301" height="260" viewBox="0 0 301 260" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M286.315 251.593C281.681 250.918 283.536 242.535 284.703 239.777C278.912 251.695 270.979 252.437 273.946 236.897C267.639 249.711 260.689 247.11 263.812 233.072C268.264 171.322 255.69 141.709 189.939 143.806C187.813 132.91 185.856 121.976 183.936 111.029C274.691 99.3803 301.151 162.667 295.753 241.225C294.758 246.022 290.937 252.281 286.315 251.605L286.315 251.593Z" fill="#1759CA"/>
+                            <path d="M10.576 37.5072C15.2101 38.1826 13.3556 46.5659 12.1878 49.3235C17.9796 37.4051 25.9117 36.6639 22.9453 52.2032C29.2517 39.3891 36.2021 41.9907 33.0795 56.0282C28.6273 117.778 41.2007 147.392 106.952 145.294C109.078 156.191 111.035 167.125 112.956 178.071C22.2003 189.72 -4.26028 126.433 1.13761 47.8755C2.13321 43.0786 5.95399 36.8195 10.5759 37.495L10.576 37.5072Z" fill="#1759CA"/>
+                            <path d="M230.409 257.787L181.902 258.135L181.219 163.089L217.051 162.832L217.559 233.527L234.16 246.799C238.669 250.408 236.165 257.733 230.409 257.774L230.409 257.787Z" fill="#1759CA"/>
+                            <path d="M104.434 258.692L152.905 258.343L152.222 163.297L116.414 163.555L116.922 234.25L100.526 247.759C96.0684 251.433 98.6777 258.721 104.434 258.679L104.434 258.692Z" fill="#1759CA"/>
+                            <path d="M230.409 257.787L181.902 258.135L181.554 209.702L217.386 209.444L217.559 233.527L234.16 246.799C238.67 250.408 236.165 257.733 230.409 257.774L230.409 257.787Z" fill="#0C4FAF"/>
+                            <path d="M152.557 209.91L152.905 258.343L104.434 258.691C98.6779 258.733 96.0686 251.445 100.526 247.771L116.922 234.262L116.749 210.179L152.557 209.922L152.557 209.91Z" fill="#0C4FAF"/>
+                            <path d="M243.03 93.1805C258.417 106.279 270.548 123.176 277.92 142.404C284.466 159.488 272.201 177.917 254.037 178.047L77.9545 179.312C59.7901 179.443 47.262 161.192 53.5613 144.016C60.6572 124.696 72.5437 107.614 87.7414 94.296C60.7483 81.709 50.5748 53.8618 46.8425 31.9435C44.1348 16.0295 56.4642 1.54705 72.4852 1.62746L164.733 2.0645L255.022 1.4159C272.072 1.29342 284.804 17.612 280.209 34.1771C273.795 57.3292 260.636 77.7682 243.03 93.1927L243.03 93.1805Z" fill="#1759CA"/>
+                            <path d="M243.03 93.1805C258.417 106.279 270.548 123.176 277.92 142.404C284.466 159.488 272.201 177.917 254.037 178.047L77.9545 179.312C59.7901 179.443 47.262 161.192 53.5613 144.016C60.6572 124.696 72.5437 107.614 87.7414 94.296C60.7483 81.709 50.5748 53.8618 46.8425 31.9435C44.1348 16.0295 56.4642 1.54705 72.4852 1.62746L164.733 2.0645L255.022 1.4159C272.072 1.29342 284.804 17.612 280.209 34.1771C273.795 57.3292 260.636 77.7682 243.03 93.1927L243.03 93.1805Z" fill="#1759CA"/>
+                            <path d="M183.835 97.0636C175.668 97.1223 169.004 90.4986 168.945 82.2635C168.885 74.0284 175.454 67.3096 183.621 67.251C191.788 67.1923 198.453 73.816 198.512 82.0511C198.571 90.2862 192.003 97.0049 183.835 97.0636Z" fill="white"/>
+                            <path d="M184.013 91.4294C176.936 91.4803 171.139 85.7179 171.087 78.5824C171.078 77.2384 172.16 76.131 173.493 76.1214C174.826 76.1118 175.925 77.2036 175.934 78.5476C175.966 82.9829 179.567 86.5738 183.978 86.5421C188.389 86.5104 191.937 82.8681 191.906 78.4329C191.896 77.0889 192.979 75.9814 194.312 75.9718C195.644 75.9623 196.743 77.0541 196.753 78.3981C196.804 85.5336 191.09 91.3786 184.013 91.4294Z" fill="#231F20"/>
+                            <path d="M144.78 97.3442C136.613 97.4029 129.948 90.7792 129.889 82.5441C129.83 74.309 136.398 67.5903 144.566 67.5316C152.733 67.4729 159.397 74.0966 159.456 82.3317C159.516 90.5668 152.947 97.2856 144.78 97.3442Z" fill="white"/>
+                            <path d="M144.376 91.7143C137.299 91.7652 131.502 86.0028 131.45 78.8674C131.441 77.5234 132.523 76.4159 133.856 76.4063C135.189 76.3967 136.288 77.4885 136.297 78.8325C136.329 83.2678 139.942 86.8586 144.341 86.827C148.74 86.7954 152.3 83.153 152.269 78.7178C152.259 77.3738 153.342 76.2663 154.675 76.2567C156.008 76.2472 157.106 77.339 157.116 78.683C157.167 85.8185 151.453 91.6635 144.376 91.7143Z" fill="#231F20"/>
+                            <path d="M213.418 119.297C205.251 119.356 198.587 112.732 198.528 104.497C198.468 96.2622 205.037 89.5435 213.204 89.4849C221.371 89.4262 228.036 96.0498 228.095 104.285C228.154 112.52 221.586 119.239 213.418 119.297Z" fill="#0C4FAF"/>
+                            <path d="M115.471 120.001C107.304 120.06 100.639 113.436 100.58 105.201C100.521 96.9659 107.089 90.2471 115.257 90.1885C123.424 90.1298 130.088 96.7535 130.147 104.989C130.207 113.224 123.638 119.942 115.471 120.001Z" fill="#0C4FAF"/>
+                            <path d="M186.493 117.817C186.501 118.99 186.437 120.139 186.299 121.264C184.882 133.163 175.751 142.368 164.639 142.448C160.519 142.478 156.656 141.247 153.344 139.084C146.867 134.866 142.497 127.077 142.433 118.133C142.336 104.62 152.121 93.5893 164.287 93.5019C176.453 93.4145 186.396 104.303 186.493 117.817Z" fill="#231F20"/>
+                            <path d="M186.299 121.264C184.882 133.163 175.751 142.368 164.639 142.448C160.519 142.478 156.656 141.247 153.344 139.084C154.762 127.184 163.881 117.979 175.005 117.899C179.125 117.87 182.988 119.1 186.299 121.264Z" fill="#CE004F"/>
+                            <path d="M299.28 72.493L299.483 100.766C299.512 104.835 296.264 108.157 292.229 108.186C288.194 108.215 284.898 104.94 284.869 100.871C284.84 96.8024 288.088 93.48 292.123 93.451C292.898 93.4454 293.651 93.5622 294.343 93.7894L294.283 85.4443L275.802 90.4036L275.877 100.936C275.907 105.004 272.659 108.327 268.623 108.356C264.588 108.385 261.293 105.109 261.264 101.041C261.234 96.972 264.482 93.6496 268.518 93.6206C269.293 93.615 270.045 93.7318 270.738 93.959L270.646 81.2275L299.267 72.4809L299.28 72.493Z" fill="white"/>
+                        </svg>
+
+                    </div>
+                </div>
+
+                <div class="service-card" onclick="selectService('selfphoto')">
+                    <div class="service-title">Snap Self Photo</div>
+                </div>
+
+                <div class="service-card" onclick="selectService('portrait')">
+                    <div class="service-title">Snap Potrait Photo</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detail Section -->
+    <div id="detail" class="section">
+        <div class="container">
+            <div class="header">
+                <button class="back-btn" onclick="goBack()">&larr;</button>
+                <div class="logo">Snap Fun</div>
+            </div>
+
+            <div class="detail-content">
+                <div class="service-info">
+                    <h2>Snap Photobox</h2>
+                    <ul class="info-list">
+                        <li>Untuk 2 orang (Bisa tambahan orang)</li>
+                        <li>+15k/orang maks. 5 orang</li>
+                        <li>5 Menit sesi foto photobox</li>
+                        <li>GRATIS 2 cetak foto</li>
+                        <li>GRATIS Semua softfile</li>
+                    </ul>
+                    <div class="elephant-detail">
+                        <svg class="elephant-svg" viewBox="0 0 100 80" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Elephant Body -->
+                            <ellipse cx="50" cy="45" rx="25" ry="20" fill="#2563eb"/>
+
+                            <!-- Elephant Head -->
+                            <circle cx="50" cy="25" r="18" fill="#2563eb"/>
+
+                            <!-- Trunk -->
+                            <path d="M 32 35 Q 20 40 25 50" stroke="#2563eb" stroke-width="8" fill="none" stroke-linecap="round"/>
+
+                            <!-- Eyes -->
+                            <circle cx="45" cy="20" r="3" fill="white"/>
+                            <circle cx="55" cy="20" r="3" fill="white"/>
+                            <circle cx="45" cy="20" r="1.5" fill="black"/>
+                            <circle cx="55" cy="20" r="1.5" fill="black"/>
+
+                            <!-- Mouth -->
+                            <ellipse cx="50" cy="28" rx="2" ry="1" fill="#dc2626"/>
+
+                            <!-- Legs -->
+                            <rect x="38" y="60" width="6" height="12" fill="#2563eb" rx="3"/>
+                            <rect x="48" y="60" width="6" height="12" fill="#2563eb" rx="3"/>
+                            <rect x="56" y="60" width="6" height="12" fill="#2563eb" rx="3"/>
+
+                            <!-- Waving Hand -->
+                            <circle cx="75" cy="35" r="6" fill="#2563eb"/>
+                            <rect x="70" y="35" width="12" height="4" fill="#2563eb" rx="2"/>
+
+                            <!-- Ears -->
+                            <ellipse cx="35" cy="25" rx="6" ry="10" fill="#2563eb"/>
+                            <ellipse cx="65" cy="25" rx="6" ry="10" fill="#2563eb"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="background-section">
+                    <h3>Pilih Background</h3>
+                    <div class="background-grid">
+                        <div class="background-option" onclick="selectBackground(1)"></div>
+                        <div class="background-option" onclick="selectBackground(2)"></div>
+                        <div class="background-option" onclick="selectBackground(3)"></div>
+                        <div class="background-option" onclick="selectBackground(4)"></div>
+                        <div class="background-option" onclick="selectBackground(5)"></div>
+                        <div class="background-option" onclick="selectBackground(6)"></div>
+                    </div>
+
+                    <button class="continue-btn" id="continueBtn" onclick="goToCalendar()" disabled>
+                        Lanjutkan ke Pilih Tanggal
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendar Section -->
+    <div id="calendar" class="section">
+        <div class="container">
+            <div class="header">
+                <button class="back-btn" onclick="goBackToDetail()">&larr;</button>
+                <div class="progress-bar"></div>
+                <button class="settings-btn">⚙️</button>
+            </div>
+
+            <div class="calendar-header">
+                <div class="month-navigation">
+                    <button class="nav-btn" onclick="previousMonth()">&larr;</button>
+                    <div class="month-year" id="monthYear">September 2024</div>
+                    <button class="nav-btn" onclick="nextMonth()">&rarr;</button>
+                </div>
+            </div>
+
+            <div class="calendar-container">
+                <div class="calendar-grid" id="calendarGrid">
+                    <!-- Calendar will be generated by JavaScript -->
+                </div>
+            </div>
+
+            <button class="continue-btn" id="bookBtn" onclick="confirmBooking()" disabled style="margin-top: 30px;">
+                Konfirmasi Booking
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // State management
+        let selectedService = '';
+        let selectedBackground = 0;
+        let selectedDate = null;
+        let currentMonth = 8; // September (0-indexed)
+        let currentYear = 2024;
+
+        const monthNames = [
+            'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+        ];
+
+        const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+
+        // Navigation functions
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.add('active');
+        }
+
+        function selectService(service) {
+            selectedService = service;
+            if (service === 'photobox') {
+                showSection('detail');
+            } else {
+                alert('Layanan ini akan segera tersedia!');
+            }
+            saveToStorage();
+        }
+
+        function goBack() {
+            showSection('home');
+        }
+
+        function goBackToDetail() {
+            showSection('detail');
+        }
+
+        function selectBackground(bgNumber) {
+            // Remove previous selection
+            document.querySelectorAll('.background-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+
+            // Add selection to clicked option
+            event.target.classList.add('selected');
+            selectedBackground = bgNumber;
+
+            // Enable continue button
+            document.getElementById('continueBtn').disabled = false;
+            saveToStorage();
+        }
+
+        function goToCalendar() {
+            showSection('calendar');
+            generateCalendar();
+        }
+
+        // Calendar functions
+        function generateCalendar() {
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
+
+            // Update month/year display
+            document.getElementById('monthYear').textContent = `${monthNames[currentMonth]} ${currentYear}`;
+
+            // Add day headers
+            dayNames.forEach(day => {
+                const headerCell = document.createElement('div');
+                headerCell.className = 'calendar-header-cell';
+                headerCell.textContent = day;
+                grid.appendChild(headerCell);
+            });
+
+            // Get first day of month and number of days
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            const daysInPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
+
+            // Add previous month days
+            for (let i = firstDay - 1; i >= 0; i--) {
+                const cell = document.createElement('div');
+                cell.className = 'calendar-cell other-month';
+                cell.textContent = daysInPrevMonth - i;
+                grid.appendChild(cell);
+            }
+
+            // Add current month days
+            const today = new Date();
+            for (let day = 1; day <= daysInMonth; day++) {
+                const cell = document.createElement('div');
+                cell.className = 'calendar-cell';
+                cell.textContent = day;
+
+                // Check if it's today
+                if (currentYear === today.getFullYear() &&
+                    currentMonth === today.getMonth() &&
+                    day === today.getDate()) {
+                    cell.classList.add('today');
+                }
+
+                // Add click handler
+                cell.addEventListener('click', () => selectDate(day, cell));
+
+                grid.appendChild(cell);
+            }
+
+            // Add next month days to fill the grid
+            const totalCells = grid.children.length;
+            const remainingCells = 42 - totalCells; // 6 rows × 7 days
+            for (let day = 1; day <= remainingCells; day++) {
+                const cell = document.createElement('div');
+                cell.className = 'calendar-cell other-month';
+                cell.textContent = day;
+                grid.appendChild(cell);
+            }
+        }
+
+        function selectDate(day, cellElement) {
+            // Remove previous selection
+            document.querySelectorAll('.calendar-cell').forEach(cell => {
+                cell.classList.remove('selected');
+            });
+
+            // Add selection to clicked cell
+            cellElement.classList.add('selected');
+            selectedDate = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+            // Enable booking button
+            document.getElementById('bookBtn').disabled = false;
+            saveToStorage();
+        }
+
+        function previousMonth() {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            generateCalendar();
+        }
+
+        function nextMonth() {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            generateCalendar();
+        }
+
+        function confirmBooking() {
+            const bookingData = {
+                service: selectedService,
+                background: selectedBackground,
+                date: selectedDate,
+                timestamp: new Date().toISOString()
+            };
+
+            alert(`Booking berhasil!\n\nLayanan: ${selectedService}\nBackground: ${selectedBackground}\nTanggal: ${selectedDate}\n\nData telah disimpan di localStorage.`);
+
+            // Reset form
+            selectedService = '';
+            selectedBackground = 0;
+            selectedDate = null;
+            document.getElementById('bookBtn').disabled = true;
+            document.getElementById('continueBtn').disabled = true;
+
+            // Go back to home
+            showSection('home');
+            saveToStorage();
+        }
+
+        // Storage functions
+        function saveToStorage() {
+            const data = {
+                selectedService,
+                selectedBackground,
+                selectedDate
+            };
+            // Note: Using a variable instead of localStorage as per instructions
+            window.bookingData = data;
+        }
+
+        function loadFromStorage() {
+            if (window.bookingData) {
+                selectedService = window.bookingData.selectedService || '';
+                selectedBackground = window.bookingData.selectedBackground || 0;
+                selectedDate = window.bookingData.selectedDate || null;
+
+                // Update UI accordingly
+                if (selectedBackground > 0) {
+                    document.getElementById('continueBtn').disabled = false;
+                }
+                if (selectedDate) {
+                    document.getElementById('bookBtn').disabled = false;
+                }
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFromStorage();
+            generateCalendar();
+        });
+    </script>
+</body>
+</html>
