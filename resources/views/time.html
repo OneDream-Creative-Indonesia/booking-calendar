@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Scheduler</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f3f4f6;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 28rem;
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .icon-box {
+            width: 1.5rem;
+            height: 1.5rem;
+            background-color: #e9d5ff;
+            border-radius: 0.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon {
+            width: 1rem;
+            height: 1rem;
+        }
+
+        .purple-icon {
+            color: #9333ea;
+        }
+
+        .blue-icon {
+            color: #2563eb;
+        }
+
+        .gray-icon {
+            color: #9ca3af;
+        }
+
+        h2 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 0.25rem;
+            transition: color 0.2s;
+        }
+
+        .close-btn:hover {
+            color: #6b7280;
+        }
+
+        .description {
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .input-btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .date-input {
+            border-color: #93c5fd;
+            background-color: #eff6ff;
+        }
+
+        .date-input:hover {
+            background-color: #dbeafe;
+        }
+
+        .input-btn:hover {
+            border-color: #9ca3af;
+        }
+
+        .input-text {
+            color: #111827;
+            font-size: 0.875rem;
+        }
+
+        .reschedule-btn {
+            width: 100%;
+            background-color: #3b82f6;
+            color: white;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 0.5rem;
+        }
+
+        .reschedule-btn:hover {
+            background-color: #2563eb;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            z-index: 1000;
+        }
+
+        .calendar-modal {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 20rem;
+        }
+
+        .calendar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .nav-btn:hover {
+            background-color: #f3f4f6;
+        }
+
+        .month-year {
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .day-header {
+            text-align: center;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #6b7280;
+            padding: 0.5rem 0;
+        }
+
+        .day-btn {
+            height: 2.5rem;
+            width: 2.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+            color: #111827;
+        }
+
+        .day-btn:hover {
+            background-color: #f3f4f6;
+        }
+
+        .day-btn.selected {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        .day-btn:disabled {
+            visibility: hidden;
+        }
+
+        .clear-btn {
+            width: 100%;
+            background: none;
+            border: none;
+            color: #6b7280;
+            padding: 0.5rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .clear-btn:hover {
+            color: #374151;
+        }
+
+        .time-modal {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            width: 100%;
+            max-width: 18rem;
+        }
+
+        .time-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .time-title {
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .time-list {
+            max-height: 16rem;
+            overflow-y: auto;
+        }
+
+        .time-option {
+            width: 100%;
+            text-align: left;
+            padding: 0.75rem 1rem;
+            border: none;
+            background: white;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            color: #111827;
+        }
+
+        .time-option:hover {
+            background-color: #f9fafb;
+        }
+
+        .time-option.selected {
+            background-color: #f3f4f6;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .open-btn {
+            background-color: #3b82f6;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .open-btn:hover {
+            background-color: #2563eb;
+        }
+    </style>
+</head>
+<body>
+    <!-- Open Scheduler Button (initially shown) -->
+    <button class="open-btn" onclick="openScheduler()">Open Scheduler</button>
+
+    <!-- Main Reschedule Modal -->
+    <div class="modal hidden" id="rescheduleModal">
+        <div class="modal-header">
+            <div class="modal-title">
+                <div class="icon-box">
+                    <svg class="icon purple-icon" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
+                    </svg>
+                </div>
+                <h2>Reschedule product</h2>
+            </div>
+            <button class="close-btn" onclick="closeScheduler()">
+                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <p class="description">
+            Choose a day and time in the future you want your product to be published.
+        </p>
+
+        <div class="form-group">
+            <label class="form-label">Date</label>
+            <button class="input-btn date-input" onclick="openCalendar()">
+                <svg class="icon blue-icon" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
+                </svg>
+                <span class="input-text" id="selectedDate">November 7, 2023</span>
+            </button>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Time</label>
+            <button class="input-btn" onclick="openTimePicker()">
+                <svg class="icon gray-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12,6 12,12 16,14"/>
+                </svg>
+                <span class="input-text" id="selectedTime">12:30 AM</span>
+            </button>
+        </div>
+
+        <button class="reschedule-btn">Reschedule</button>
+    </div>
+
+    <!-- Calendar Modal -->
+    <div class="overlay hidden" id="calendarOverlay">
+        <div class="calendar-modal">
+            <div class="calendar-header">
+                <button class="nav-btn" onclick="navigateMonth(-1)">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <polyline points="15,18 9,12 15,6"/>
+                    </svg>
+                </button>
+                <span class="month-year" id="monthYear">November 2023</span>
+                <button class="nav-btn" onclick="navigateMonth(1)">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <polyline points="9,18 15,12 9,6"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="calendar-grid">
+                <div class="day-header">Su</div>
+                <div class="day-header">Mo</div>
+                <div class="day-header">Tu</div>
+                <div class="day-header">We</div>
+                <div class="day-header">Th</div>
+                <div class="day-header">Fr</div>
+                <div class="day-header">Sa</div>
+                <div id="calendarDays"></div>
+            </div>
+
+            <button class="clear-btn" onclick="closeCalendar()">Clear</button>
+        </div>
+    </div>
+
+    <!-- Time Picker Modal -->
+    <div class="overlay hidden" id="timeOverlay">
+        <div class="time-modal">
+            <div class="time-header">
+                <span class="time-title">12:30 PM</span>
+                <button class="close-btn" onclick="closeTimePicker()">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="time-list" id="timeList">
+                <!-- Time options will be generated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentMonth = 10; // November (0-indexed)
+        let currentYear = 2023;
+        let selectedDate = 'November 7, 2023';
+        let selectedTime = '12:30 AM';
+
+        const months = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+
+        const timeOptions = [
+            '12:00 PM', '12:30 PM', '01:00 PM', '01:30 PM', '02:00 PM', 
+            '02:30 PM', '03:00 PM', '03:30 PM', '04:00 PM', '04:30 PM'
+        ];
+
+        function openScheduler() {
+            document.querySelector('.open-btn').style.display = 'none';
+            document.getElementById('rescheduleModal').classList.remove('hidden');
+        }
+
+        function closeScheduler() {
+            document.querySelector('.open-btn').style.display = 'block';
+            document.getElementById('rescheduleModal').classList.add('hidden');
+        }
+
+        function openCalendar() {
+            document.getElementById('calendarOverlay').classList.remove('hidden');
+            generateCalendar();
+        }
+
+        function closeCalendar() {
+            document.getElementById('calendarOverlay').classList.add('hidden');
+        }
+
+        function openTimePicker() {
+            document.getElementById('timeOverlay').classList.remove('hidden');
+            generateTimeOptions();
+        }
+
+        function closeTimePicker() {
+            document.getElementById('timeOverlay').classList.add('hidden');
+        }
+
+        function navigateMonth(direction) {
+            currentMonth += direction;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            } else if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            generateCalendar();
+        }
+
+        function generateCalendar() {
+            const monthYear = document.getElementById('monthYear');
+            const calendarDays = document.getElementById('calendarDays');
+            
+            monthYear.textContent = `${months[currentMonth]} ${currentYear}`;
+            
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            
+            calendarDays.innerHTML = '';
+            
+            // Empty cells for days before the first day of the month
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDay = document.createElement('button');
+                emptyDay.className = 'day-btn';
+                emptyDay.disabled = true;
+                calendarDays.appendChild(emptyDay);
+            }
+            
+            // Days of the month
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayBtn = document.createElement('button');
+                dayBtn.className = 'day-btn';
+                dayBtn.textContent = day;
+                dayBtn.onclick = () => selectDate(day);
+                
+                if (day === 7) { // Highlight day 7 as selected
+                    dayBtn.classList.add('selected');
+                }
+                
+                calendarDays.appendChild(dayBtn);
+            }
+        }
+
+        function selectDate(day) {
+            const monthName = months[currentMonth];
+            selectedDate = `${monthName} ${day}, ${currentYear}`;
+            document.getElementById('selectedDate').textContent = selectedDate;
+            closeCalendar();
+        }
+
+        function generateTimeOptions() {
+            const timeList = document.getElementById('timeList');
+            timeList.innerHTML = '';
+            
+            timeOptions.forEach(time => {
+                const timeBtn = document.createElement('button');
+                timeBtn.className = 'time-option';
+                timeBtn.textContent = time;
+                timeBtn.onclick = () => selectTime(time);
+                
+                if (time === '12:30 PM') {
+                    timeBtn.classList.add('selected');
+                }
+                
+                timeList.appendChild(timeBtn);
+            });
+        }
+
+        function selectTime(time) {
+            selectedTime = time;
+            document.getElementById('selectedTime').textContent = time;
+            closeTimePicker();
+        }
+
+        // Close modals when clicking outside
+        document.getElementById('calendarOverlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeCalendar();
+            }
+        });
+
+        document.getElementById('timeOverlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeTimePicker();
+            }
+        });
+    </script>
+</body>
+</html>
