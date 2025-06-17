@@ -4,10 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Booking Studio Foto - Snap Fun</title>
-
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&display=swap" rel="stylesheet">
+    
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.14/index.global.min.js'></script>
 
     <style>
         /* Variabel Warna & Pengaturan Dasar */
@@ -18,6 +20,7 @@
             --text-dark: #282828;
             --text-light: #fff;
             --bg-light: #fff;
+            --bg-disabled: #f1f3f5;
             --border-light: #e0e0e0;
             --border-radius-md: 16px;
             --border-radius-lg: 24px;
@@ -38,7 +41,7 @@
             margin: 0 auto;
             padding: 2rem 1.5rem;
         }
-
+        
         /* Navigasi / Header */
         .navbar {
             display: flex;
@@ -47,115 +50,51 @@
             padding-bottom: 1rem;
             border-bottom: 1px solid var(--border-light);
             margin-bottom: 2rem;
-            height: 105px; /* Memberi tinggi agar layout stabil */
+            height: 70px;
         }
-
-        /* STYLING BARU UNTUK LOGO SVG */
+        
         .navbar-logo-svg {
-            flex-shrink: 0;
-            position: relative;
-        }
-        .navbar-logo-svg > div {
-             position: relative !important; /* Memastikan container SVG bisa diskalakan */
+            transform: scale(0.65);
+            transform-origin: right center;
         }
 
         .navbar .back-button {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
-            background-color: var(--primary-pink);
-            color: white;
-            border-radius: 50%;
-            text-decoration: none;
-            font-size: 1.5rem;
-            font-weight: bold;
-            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            width: 40px; height: 40px; background-color: var(--primary-pink);
+            color: white; border-radius: 50%; text-decoration: none;
+            font-size: 1.5rem; font-weight: bold; cursor: pointer;
+            flex-shrink: 0;
         }
 
         /* Konten Halaman yang Dapat Diganti */
-        .page {
-            display: none; /* Semua halaman disembunyikan secara default */
-            flex-direction: column;
-            align-items: center;
-            animation: fadeIn 0.5s ease-in-out;
-        }
-
-        .page.active {
-            display: flex; /* Hanya halaman aktif yang ditampilkan */
-        }
-
+        .page { display: none; flex-direction: column; align-items: center; animation: fadeIn 0.5s ease-in-out; }
+        .page.active { display: flex; }
+        
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
         /* Judul Section */
-        .section-header {
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-
-        .section-header h1 {
-            font-size: 2.5rem;
-            font-weight: 800;
-            margin: 0 0 0.5rem 0;
-        }
-
-        .section-header p {
-            font-size: 1.25rem;
-            font-weight: 500;
-            margin: 0;
-            color: #555;
-        }
+        .section-header { text-align: center; margin-bottom: 3rem; }
+        .section-header h1 { font-size: 2.5rem; font-weight: 800; margin: 0 0 0.5rem 0; }
+        .section-header p { font-size: 1.25rem; font-weight: 500; margin: 0; color: #555; }
 
         /* --- Halaman 1: Pemilihan Paket --- */
-        .packages-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2rem;
-            width: 100%;
-        }
-
-        .package-card {
-            border-radius: var(--border-radius-lg);
-            padding: 2rem;
-            color: var(--text-light);
-            cursor: pointer;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .package-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
-        }
-
-        .package-card .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-            padding-bottom: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
+        .packages-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; width: 100%; }
+        .package-card { border-radius: var(--border-radius-lg); padding: 2rem; color: var(--text-light); cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease; display: flex; flex-direction: column; }
+        .package-card:hover { transform: translateY(-10px); box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15); }
+        .package-card .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid rgba(255, 255, 255, 0.3); padding-bottom: 1rem; margin-bottom: 1.5rem; }
         .package-card .header h2 { margin: 0; font-size: 1.5rem; font-weight: 800; }
         .package-card .header .price { font-size: 1.5rem; font-weight: 800; }
-
         .package-card .details-list { list-style-type: none; padding: 0; margin: 0; flex-grow: 1; }
-
         .package-card .details-list li { margin-bottom: 1rem; display: flex; align-items: flex-start; }
-
         .package-card .details-list .icon { width: 20px; height: 20px; border-radius: 50%; background-color: var(--bg-light); margin-right: 1rem; flex-shrink: 0; }
-
         .package-card.card-blue { background-color: var(--primary-blue); }
         .package-card.card-pink { background-color: var(--primary-pink); }
         .package-card.card-yellow { background-color: var(--primary-yellow); color: var(--text-dark); }
         .package-card.card-yellow .icon { background-color: var(--primary-blue); }
-
+        
         /* --- Halaman 2: Pilih Background --- */
         .background-selection-layout { display: flex; gap: 3rem; width: 100%; align-items: flex-start; }
         .package-summary { flex: 1; max-width: 350px; }
@@ -163,34 +102,51 @@
         .package-summary ul { list-style-type: none; padding-left: 0; }
         .package-summary ul li { display: flex; align-items: center; margin-bottom: 1rem; font-weight: 500; }
         .package-summary ul .icon { width: 18px; height: 18px; border-radius: 50%; background-color: var(--primary-blue); margin-right: 1rem; }
-
+        .character-art { margin-top: 2rem; width: 347px; height: 330.13px; flex-shrink: 0; position: relative; }
+        .character-art svg { position: absolute; }
         .background-grid-container { flex: 2; background-color: white; padding: 2rem; border-radius: var(--border-radius-lg); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08); text-align: center; }
         .background-grid-container h2 { margin-top: 0; font-size: 1.8rem; }
         .background-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
         .background-item { cursor: pointer; }
-
         .background-item .preview { width: 100%; aspect-ratio: 1 / 1; background-color: var(--primary-blue); border-radius: var(--border-radius-md); margin-bottom: 0.5rem; border: 4px solid transparent; transition: border-color 0.2s; }
         .background-item.selected .preview { border-color: var(--primary-pink); }
         .background-item p { margin: 0; font-weight: 700; }
 
-        /* STYLING UNTUK GAJAH SVG */
-        .character-art { margin-top: 2rem; width: 347px; height: 330.13px; flex-shrink: 0; position: relative; }
-        .character-art svg { position: absolute; }
+        /* --- Halaman 3: Pilih Jadwal --- */
+        .schedule-layout { display: grid; grid-template-columns: 1.2fr 1fr; gap: 2rem; width: 100%; max-width: 1100px; }
+        .calendar-container { padding: 1.5rem; border-radius: var(--border-radius-lg); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08); }
+        .time-slots-container { display: flex; flex-direction: column; }
+        .time-slots-header { text-align: center; margin-bottom: 1.5rem; }
+        .time-slots-header h3 { margin: 0; font-size: 1.5rem; font-weight: 700; }
+        .time-slots-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: auto; }
+        .time-slot { padding: 1rem; text-align: center; border: 1px solid var(--border-light); border-radius: var(--border-radius-lg); cursor: pointer; font-weight: 700; transition: background-color 0.2s, color 0.2s; }
+        .time-slot.selected { background-color: var(--primary-blue); color: white; border-color: var(--primary-blue); }
+        .time-slot.disabled { background-color: var(--bg-disabled); color: #aaa; cursor: not-allowed; border-color: var(--border-light); }
+        .time-slots-container .btn-primary { margin-top: 1.5rem; }
+        
+        /* Override FullCalendar Styles */
+        .fc { --fc-border-color: transparent; --fc-today-bg-color: rgba(254, 221, 3, 0.2); --fc-button-text-color: var(--text-dark); font-family: 'Montserrat', sans-serif;}
+        .fc .fc-toolbar-title { font-size: 1.5rem; font-weight: 800; color: var(--text-dark); }
+        .fc .fc-button { background: none !important; border: none !important; box-shadow: none !important; }
+        .fc .fc-daygrid-day-number { font-weight: 700; }
+        .fc .fc-day.fc-day-today .fc-daygrid-day-number { color: var(--text-dark); }
+        .fc-day-selected .fc-daygrid-day-number, .fc-day-selected:hover .fc-daygrid-day-number { color: white; }
+        .fc-day-disabled { background-color: var(--bg-disabled) !important; color: #ccc !important; cursor: not-allowed; }
+        .fc-day-disabled .fc-daygrid-day-number { color: #aaa !important; }
 
-        /* --- Halaman 3: Form Booking --- */
+        /* --- Halaman 4: Form Booking --- */
         .form-container { width: 100%; max-width: 800px; background-color: white; padding: 2rem; border-radius: var(--border-radius-lg); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08); }
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
         .form-group { display: flex; flex-direction: column; }
-        .form-group label { margin-bottom: 0.5rem; font-weight: 700; }
+        .form-group label { margin-bottom: 0.5rem; font-weight: 700; font-size: 0.9rem; }
         .form-group label .red-star { color: var(--primary-pink); }
         .form-group .input-wrapper { position: relative; }
         .form-group .input-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; opacity: 0.5; }
         .form-group input, .form-group select { width: 100%; padding: 1rem 1rem 1rem 3rem; border-radius: var(--border-radius-md); border: 1px solid var(--border-light); font-size: 1rem; font-family: 'Montserrat', sans-serif; box-sizing: border-box; }
         .form-group select { appearance: none; padding-right: 3rem; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%231759CA'%3E%3Cpath d='M7 10l5 5 5-5H7z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1.5em; }
-
         .dp-section { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-light); }
         .dp-section h3 { margin: 0 0 1rem 0; font-size: 1.1rem; }
-        .dp-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .dp-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; gap: 1rem; flex-wrap: wrap;}
         .dp-info p { margin: 0; }
         .dp-info .price { font-weight: 800; font-size: 1.2rem; }
         .dp-info .btn-secondary { background: none; border: 2px solid var(--primary-blue); color: var(--primary-blue); padding: 0.5rem 1rem; }
@@ -200,7 +156,7 @@
         .agreement-box .red-star { color: var(--primary-pink); }
         .form-container .btn-primary { margin-top: 2rem; }
 
-        /* --- Halaman 4: Konfirmasi Sukses --- */
+        /* --- Halaman 5: Konfirmasi Sukses --- */
         .success-container { display: flex; flex-direction: column; align-items: center; text-align: center; max-width: 600px; }
         .success-icon { width: 100px; height: 100px; background-color: var(--primary-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 2rem; position: relative; }
         .success-icon .checkmark { width: 40px; height: 40px; stroke: white; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
@@ -215,34 +171,28 @@
         .btn { display: inline-block; padding: 1rem 2rem; font-family: 'Montserrat', sans-serif; font-size: 1rem; font-weight: 700; border-radius: var(--border-radius-lg); border: none; cursor: pointer; text-decoration: none; transition: background-color 0.3s, transform 0.2s; }
         .btn:hover { transform: translateY(-3px); }
         .btn-primary { background-color: var(--primary-blue); color: var(--text-light); width: 100%; text-align: center; box-sizing: border-box; font-size: 1.2rem; }
-
-        /* Media Query untuk Mobile */
+        
+        /* Media Query (Responsif) */
+        @media (max-width: 992px) {
+            .background-selection-layout { flex-direction: column; align-items: center; }
+            .schedule-layout { grid-template-columns: 1fr; }
+            .package-summary { max-width: 100%; text-align: center; display: flex; flex-direction: column; align-items: center; }
+            .packages-grid { grid-template-columns: 1fr; }
+            .character-art { display: none; }
+            .schedule-layout { gap: 1.5rem; }
+        }
+        
         @media (max-width: 768px) {
             .main-container { padding: 1rem; }
-            .navbar { padding-bottom: 1rem; margin-bottom: 1rem; }
-
-            .navbar-logo-svg {
-                transform: scale(0.65); /* Mengecilkan logo SVG */
-                transform-origin: right center; /* Titik penskalaan dari kanan */
-            }
-
+            .navbar { margin-bottom: 1.5rem; height: auto; }
+            .navbar-logo-svg { transform: scale(0.6); transform-origin: right center; }
             .section-header { margin-bottom: 2rem; }
             .section-header h1 { font-size: 1.8rem; }
             .section-header p { font-size: 1rem; }
-            .packages-grid { grid-template-columns: 1fr; }
-            .background-selection-layout { flex-direction: column; gap: 2rem; align-items: center; }
-            .package-summary { max-width: 100%; text-align: center; }
             .background-grid { grid-template-columns: 1fr 1fr; gap: 1rem; }
-
-            .character-art {
-                transform: scale(0.7);
-                transform-origin: center;
-                margin-top: -3rem;
-                margin-bottom: -4rem;
-            }
-
             .form-grid { grid-template-columns: 1fr; }
             .dp-info { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+            .time-slots-grid { grid-template-columns: 1fr 1fr; }
             .success-container h1 { font-size: 1.5rem; }
             .success-container p { font-size: 1rem; }
         }
@@ -253,37 +203,25 @@
     <main class="main-container">
         <nav class="navbar">
             <div id="backButtonContainer"></div>
-
             <div class="navbar-logo-svg">
-                <div style="width: 153.84px; height: 105px;">
-                    <div style="left: 0px; top: 0px; position: absolute"><svg width="154" height="105" viewBox="0 0 154 105" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M132.585 10.3348C128.575 10.3348 125.722 11.2509 123.431 11.9896C121.847 12.5001 120.595 12.9003 119.308 12.9003C118.022 12.9003 116.564 12.4839 114.434 11.5061L109.13 9.07215V17.8488C108.386 16.8817 107.537 15.9978 106.575 15.2053C102.657 11.9735 96.9683 10.3348 89.671 10.3348C85.4688 10.3348 81.3351 10.8613 78.3323 11.7801L75.6512 12.5995V19.0792C74.9658 17.6124 74.0931 16.3121 73.0307 15.1892C69.9858 11.9681 65.57 10.3375 59.9072 10.3375C55.3359 10.3375 52.3938 11.4228 50.0317 12.2932C48.2627 12.946 46.9841 13.4161 45.2441 13.4161C43.9893 13.4161 42.4708 13.2066 39.8898 11.6861L38.2369 10.7136V3.44135L35.9828 2.43661C32.4528 0.865038 27.7629 0 22.7671 0C10.1603 0 2.32785 6.33465 2.32785 16.5297C2.32785 20.9436 3.70927 24.4387 7.10219 28.6027L9.60931 31.6679C11.0514 33.4598 11.6973 34.3436 11.9029 34.8084C12.2904 35.6868 11.6867 36.4095 10.1471 35.9985C6.70938 35.0824 0 26.6818 0 26.6818V51.7196L2.30412 52.7055C5.46768 54.0595 9.41685 54.8842 13.5822 55.0777C11.3941 57.9038 11.0988 61.6407 11.0988 64.6146V103.719H33.4098V90.5711H44.7775C45.695 93.9479 47.2293 96.7875 49.3831 99.0495C53.1399 102.999 58.5495 105 65.4645 105C73.2891 105 79.5898 102.244 83.4125 97.5693V103.719H126.679V72.4509C126.679 69.3051 126.226 66.5354 125.33 64.1525L130.808 64.2277V54.5377C137.414 54.3281 143.032 52.2515 147.103 48.4985C151.511 44.4366 153.841 38.7091 153.841 31.9312C153.841 19.012 145.3 10.3348 132.585 10.3348Z" fill="#1759CA"/></svg></div>
-                    <div style="left: 76.26px; top: 14.17px; position: absolute"><svg width="34" height="38" viewBox="0 0 34 38" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.262801 27.6158C0.262801 22.5492 3.15745 17.547 15.4927 15.688L18.6404 15.2393C17.6966 13.4448 15.4294 12.5448 12.4715 12.5448C8.31933 12.5448 5.23486 14.4038 3.4079 17.0984V1.44977C5.92557 0.678762 9.70075 0.165649 13.6657 0.165649C26.5045 0.165649 33.1111 5.48751 33.1111 16.3273V37.1688C30.2797 35.7585 28.139 34.9257 25.6213 34.9257C21.0289 34.9257 18.071 38.0043 11.8388 38.0043C4.47561 38.0043 0.260162 33.7705 0.260162 27.6158H0.262801ZM19.2679 24.9213V21.9716L17.8838 22.2295C14.5489 22.8715 13.2255 24.153 13.2255 26.012C13.2255 27.871 14.4224 28.7683 16.0569 28.7683C17.6914 28.7683 19.2652 27.8066 19.2652 24.9213H19.2679Z" fill="white"/></svg></div>
-                    <div style="left: 112.89px; top: 14.17px; position: absolute"><svg width="39" height="47" viewBox="0 0 39 47" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20.5846 0.168335C14.3551 0.168335 11.4604 2.7339 7.30561 2.7339C5.35475 2.7339 3.40389 2.15631 0.88623 1.00113V37.7276C7.61406 38.8022 11.7188 42.1173 15.0458 46.2464V36.7229H17.69C30.2124 36.7229 38.0791 29.4775 38.0791 17.9338C38.0791 7.16117 31.2827 0.168335 20.5846 0.168335ZM16.936 25.8186H15.0484V16.647C15.0484 13.6328 16.182 11.7093 19.0134 11.7093C21.8448 11.7093 23.5452 14.017 23.5452 18.2508C23.5452 23.9596 20.7771 25.8186 16.936 25.8186Z" fill="white"/></svg></div>
-                    <div style="left: 3.76px; top: 3.83px; position: absolute"><svg width="32" height="49" viewBox="0 0 32 49" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.761993 46.1729V31.486C2.20932 34.1779 4.85353 35.7172 7.93536 35.7172C11.0172 35.7172 12.7809 34.4331 12.7809 32.0609C12.7809 30.6506 12.0875 29.4309 9.50923 26.226L6.99156 23.1473C4.22345 19.7489 3.08984 17.0544 3.08984 13.5271C3.08984 5.57521 9.19551 0.828247 19.7671 0.828247C24.2356 0.828247 28.451 1.59657 31.4722 2.94517V17.632C30.0882 15.0664 27.067 13.4008 23.8586 13.4008C21.0878 13.4008 19.4533 14.7468 19.4533 17.0571C19.4533 18.4675 20.21 19.8779 22.725 22.8921L25.2427 25.9708C28.0108 29.3691 29.1444 32.0636 29.1444 35.3975C29.1444 43.3494 22.725 48.2871 12.4672 48.2871C8.12517 48.2871 3.9071 47.5188 0.761993 46.1702V46.1729Z" fill="white"/></svg></div>
-                    <div style="left: 38.01px; top: 14.17px; position: absolute"><svg width="36" height="37" viewBox="0 0 36 37" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7.24149 3.24701C12.464 3.24701 14.6679 0.168335 21.9046 0.168335C31.2186 0.168335 35.7504 5.17051 35.7504 14.5973V36.7229H21.2771V17.1628C21.2771 14.2131 19.8298 13.0579 17.879 13.0579C15.9281 13.0579 14.4808 14.2131 14.4808 17.1628V36.7229H0.00749207V1.00113C2.83888 2.66942 4.97955 3.24432 7.24413 3.24432L7.24149 3.24701Z" fill="white"/></svg></div>
-                    <div style="left: 87.18px; top: 58.02px; position: absolute"><svg width="36" height="42" viewBox="0 0 36 42" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7.41109 3.10053C12.6336 3.10053 14.8375 0.0218506 22.0742 0.0218506C31.3882 0.0218506 35.92 5.02403 35.92 14.4508V41.8848H21.4467V17.0163C21.4467 14.0666 19.9994 12.9114 18.0486 12.9114C16.0977 12.9114 14.6504 14.0666 14.6504 17.0163V41.8848H0.177094V0.854653C3.00848 2.52294 5.14915 3.09784 7.41373 3.09784L7.41109 3.10053Z" fill="white"/></svg></div>
-                    <div style="left: 14.86px; top: 54.99px; position: absolute"><svg width="31" height="45" viewBox="0 0 31 45" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9.41823 -0.0057373H30.3109V15.5139C28.2968 13.2062 25.4654 12.18 18.3553 12.18H15.6504V19.5543H30.3135V31.7401H15.6504V44.8876H0.860809V9.61445C0.860809 2.81772 2.87494 -0.0057373 9.41823 -0.0057373Z" fill="white"/></svg></div>
-                    <div style="left: 47.53px; top: 74.09px; position: absolute"><svg width="37" height="28" viewBox="0 0 37 28" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.529785 8.31552V0.0922852H15.1691C15.1691 12.732 15.1296 2.41607 15.1296 7.80241C15.1296 12.1625 16.5137 14.6018 18.9681 14.6018C21.0455 14.6018 22.2397 13.3822 22.2397 11.2035V0.0949742H36.7156V11.5903C36.7156 21.0815 29.6029 27.1744 18.4645 27.1744C6.69609 27.1744 0.529785 20.6974 0.529785 8.32089V8.31552Z" fill="white"/></svg></div>
-                    <div style="left: 52.46px; top: 58.36px; position: absolute"><svg width="12" height="13" viewBox="0 0 12 13" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6.22528 12.0976C9.40661 12.0976 11.9856 9.46955 11.9856 6.22769C11.9856 2.98583 9.40661 0.357788 6.22528 0.357788C3.04395 0.357788 0.464966 2.98583 0.464966 6.22769C0.464966 9.46955 3.04395 12.0976 6.22528 12.0976Z" fill="#FEDD03"/></svg></div>
-                    <div style="left: 68.79px; top: 58.04px; position: absolute"><svg width="11" height="13" viewBox="0 0 11 13" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.76108 12.4119C8.38145 12.4119 7.99918 12.3098 7.6591 12.0949L2.18615 8.6455C1.3109 8.09478 0.78891 7.19213 0.78891 6.23307C0.78891 5.274 1.30826 4.37135 2.18087 3.82063L7.65647 0.357793C8.58708 -0.23054 9.83932 0.0193019 10.4509 0.92195C11.0599 1.82191 10.7989 3.03082 9.86832 3.62184L5.74252 6.23038L9.86568 8.82818C10.7989 9.41651 11.0626 10.6254 10.4536 11.5281C10.066 12.1003 9.42015 12.4119 8.76108 12.4119Z" fill="#FEDD03"/></svg></div>
-                    <div style="left: 0px; top: 0px; position: absolute"><svg width="154" height="105" viewBox="0 0 154 105" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M132.585 10.3348C128.575 10.3348 125.722 11.2509 123.431 11.9896C121.847 12.5001 120.595 12.9003 119.308 12.9003C118.022 12.9003 116.564 12.4839 114.434 11.5061L109.13 9.07215V17.8488C108.386 16.8817 107.537 15.9978 106.575 15.2053C102.657 11.9735 96.9683 10.3348 89.671 10.3348C85.4688 10.3348 81.3351 10.8613 78.3323 11.7801L75.6512 12.5995V19.0792C74.9658 17.6124 74.0931 16.3121 73.0307 15.1892C69.9858 11.9681 65.57 10.3375 59.9072 10.3375C55.3359 10.3375 52.3938 11.4228 50.0317 12.2932C48.2627 12.946 46.9841 13.4161 45.2441 13.4161C43.9893 13.4161 42.4708 13.2066 39.8898 11.6861L38.2369 10.7136V3.44135L35.9828 2.43661C32.4528 0.865038 27.7629 0 22.7671 0C10.1603 0 2.32785 6.33465 2.32785 16.5297C2.32785 20.9436 3.70927 24.4387 7.10219 28.6027L9.60931 31.6679C11.0514 33.4598 11.6973 34.3436 11.9029 34.8084C12.2904 35.6868 11.6867 36.4095 10.1471 35.9985C6.70938 35.0824 0 26.6818 0 26.6818V51.7196L2.30412 52.7055C5.46768 54.0595 9.41685 54.8842 13.5822 55.0777C11.3941 57.9038 11.0988 61.6407 11.0988 64.6146V103.719H33.4098V90.5711H44.7775C45.695 93.9479 47.2293 96.7875 49.3831 99.0495C53.1399 102.999 58.5495 105 65.4645 105C73.2891 105 79.5898 102.244 83.4125 97.5693V103.719H126.679V72.4509C126.679 69.3051 126.226 66.5354 125.33 64.1525L130.808 64.2277V54.5377C137.414 54.3281 143.032 52.2515 147.103 48.4985C151.511 44.4366 153.841 38.7091 153.841 31.9312C153.841 19.012 145.3 10.3348 132.585 10.3348Z" fill="#1759CA"/></svg></div>
-                    <div style="left: 76.26px; top: 14.17px; position: absolute"><svg width="34" height="38" viewBox="0 0 34 38" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.262801 27.6158C0.262801 22.5492 3.15745 17.547 15.4927 15.688L18.6404 15.2393C17.6966 13.4448 15.4294 12.5448 12.4715 12.5448C8.31933 12.5448 5.23486 14.4038 3.4079 17.0984V1.44977C5.92557 0.678762 9.70075 0.165649 13.6657 0.165649C26.5045 0.165649 33.1111 5.48751 33.1111 16.3273V37.1688C30.2797 35.7585 28.139 34.9257 25.6213 34.9257C21.0289 34.9257 18.071 38.0043 11.8388 38.0043C4.47561 38.0043 0.260162 33.7705 0.260162 27.6158H0.262801ZM19.2679 24.9213V21.9716L17.8838 22.2295C14.5489 22.8715 13.2255 24.153 13.2255 26.012C13.2255 27.871 14.4224 28.7683 16.0569 28.7683C17.6914 28.7683 19.2652 27.8066 19.2652 24.9213H19.2679Z" fill="white"/></svg></div>
-                    <div style="left: 112.89px; top: 14.17px; position: absolute"><svg width="39" height="47" viewBox="0 0 39 47" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20.5846 0.168335C14.3551 0.168335 11.4604 2.7339 7.30561 2.7339C5.35475 2.7339 3.40389 2.15631 0.88623 1.00113V37.7276C7.61406 38.8022 11.7188 42.1173 15.0458 46.2464V36.7229H17.69C30.2124 36.7229 38.0791 29.4775 38.0791 17.9338C38.0791 7.16117 31.2827 0.168335 20.5846 0.168335ZM16.936 25.8186H15.0484V16.647C15.0484 13.6328 16.182 11.7093 19.0134 11.7093C21.8448 11.7093 23.5452 14.017 23.5452 18.2508C23.5452 23.9596 20.7771 25.8186 16.936 25.8186Z" fill="white"/></svg></div>
-                    <div style="left: 3.76px; top: 3.83px; position: absolute"><svg width="32" height="49" viewBox="0 0 32 49" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.761993 46.1729V31.486C2.20932 34.1779 4.85353 35.7172 7.93536 35.7172C11.0172 35.7172 12.7809 34.4331 12.7809 32.0609C12.7809 30.6506 12.0875 29.4309 9.50923 26.226L6.99156 23.1473C4.22345 19.7489 3.08984 17.0544 3.08984 13.5271C3.08984 5.57521 9.19551 0.828247 19.7671 0.828247C24.2356 0.828247 28.451 1.59657 31.4722 2.94517V17.632C30.0882 15.0664 27.067 13.4008 23.8586 13.4008C21.0878 13.4008 19.4533 14.7468 19.4533 17.0571C19.4533 18.4675 20.21 19.8779 22.725 22.8921L25.2427 25.9708C28.0108 29.3691 29.1444 32.0636 29.1444 35.3975C29.1444 43.3494 22.725 48.2871 12.4672 48.2871C8.12517 48.2871 3.9071 47.5188 0.761993 46.1702V46.1729Z" fill="white"/></svg></div>
-                    <div style="left: 38.01px; top: 14.17px; position: absolute"><svg width="36" height="37" viewBox="0 0 36 37" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7.24149 3.24701C12.464 3.24701 14.6679 0.168335 21.9046 0.168335C31.2186 0.168335 35.7504 5.17051 35.7504 14.5973V36.7229H21.2771V17.1628C21.2771 14.2131 19.8298 13.0579 17.879 13.0579C15.9281 13.0579 14.4808 14.2131 14.4808 17.1628V36.7229H0.00749207V1.00113C2.83888 2.66942 4.97955 3.24432 7.24413 3.24432L7.24149 3.24701Z" fill="white"/></svg></div>
-                    <div style="left: 87.18px; top: 58.02px; position: absolute"><svg width="36" height="42" viewBox="0 0 36 42" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7.41109 3.10053C12.6336 3.10053 14.8375 0.0218506 22.0742 0.0218506C31.3882 0.0218506 35.92 5.02403 35.92 14.4508V41.8848H21.4467V17.0163C21.4467 14.0666 19.9994 12.9114 18.0486 12.9114C16.0977 12.9114 14.6504 14.0666 14.6504 17.0163V41.8848H0.177094V0.854653C3.00848 2.52294 5.14915 3.09784 7.41373 3.09784L7.41109 3.10053Z" fill="white"/></svg></div>
-                    <div style="left: 14.86px; top: 54.99px; position: absolute"><svg width="31" height="45" viewBox="0 0 31 45" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9.41823 -0.0057373H30.3109V15.5139C28.2968 13.2062 25.4654 12.18 18.3553 12.18H15.6504V19.5543H30.3135V31.7401H15.6504V44.8876H0.860809V9.61445C0.860809 2.81772 2.87494 -0.0057373 9.41823 -0.0057373Z" fill="white"/></svg></div>
-                    <div style="left: 47.53px; top: 74.09px; position: absolute"><svg width="37" height="28" viewBox="0 0 37 28" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.529785 8.31552V0.0922852H15.1691C15.1691 12.732 15.1296 2.41607 15.1296 7.80241C15.1296 12.1625 16.5137 14.6018 18.9681 14.6018C21.0455 14.6018 22.2397 13.3822 22.2397 11.2035V0.0949742H36.7156V11.5903C36.7156 21.0815 29.6029 27.1744 18.4645 27.1744C6.69609 27.1744 0.529785 20.6974 0.529785 8.32089V8.31552Z" fill="white"/></svg></div>
-                    <div style="left: 52.46px; top: 58.36px; position: absolute"><svg width="12" height="13" viewBox="0 0 12 13" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6.22528 12.0976C9.40661 12.0976 11.9856 9.46955 11.9856 6.22769C11.9856 2.98583 9.40661 0.357788 6.22528 0.357788C3.04395 0.357788 0.464966 2.98583 0.464966 6.22769C0.464966 9.46955 3.04395 12.0976 6.22528 12.0976Z" fill="#FEDD03"/></svg></div>
-                    <div style="left: 68.79px; top: 58.04px; position: absolute"><svg width="11" height="13" viewBox="0 0 11 13" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.76108 12.4119C8.38145 12.4119 7.99918 12.3098 7.6591 12.0949L2.18615 8.6455C1.3109 8.09478 0.78891 7.19213 0.78891 6.23307C0.78891 5.274 1.30826 4.37135 2.18087 3.82063L7.65647 0.357793C8.58708 -0.23054 9.83932 0.0193019 10.4509 0.92195C11.0599 1.82191 10.7989 3.03082 9.86832 3.62184L5.74252 6.23038L9.86568 8.82818C10.7989 9.41651 11.0626 10.6254 10.4536 11.5281C10.066 12.1003 9.42015 12.4119 8.76108 12.4119Z" fill="#FEDD03"/></svg></div>
+                 <div style="width: 153.84px; height: 105px; position: relative;">
+                    <svg width="154" height="105" viewBox="0 0 154 105" fill="none" xmlns="http://www.w3.org/2000/svg" style="position: absolute; left: 0; top: 0;"><path d="M132.585 10.3348C128.575 10.3348 125.722 11.2509 123.431 11.9896C121.847 12.5001 120.595 12.9003 119.308 12.9003C118.022 12.9003 116.564 12.4839 114.434 11.5061L109.13 9.07215V17.8488C108.386 16.8817 107.537 15.9978 106.575 15.2053C102.657 11.9735 96.9683 10.3348 89.671 10.3348C85.4688 10.3348 81.3351 10.8613 78.3323 11.7801L75.6512 12.5995V19.0792C74.9658 17.6124 74.0931 16.3121 73.0307 15.1892C69.9858 11.9681 65.57 10.3375 59.9072 10.3375C55.3359 10.3375 52.3938 11.4228 50.0317 12.2932C48.2627 12.946 46.9841 13.4161 45.2441 13.4161C43.9893 13.4161 42.4708 13.2066 39.8898 11.6861L38.2369 10.7136V3.44135L35.9828 2.43661C32.4528 0.865038 27.7629 0 22.7671 0C10.1603 0 2.32785 6.33465 2.32785 16.5297C2.32785 20.9436 3.70927 24.4387 7.10219 28.6027L9.60931 31.6679C11.0514 33.4598 11.6973 34.3436 11.9029 34.8084C12.2904 35.6868 11.6867 36.4095 10.1471 35.9985C6.70938 35.0824 0 26.6818 0 26.6818V51.7196L2.30412 52.7055C5.46768 54.0595 9.41685 54.8842 13.5822 55.0777C11.3941 57.9038 11.0988 61.6407 11.0988 64.6146V103.719H33.4098V90.5711H44.7775C45.695 93.9479 47.2293 96.7875 49.3831 99.0495C53.1399 102.999 58.5495 105 65.4645 105C73.2891 105 79.5898 102.244 83.4125 97.5693V103.719H126.679V72.4509C126.679 69.3051 126.226 66.5354 125.33 64.1525L130.808 64.2277V54.5377C137.414 54.3281 143.032 52.2515 147.103 48.4985C151.511 44.4366 153.841 38.7091 153.841 31.9312C153.841 19.012 145.3 10.3348 132.585 10.3348Z" fill="#1759CA"/></svg>
+                    <svg width="34" height="38" viewBox="0 0 34 38" fill="none" xmlns="http://www.w3.org/2000/svg" style="position: absolute; left: 76.26px; top: 14.17px;"><path d="M0.262801 27.6158C0.262801 22.5492 3.15745 17.547 15.4927 15.688L18.6404 15.2393C17.6966 13.4448 15.4294 12.5448 12.4715 12.5448C8.31933 12.5448 5.23486 14.4038 3.4079 17.0984V1.44977C5.92557 0.678762 9.70075 0.165649 13.6657 0.165649C26.5045 0.165649 33.1111 5.48751 33.1111 16.3273V37.1688C30.2797 35.7585 28.139 34.9257 25.6213 34.9257C21.0289 34.9257 18.071 38.0043 11.8388 38.0043C4.47561 38.0043 0.260162 33.7705 0.260162 27.6158H0.262801ZM19.2679 24.9213V21.9716L17.8838 22.2295C14.5489 22.8715 13.2255 24.153 13.2255 26.012C13.2255 27.871 14.4224 28.7683 16.0569 28.7683C17.6914 28.7683 19.2652 27.8066 19.2652 24.9213H19.2679Z" fill="white"/></svg>
+                    <svg width="39" height="47" viewBox="0 0 39 47" fill="none" xmlns="http://www.w3.org/2000/svg" style="position: absolute; left: 112.89px; top: 14.17px;"><path d="M20.5846 0.168335C14.3551 0.168335 11.4604 2.7339 7.30561 2.7339C5.35475 2.7339 3.40389 2.15631 0.88623 1.00113V37.7276C7.61406 38.8022 11.7188 42.1173 15.0458 46.2464V36.7229H17.69C30.2124 36.7229 38.0791 29.4775 38.0791 17.9338C38.0791 7.16117 31.2827 0.168335 20.5846 0.168335ZM16.936 25.8186H15.0484V16.647C15.0484 13.6328 16.182 11.7093 19.0134 11.7093C21.8448 11.7093 23.5452 14.017 23.5452 18.2508C23.5452 23.9596 20.7771 25.8186 16.936 25.8186Z" fill="white"/></svg>
+                    <svg width="32" height="49" viewBox="0 0 32 49" fill="none" xmlns="http://www.w3.org/2000/svg" style="position: absolute; left: 3.76px; top: 3.83px;"><path d="M0.761993 46.1729V31.486C2.20932 34.1779 4.85353 35.7172 7.93536 35.7172C11.0172 35.7172 12.7809 34.4331 12.7809 32.0609C12.7809 30.6506 12.0875 29.4309 9.50923 26.226L6.99156 23.1473C4.22345 19.7489 3.08984 17.0544 3.08984 13.5271C3.08984 5.57521 9.19551 0.828247 19.7671 0.828247C24.2356 0.828247 28.451 1.59657 31.4722 2.94517V17.632C30.0882 15.0664 27.067 13.4008 23.8586 13.4008C21.0878 13.4008 19.4533 14.7468 19.4533 17.0571C19.4533 18.4675 20.21 19.8779 22.725 22.8921L25.2427 25.9708C28.0108 29.3691 29.1444 32.0636 29.1444 35.3975C29.1444 43.3494 22.725 48.2871 12.4672 48.2871C8.12517 48.2871 3.9071 47.5188 0.761993 46.1702V46.1729Z" fill="white"/></svg>
+                    <svg width="36" height="37" viewBox="0 0 36 37" fill="none" xmlns="http://www.w3.org/2000/svg" style="position: absolute; left: 38.01px; top: 14.17px;"><path d="M7.24149 3.24701C12.464 3.24701 14.6679 0.168335 21.9046 0.168335C31.2186 0.168335 35.7504 5.17051 35.7504 14.5973V36.7229H21.2771V17.1628C21.2771 14.2131 19.8298 13.0579 17.879 13.0579C15.9281 13.0579 14.4808 14.2131 14.4808 17.1628V36.7229H0.00749207V1.00113C2.83888 2.66942 4.97955 3.24432 7.24413 3.24432L7.24149 3.24701Z" fill="white"/></svg>
+                    <svg width="36" height="42" viewBox="0 0 36 42" fill="none" xmlns="http://www.w3.org/2000/svg" style="position: absolute; left: 87.18px; top: 58.02px;"><path d="M7.41109 3.10053C12.6336 3.10053 14.8375 0.0218506 22.0742 0.0218506C31.3882 0.0218506 35.92 5.02403 35.92 14.4508V41.8848H21.4467V17.0163C21.4467 14.0666 19.9994 12.9114 18.0486 12.9114C16.0977 12.9114 14.6504 14.0666 14.6504 17.0163V41.8848H0.177094V0.854653C3.00848 2.52294 5.14915 3.09784 7.41373 3.09784L7.41109 3.10053Z" fill="white"/></svg>
+                    <svg width="31" height="45" viewBox="0 0 31 45" fill="none" xmlns="http://www.w3.org/2000/svg" style="position: absolute; left: 14.86px; top: 54.99px;"><path d="M9.41823 -0.0057373H30.3109V15.5139C28.2968 13.2062 25.4654 12.18 18.3553 12.18H15.6504V19.5543H30.3135V31.7401H15.6504V44.8876H0.860809V9.61445C0.860809 2.81772 2.87494 -0.0057373 9.41823 -0.0057373Z" fill="white"/></svg>
+                    <svg width="37" height="28" viewBox="0 0 37 28" fill="none" xmlns="http://www.w3.org/2000/svg" style="position: absolute; left: 47.53px; top: 74.09px;"><path d="M0.529785 8.31552V0.0922852H15.1691C15.1691 12.732 15.1296 2.41607 15.1296 7.80241C15.1296 12.1625 16.5137 14.6018 18.9681 14.6018C21.0455 14.6018 22.2397 13.3822 22.2397 11.2035V0.0949742H36.7156V11.5903C36.7156 21.0815 29.6029 27.1744 18.4645 27.1744C6.69609 27.1744 0.529785 20.6974 0.529785 8.32089V8.31552Z" fill="white"/></svg>
+                    <svg width="12" height="13" viewBox="0 0 12 13" fill="none" xmlns="http://www.w3.org/2000/svg" style="position: absolute; left: 52.46px; top: 58.36px;"><path d="M6.22528 12.0976C9.40661 12.0976 11.9856 9.46955 11.9856 6.22769C11.9856 2.98583 9.40661 0.357788 6.22528 0.357788C3.04395 0.357788 0.464966 2.98583 0.464966 6.22769C0.464966 9.46955 3.04395 12.0976 6.22528 12.0976Z" fill="#FEDD03"/></svg>
+                    <svg width="11" height="13" viewBox="0 0 11 13" fill="none" xmlns="http://www.w3.org/2000/svg" style="position: absolute; left: 68.79px; top: 58.04px;"><path d="M8.76108 12.4119C8.38145 12.4119 7.99918 12.3098 7.6591 12.0949L2.18615 8.6455C1.3109 8.09478 0.78891 7.19213 0.78891 6.23307C0.78891 5.274 1.30826 4.37135 2.18087 3.82063L7.65647 0.357793C8.58708 -0.23054 9.83932 0.0193019 10.4509 0.92195C11.0599 1.82191 10.7989 3.03082 9.86832 3.62184L5.74252 6.23038L9.86568 8.82818C10.7989 9.41651 11.0626 10.6254 10.4536 11.5281C10.066 12.1003 9.42015 12.4119 8.76108 12.4119Z" fill="#FEDD03"/></svg>
                 </div>
             </div>
-
         </nav>
-
+        
         <div id="page-content">
 
-            <section id="page-pilih-paket" class="page active">
+            <section id="page-pilih-paket" class="page">
                 <div class="section-header">
                     <h1>Mau pilih yang mana?</h1>
                     <p>Pilih paket sesuai yang kamu mau!</p>
@@ -321,7 +259,7 @@
             </section>
 
             <section id="page-pilih-background" class="page">
-                <div class="background-selection-layout">
+                 <div class="background-selection-layout">
                     <div class="package-summary">
                         <h2 id="summary-title">Snap Photobox</h2>
                         <ul>
@@ -352,19 +290,40 @@
                     </div>
                     <div class="background-grid-container">
                         <h2>Pilih Background</h2>
-                        <div class="background-grid">
-                            <div class="background-item" onclick="selectBackground(this)"><div class="preview"></div><p>Tirai Merah</p></div>
-                            <div class="background-item" onclick="selectBackground(this)"><div class="preview"></div><p>Tirai Biru</p></div>
-                            <div class="background-item" onclick="selectBackground(this)"><div class="preview"></div><p>Tirai Hijau</p></div>
-                            <div class="background-item" onclick="selectBackground(this)"><div class="preview"></div><p>Polos Merah</p></div>
-                            <div class="background-item" onclick="selectBackground(this)"><div class="preview"></div><p>Kotak Biru</p></div>
-                            <div class="background-item" onclick="selectBackground(this)"><div class="preview"></div><p>Polos Hijau</p></div>
+                        <div class="background-grid" id="background-grid">
+                            <div class="background-item" onclick="selectBackground(this, 'Tirai Merah')"><div class="preview" style="background-color: #A52A2A;"></div><p>Tirai Merah</p></div>
+                            <div class="background-item" onclick="selectBackground(this, 'Tirai Biru')"><div class="preview" style="background-color: #4682B4;"></div><p>Tirai Biru</p></div>
+                            <div class="background-item" onclick="selectBackground(this, 'Tirai Hijau')"><div class="preview" style="background-color: #2E8B57;"></div><p>Tirai Hijau</p></div>
+                            <div class="background-item" onclick="selectBackground(this, 'Polos Merah')"><div class="preview" style="background-color: #DC143C;"></div><p>Polos Merah</p></div>
+                            <div class="background-item" onclick="selectBackground(this, 'Kotak Biru')"><div class="preview" style="background: repeating-linear-gradient(45deg, #6495ED, #6495ED 10px, #4169E1 10px, #4169E1 20px);"></div><p>Kotak Biru</p></div>
+                            <div class="background-item" onclick="selectBackground(this, 'Polos Hijau')"><div class="preview" style="background-color: #006400;"></div><p>Polos Hijau</p></div>
+                        </div>
+                        <button class="btn btn-primary" onclick="goToPage('page-pilih-jadwal')">Lanjut</button>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="page-pilih-jadwal" class="page">
+                <div class="section-header">
+                    <h1>Pilih Tanggal & Waktu</h1>
+                    <p>Pilih slot yang tersedia untuk sesi fotomu.</p>
+                </div>
+                <div class="schedule-layout">
+                    <div class="calendar-container">
+                        <div id="calendar"></div>
+                    </div>
+                    <div class="time-slots-container">
+                        <div class="time-slots-header">
+                            <h3 id="time-slots-date-header">Pilih Tanggal Dulu</h3>
+                        </div>
+                        <div class="time-slots-grid" id="time-slots-grid">
+                            <p style="grid-column: 1 / -1; text-align: center; color: #888;">Jadwal akan muncul di sini setelah kamu memilih tanggal.</p>
                         </div>
                         <button class="btn btn-primary" onclick="goToPage('page-form')">Lanjut</button>
                     </div>
                 </div>
             </section>
-
+            
             <section id="page-form" class="page">
                 <div class="form-container">
                     <div class="section-header" style="margin-bottom: 2rem; text-align: left;">
@@ -375,35 +334,57 @@
                         <div class="form-group"><label for="nama">Nama<span class="red-star">*</span></label><div class="input-wrapper"><img src="https://api.iconify.design/solar:user-circle-bold-duotone.svg" class="input-icon" alt="user icon"><input type="text" id="nama" placeholder="ketik nama kamu"></div></div>
                         <div class="form-group"><label for="whatsapp">Nomor WhatsApp<span class="red-star">*</span></label><div class="input-wrapper"><img src="https://api.iconify.design/solar:phone-bold-duotone.svg" class="input-icon" alt="phone icon"><input type="text" id="whatsapp" placeholder="ketik nomor wa kamu"></div></div>
                         <div class="form-group"><label for="email">Email<span class="red-star">*</span></label><div class="input-wrapper"><img src="https://api.iconify.design/solar:letter-bold-duotone.svg" class="input-icon" alt="email icon"><input type="email" id="email" placeholder="ketik email kamu"></div></div>
-                        <div class="form-group"><label for="jumlah-orang">Jumlah Orang (Kalau lebih dari 2 orang, tambah 15 rb per orang ya)<span class="red-star">*</span></label><div class="input-wrapper"><img src="https://api.iconify.design/solar:users-group-rounded-bold-duotone.svg" class="input-icon" alt="group icon"><select id="jumlah-orang"><option value="">pilih jumlah orangnya</option><option value="1">1 Orang</option><option value="2">2 Orang</option><option value="3">3 Orang (+ 15rb)</option><option value="4">4 Orang (+ 30rb)</option><option value="5">5 Orang (+ 45rb)</option></select></div></div>
+                        <div class="form-group"><label for="jumlah-orang">Jumlah Orang (Tambah 15 rb/org > 1)<span class="red-star">*</span></label><div class="input-wrapper"><img src="https://api.iconify.design/solar:users-group-rounded-bold-duotone.svg" class="input-icon" alt="group icon"><select id="jumlah-orang"><option value="">pilih jumlah orangnya</option><option value="1">1 Orang</option><option value="2">2 Orang (+ 15rb)</option><option value="3">3 Orang (+ 30rb)</option><option value="4">4 Orang (+ 45rb)</option><option value="5">5 Orang (+ 60rb)</option></select></div></div>
                     </div>
                     <div class="dp-section">
                         <h3>Down Payment (DP)</h3>
                         <div class="dp-info"><p>Pembayaran DP via QRIS. <a href="#" class="btn-link">Klik disini</a></p><span class="price">Rp 15.000</span></div>
                         <div class="dp-info"><p>Kalau ada kendala, tenang~ tinggal chat admin kami aja.</p><button class="btn btn-secondary">💬 Chat Kami</button></div>
                     </div>
-                    <div class="agreement-box"><input type="checkbox" id="agreement"><label for="agreement">Saya setuju, kalau batalin di hari-H, <strong class="red-star">DP sebesar Rp15.000 hangus.</strong> Biar adil dan slot nggak kepakai sia-sia.<span class="red-star">*</span></label></div>
-                    <button class="btn btn-primary" onclick="goToPage('page-sukses')">Lanjut</button>
+                    <div class="agreement-box"><input type="checkbox" id="agreement"><label for="agreement">Saya setuju, kalau batalin di hari-H, <strong class="red-star">DP sebesar Rp15.000 hangus.</strong><span class="red-star">*</span></label></div>
+                    <button class="btn btn-primary" onclick="submitBooking()">Booking Sekarang</button>
                 </div>
             </section>
-
+            
             <section id="page-sukses" class="page">
                 <div class="success-container">
                     <div class="success-icon"><svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"><path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/></svg></div>
                     <h1>Booking kamu udah masuk!</h1>
                     <p>Jangan lupa <strong>kirim bukti transfer DP ke WhatsApp admin</strong> buat konfirmasi ya! Tanpa konfirmasi, jadwal belum kami kunci.</p>
-                    <button class="btn btn-primary" onclick="goToPage('page-pilih-paket')">Konfirmasi</button>
+                    <button class="btn btn-primary" onclick="goToPage('page-pilih-paket')">Selesai</button>
                 </div>
             </section>
-
         </div>
     </main>
 
     <script>
+        // --- GLOBAL VARIABLES ---
         const pages = document.querySelectorAll('.page');
         const backButtonContainer = document.getElementById('backButtonContainer');
+        const timeSlotsGrid = document.getElementById('time-slots-grid');
+        const timeSlotsDateHeader = document.getElementById('time-slots-date-header');
+        
         let pageHistory = ['page-pilih-paket'];
-
+        let calendar;
+        let isCalendarRendered = false;
+        
+        // Data booking sementara
+        let bookingData = {
+            package: null,
+            background: null,
+            date: null,
+            time: null
+        };
+        
+        // --- SIMULATED SERVER DATA ---
+        const closedDays = ['Minggu']; // Hari Minggu tutup
+        const dayMap = { 0: 'Minggu', 1: 'Senin', 2: 'Selasa', 3: 'Rabu', 4: 'Kamis', 5: 'Jumat', 6: 'Sabtu' };
+        const availableSlots = [
+            '10:00', '10:30', '11:00', '11:30', '13:00', '13:30', 
+            '14:00', '14:30', '15:00', '15:30', '16:00', '16:30'
+        ];
+        
+        // --- NAVIGATION FUNCTIONS ---
         function updateNav() {
             if (pageHistory.length > 1) {
                 backButtonContainer.innerHTML = `<a href="#" class="back-button" onclick="goBack(event)">&lt;</a>`;
@@ -414,43 +395,153 @@
 
         function goToPage(pageId) {
             pages.forEach(page => page.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
+            const targetPage = document.getElementById(pageId);
+            if(targetPage) {
+                targetPage.classList.add('active');
+            }
 
-            if (pageHistory[pageHistory.length - 1] !== pageId) {
+            if (pageId === 'page-pilih-paket') {
+                pageHistory = ['page-pilih-paket']; // Reset history
+            } else if (pageHistory[pageHistory.length - 1] !== pageId) {
                 pageHistory.push(pageId);
             }
-            // Jika kembali ke halaman pertama, reset history
-            if (pageId === 'page-pilih-paket' && pageHistory.length > 1) {
-                pageHistory = ['page-pilih-paket'];
+            
+            // Render calendar only when its page is active and it hasn't been rendered yet
+            if (pageId === 'page-pilih-jadwal' && !isCalendarRendered) {
+                setTimeout(() => { // Timeout to ensure the element is visible before rendering
+                    calendar.render();
+                    isCalendarRendered = true;
+                }, 0);
             }
+
             updateNav();
             window.scrollTo(0, 0);
         }
 
         function goBack(event) {
-            event.preventDefault(); // Mencegah default action dari tag 'a'
+            event.preventDefault();
             if (pageHistory.length > 1) {
                 pageHistory.pop();
                 const prevPageId = pageHistory[pageHistory.length - 1];
-                pages.forEach(page => page.classList.remove('active'));
-                document.getElementById(prevPageId).classList.add('active');
-                updateNav();
-                window.scrollTo(0, 0);
+                goToPage(prevPageId);
+                // This call is needed because we're not adding to history
+                if (pageHistory[pageHistory.length - 1] === prevPageId) {
+                    pageHistory.pop();
+                }
             }
         }
 
+        // --- BOOKING FLOW FUNCTIONS ---
         function selectPackage(packageName) {
-            console.log("Paket dipilih:", packageName);
+            bookingData.package = packageName;
             document.getElementById('summary-title').textContent = packageName;
             goToPage('page-pilih-background');
         }
 
-        function selectBackground(element) {
+        function selectBackground(element, backgroundName) {
             document.querySelectorAll('.background-item').forEach(item => item.classList.remove('selected'));
             element.classList.add('selected');
+            bookingData.background = backgroundName;
+        }
+        
+        function updateSlotsForDate(date) {
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            
+            // Clear previous slots
+            timeSlotsGrid.innerHTML = '';
+            
+            const isPast = date < today;
+            const dayName = dayMap[date.getDay()];
+            const isClosed = closedDays.includes(dayName);
+
+            let headerText;
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            headerText = date.toLocaleDateString('id-ID', options);
+
+            if (isPast) {
+                timeSlotsGrid.innerHTML = `<p style="grid-column: 1 / -1; text-align: center; color: #888;">Tidak bisa booking untuk tanggal yang sudah lewat.</p>`;
+            } else if (isClosed) {
+                timeSlotsGrid.innerHTML = `<p style="grid-column: 1 / -1; text-align: center; color: #888;">Studio tutup pada hari ${dayName}.</p>`;
+            } else {
+                 // Generate new slots
+                availableSlots.forEach(slot => {
+                    const slotEl = document.createElement('div');
+                    slotEl.classList.add('time-slot');
+                    slotEl.textContent = slot;
+                    slotEl.onclick = () => selectTime(slotEl, slot);
+                    timeSlotsGrid.appendChild(slotEl);
+                });
+            }
+            timeSlotsDateHeader.textContent = headerText;
         }
 
+        function selectTime(element, time) {
+            document.querySelectorAll('.time-slot').forEach(item => item.classList.remove('selected'));
+            element.classList.add('selected');
+            bookingData.time = time;
+        }
+
+        function submitBooking() {
+            // Simple validation
+            const name = document.getElementById('nama').value;
+            const agreement = document.getElementById('agreement').checked;
+            
+            if (!bookingData.package || !bookingData.date || !bookingData.time) {
+                alert("Harap lengkapi pilihan paket, tanggal, dan waktu terlebih dahulu.");
+                return;
+            }
+            if (!name || !agreement) {
+                alert("Harap isi nama dan setujui syarat & ketentuan.");
+                return;
+            }
+            
+            console.log("Booking Dibuat:", bookingData);
+            goToPage('page-sukses');
+        }
+
+        // --- INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', () => {
+            const calendarEl = document.getElementById('calendar');
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'id',
+                height: 'auto',
+                selectable: true,
+                validRange: {
+                    start: new Date().toISOString().split('T')[0] // Mulai dari hari ini
+                },
+                headerToolbar: {
+                    left: 'prev',
+                    center: 'title',
+                    right: 'next'
+                },
+                dateClick: function(info) {
+                    const clickedDate = info.date;
+                    const dayName = dayMap[clickedDate.getDay()];
+                    
+                    if (closedDays.includes(dayName)) {
+                        alert(`Hari ${dayName} kami tutup, silahkan pilih hari lain.`);
+                        return;
+                    }
+                    
+                    // Highlight the selected day
+                     document.querySelectorAll('.fc-day-selected').forEach(el => el.classList.remove('fc-day-selected'));
+                    info.dayEl.classList.add('fc-day-selected');
+
+                    bookingData.date = info.dateStr;
+                    bookingData.time = null; // Reset time selection
+                    updateSlotsForDate(info.date);
+                },
+                dayCellDidMount: function(info) {
+                    const dayName = dayMap[info.date.getDay()];
+                    if (closedDays.includes(dayName)) {
+                        info.el.classList.add('fc-day-disabled');
+                    }
+                },
+            });
+
+            // Start on the first page
             goToPage('page-pilih-paket');
         });
     </script>
