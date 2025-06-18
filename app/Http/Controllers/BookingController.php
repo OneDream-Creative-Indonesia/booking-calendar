@@ -11,5 +11,10 @@ class BookingController extends Controller
     {
         return view('booking.calendar');
     }
+       public function home()
+    {
+        return view('home');
+    }
+
 
 }

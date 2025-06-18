@@ -102,8 +102,9 @@
         .package-summary ul { list-style-type: none; padding-left: 0; }
         .package-summary ul li { display: flex; align-items: center; margin-bottom: 1rem; font-weight: 500; }
         .package-summary ul .icon { width: 18px; height: 18px; border-radius: 50%; background-color: var(--primary-blue); margin-right: 1rem; }
-        .character-art { margin-top: 2rem; width: 347px; height: 330.13px; flex-shrink: 0; position: relative; }
-        .character-art svg { position: absolute; }
+        .character-art-desktop { margin-top: 2rem; width: 347px; height: 330.13px; flex-shrink: 0; position: relative; }
+        .character-art-desktop svg { position: absolute; }
+        .character-art-mobile {display:none;}
         .background-grid-container { flex: 2; background-color: white; padding: 2rem; border-radius: var(--border-radius-lg); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08); text-align: center; }
         .background-grid-container h2 { margin-top: 0; font-size: 1.8rem; }
         .background-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
@@ -178,8 +179,11 @@
             .schedule-layout { grid-template-columns: 1fr; }
             .package-summary { max-width: 100%; text-align: center; display: flex; flex-direction: column; align-items: center; }
             .packages-grid { grid-template-columns: 1fr; }
-            .character-art { display: none; }
-            .schedule-layout { gap: 1.5rem; }
+            .character-art-desktop { display: none; }
+            .character-art-mobile svg { position: absolute; }
+            .character-art-mobile { display: block; margin-top: 2rem;bottom:80px;left:10px;flex-shrink: 0; position: relative; }
+            .background-grid-container {z-index: 2;}
+            .schedule-layout { gap: 1.5rem;}
         }
         
         @media (max-width: 768px) {
@@ -268,7 +272,7 @@
                             <li><span class="icon"></span>Dapet GRATIS 1 cetak foto</li>
                             <li><span class="icon"></span>Dapet semua soft file</li>
                         </ul>
-                        <div class="character-art">
+                        <div class="character-art-desktop">
                             <div style="left: 214.75px; top: 160.46px; position: absolute"><svg width="129" height="164" viewBox="0 0 129 164" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M116.699 163.507C111.405 162.696 113.595 153.123 114.953 149.978C108.23 163.563 99.1513 164.346 102.672 146.596C95.3533 161.201 87.4247 158.168 91.1118 142.137C96.7117 71.5437 82.5733 37.5675 7.3489 39.4264C5.00636 26.9456 2.85787 14.4229 0.750977 1.88628C104.654 -10.6923 134.4 61.914 127.58 151.725C126.402 157.204 121.981 164.332 116.699 163.521V163.507Z" fill="#1759CA"/></svg></div>
                             <div style="left: 5.26px; top: 76.29px; position: absolute"><svg width="129" height="164" viewBox="0 0 129 164" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12.063 0.366212C17.358 1.17683 15.1679 10.7505 13.8095 13.8952C20.5322 0.310307 29.6113 -0.472362 26.0905 17.2774C33.4092 2.67228 41.3378 5.70512 37.6507 21.7358C32.0508 92.3296 46.1892 126.306 121.414 124.447C123.756 136.928 125.905 149.45 128.012 161.987C24.1084 174.566 -5.63765 101.959 1.18204 12.1482C2.36024 6.66948 6.78194 -0.458381 12.063 0.352238V0.366212Z" fill="#1759CA"/></svg></div>
                             <div style="left: 211.22px; top: 221.41px; position: absolute"><svg width="63" height="110" viewBox="0 0 63 110" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M55.7025 109.132H0.216309V0.411011H41.2037V81.2773L60.0826 96.5952C65.2112 100.76 62.2865 109.118 55.7025 109.118V109.132Z" fill="#1759CA"/></svg></div>
@@ -286,6 +290,88 @@
                             <div style="left: 179.53px; top: 169.67px; position: absolute"><svg width="39" height="29" viewBox="0 0 39 29" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M38.3707 4.61243C36.6519 18.2113 26.1313 28.6655 13.4207 28.6655C8.70787 28.6655 4.30002 27.2259 0.529785 24.7242C2.24857 11.1253 12.7553 0.671143 25.4799 0.671143C30.1926 0.671143 34.6005 2.11069 38.3707 4.61243Z" fill="#CE004F"/></svg></div>
                             <div style="left: 0px; top: 0px; position: absolute"><svg width="57" height="53" viewBox="0 0 57 53" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M56.706 0V41.9705C56.706 48.0083 51.8546 52.8999 45.8665 52.8999C39.8785 52.8999 35.0271 48.0083 35.0271 41.9705C35.0271 35.9328 39.8785 31.0411 45.8665 31.0411C47.017 31.0411 48.1259 31.2228 49.1655 31.5583V19.1754L21.6788 26.3451V41.9845C21.6788 48.0222 16.8274 52.9139 10.8394 52.9139C4.8514 52.9139 0 48.0222 0 41.9845C0 35.9468 4.8514 31.0551 10.8394 31.0551C11.9899 31.0551 13.0988 31.2368 14.1384 31.5722V12.6764L56.706 0Z" fill="white"/></svg></div>
                             <div style="left: 303.28px; top: 118.74px; position: absolute"><svg width="44" height="42" viewBox="0 0 44 42" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M44 0.755923V33.0969C44 37.7509 40.2575 41.5245 35.6418 41.5245C31.026 41.5245 27.2835 37.7509 27.2835 33.0969C27.2835 28.4428 31.026 24.6692 35.6418 24.6692C36.5289 24.6692 37.3883 24.809 38.1784 25.0745V15.5288L16.9985 21.0494V33.0969C16.9985 37.7509 13.256 41.5245 8.64025 41.5245C4.02449 41.5245 0.281982 37.7509 0.281982 33.0969C0.281982 28.4428 4.02449 24.6692 8.64025 24.6692C9.52737 24.6692 10.3868 24.809 11.1768 25.0745V10.5113L43.9862 0.741943L44 0.755923Z" fill="white"/></svg></div>
+                        </div>
+                        <div class="character-art-mobile">
+                            <div style="left: 107.375px; top: 80.23px; position: absolute">
+                                <svg width="64.5" height="82" viewBox="0 0 129 164" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M116.699 163.507C111.405 162.696 113.595 153.123 114.953 149.978C108.23 163.563 99.1513 164.346 102.672 146.596C95.3533 161.201 87.4247 158.168 91.1118 142.137C96.7117 71.5437 82.5733 37.5675 7.3489 39.4264C5.00636 26.9456 2.85787 14.4229 0.750977 1.88628C104.654 -10.6923 134.4 61.914 127.58 151.725C126.402 157.204 121.981 164.332 116.699 163.521V163.507Z" fill="#1759CA"/>
+                                </svg>
+                            </div>
+                            <div style="left: 2.63px; top: 38.145px; position: absolute">
+                                <svg width="64.5" height="82" viewBox="0 0 129 164" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12.063 0.366212C17.358 1.17683 15.1679 10.7505 13.8095 13.8952C20.5322 0.310307 29.6113 -0.472362 26.0905 17.2774C33.4092 2.67228 41.3378 5.70512 37.6507 21.7358C32.0508 92.3296 46.1892 126.306 121.414 124.447C123.756 136.928 125.905 149.45 128.012 161.987C24.1084 174.566 -5.63765 101.959 1.18204 12.1482C2.36024 6.66948 6.78194 -0.458381 12.063 0.352238V0.366212Z" fill="#1759CA"/>
+                                </svg>
+                            </div>
+                            <div style="left: 105.61px; top: 110.705px; position: absolute">
+                                <svg width="31.5" height="55" viewBox="0 0 63 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M55.7025 109.132H0.216309V0.411011H41.2037V81.2773L60.0826 96.5952C65.2112 100.76 62.2865 109.118 55.7025 109.118V109.132Z" fill="#1759CA"/>
+                                </svg>
+                            </div>
+                            <div style="left: 57.805px; top: 110.705px; position: absolute">
+                                <svg width="32" height="55" viewBox="0 0 64 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M7.60198 109.132H63.0466V0.411011H22.0869V81.2773L3.22186 96.5952C-1.90676 100.76 1.01793 109.118 7.60198 109.118V109.132Z" fill="#1759CA"/>
+                                </svg>
+                            </div>
+                            <div style="left: 105.61px; top: 137.365px; position: absolute">
+                                <svg width="31.5" height="28.5" viewBox="0 0 63 57" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M55.7025 56.1318H0.216309V0.730103H41.2037V28.2772L60.0826 43.5951C65.2112 47.76 62.2865 56.1178 55.7025 56.1178V56.1318Z" fill="#0C4FAF"/>
+                                </svg>
+                            </div>
+                            <div style="left: 57.805px; top: 137.365px; position: absolute">
+                                <svg width="32" height="28.5" viewBox="0 0 64 57" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M63.0466 0.730103V56.1318H7.60198C1.01793 56.1318 -1.90676 47.774 3.22186 43.6091L22.0869 28.2912V0.744071H63.0466V0.730103Z" fill="#0C4FAF"/>
+                                </svg>
+                            </div>
+                            <div style="left: 29.1px; top: 17.915px; position: absolute">
+                                <svg width="134.5" height="102.5" viewBox="0 0 269 205" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M224.49 106.956C241.983 122.065 255.719 141.492 263.995 163.546C271.341 183.141 257.161 204.119 236.383 204.119H34.9668C14.1889 204.119 0.0089912 183.141 7.3554 163.546C15.6305 141.505 29.3669 122.065 46.8597 106.956C16.0879 92.3372 4.6802 60.4016 0.591158 35.3003C-2.37513 17.0754 11.8464 0.611396 30.1708 0.835016L135.682 2.09288H238.961C258.464 2.09288 272.893 20.8629 267.501 39.7727C259.975 66.2017 244.755 89.4721 224.49 106.97V106.956Z" fill="#1759CA"/><path d="M224.49 106.956C241.983 122.065 255.719 141.492 263.995 163.546C271.341 183.141 257.161 204.119 236.383 204.119H34.9668C14.1889 204.119 0.0089912 183.141 7.3554 163.546C15.6305 141.505 29.3669 122.065 46.8597 106.956C16.0879 92.3372 4.6802 60.4016 0.591158 35.3003C-2.37513 17.0754 11.8464 0.611396 30.1708 0.835016L135.682 2.09288H238.961C258.464 2.09288 272.893 20.8629 267.501 39.7727C259.975 66.2017 244.755 89.4721 224.49 106.97V106.956Z" fill="#1759CA"/>
+                                </svg>
+                            </div>
+                            <div style="left: 98.92px; top: 55.905px; position: absolute">
+                                <svg width="17.5" height="17.5" viewBox="0 0 35 35" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M17.7508 34.9115C8.40839 34.9115 0.84021 27.2805 0.84021 17.8605C0.84021 8.44057 8.40839 0.80957 17.7508 0.80957C27.0932 0.80957 34.6614 8.44057 34.6614 17.8605C34.6614 27.2805 27.0932 34.9115 17.7508 34.9115Z" fill="white"/>
+                                </svg>
+                            </div>
+                            <div style="left: 100.16px; top: 60.935px; position: absolute">
+                                <svg width="15" height="9.5" viewBox="0 0 30 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M15.0004 18.4684C6.90545 18.4684 0.321411 11.8297 0.321411 3.66756C0.321411 2.13017 1.56891 0.872314 3.09364 0.872314C4.61837 0.872314 5.86587 2.13017 5.86587 3.66756C5.86587 8.74092 9.9549 12.8779 15.0004 12.8779C20.0458 12.8779 24.1349 8.74092 24.1349 3.66756C24.1349 2.13017 25.3824 0.872314 26.9071 0.872314C28.4318 0.872314 29.6793 2.13017 29.6793 3.66756C29.6793 11.8297 23.0953 18.4684 15.0004 18.4684Z" fill="#231F20"/>
+                                </svg>
+                            </div>
+                            <div style="left: 76.585px; top: 55.905px; position: absolute">
+                                <svg width="17" height="17.5" viewBox="0 0 34 35" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M17.0761 34.9115C7.73371 34.9115 0.165527 27.2805 0.165527 17.8605C0.165527 8.44057 7.73371 0.80957 17.0761 0.80957C26.4185 0.80957 33.9867 8.44057 33.9867 17.8605C33.9867 27.2805 26.4185 34.9115 17.0761 34.9115Z" fill="white"/>
+                                </svg>
+                            </div>
+                            <div style="left: 77.49px; top: 60.935px; position: absolute">
+                                <svg width="15.5" height="9.5" viewBox="0 0 31 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M15.6605 18.4684C7.56562 18.4684 0.981567 11.8297 0.981567 3.66756C0.981567 2.13017 2.22907 0.872314 3.7538 0.872314C5.27852 0.872314 6.52603 2.13017 6.52603 3.66756C6.52603 8.74092 10.6289 12.8779 15.6605 12.8779C20.6921 12.8779 24.795 8.74092 24.795 3.66756C24.795 2.13017 26.0425 0.872314 27.5673 0.872314C29.092 0.872314 30.3395 2.13017 30.3395 3.66756C30.3395 11.8297 23.7554 18.4684 15.6605 18.4684Z" fill="#231F20"/>
+                                </svg>
+                            </div>
+                            <div style="left: 115.75px; top: 68.74px; position: absolute">
+                                <svg width="17.5" height="17.5" viewBox="0 0 35 35" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M17.4059 34.5857C8.06344 34.5857 0.495239 26.9547 0.495239 17.5347C0.495239 8.11477 8.06344 0.483765 17.4059 0.483765C26.7483 0.483765 34.3165 8.11477 34.3165 17.5347C34.3165 26.9547 26.7483 34.5857 17.4059 34.5857Z" fill="#0C4FAF"/>
+                                </svg>
+                            </div>
+                            <div style="left: 59.73px; top: 68.74px; position: absolute">
+                                <svg width="17.5" height="17.5" viewBox="0 0 35 35" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M17.3662 34.5857C8.02375 34.5857 0.455566 26.9547 0.455566 17.5347C0.455566 8.11477 8.02375 0.483765 17.3662 0.483765C26.7086 0.483765 34.2768 8.11477 34.2768 17.5347C34.2768 26.9547 26.7086 34.5857 17.3662 34.5857Z" fill="#0C4FAF"/>
+                                </svg>
+                            </div>
+                            <div style="left: 83.61px; top: 70.84px; position: absolute">
+                                <svg width="25.5" height="28.5" viewBox="0 0 51 57" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M50.6203 28.6711C50.6203 30.0128 50.5372 31.3266 50.3708 32.6124C48.6521 46.2112 38.1314 56.6654 25.4208 56.6654C20.708 56.6654 16.3001 55.2259 12.5299 52.7241C5.15577 47.8464 0.221191 38.9017 0.221191 28.6711C0.221191 13.2134 11.5042 0.676758 25.4208 0.676758C39.3374 0.676758 50.6203 13.2134 50.6203 28.6711Z" fill="#231F20"/>
+                                </svg>
+                            </div>
+                            <div style="left: 89.765px; top: 84.835px; position: absolute">
+                                <svg width="19.5" height="14.5" viewBox="0 0 39 29" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M38.3707 4.61243C36.6519 18.2113 26.1313 28.6655 13.4207 28.6655C8.70787 28.6655 4.30002 27.2259 0.529785 24.7242C2.24857 11.1253 12.7553 0.671143 25.4799 0.671143C30.1926 0.671143 34.6005 2.11069 38.3707 4.61243Z" fill="#CE004F"/>
+                                </svg>
+                            </div>
+                            <div style="left: 151.64px; top: 59.37px; position: absolute">
+                                <svg width="22" height="21" viewBox="0 0 44 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M44 0.755923V33.0969C44 37.7509 40.2575 41.5245 35.6418 41.5245C31.026 41.5245 27.2835 37.7509 27.2835 33.0969C27.2835 28.4428 31.026 24.6692 35.6418 24.6692C36.5289 24.6692 37.3883 24.809 38.1784 25.0745V15.5288L16.9985 21.0494V33.0969C16.9985 37.7509 13.256 41.5245 8.64025 41.5245C4.02449 41.5245 0.281982 37.7509 0.281982 33.0969C0.281982 28.4428 4.02449 24.6692 8.64025 24.6692C9.52737 24.6692 10.3868 24.809 11.1768 25.0745V10.5113L43.9862 0.741943L44 0.755923Z" fill="white"/>
+                                </svg>
+                            </div>
                         </div>
                     </div>
                     <div class="background-grid-container">
