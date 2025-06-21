@@ -230,36 +230,7 @@
                     <h1>Mau pilih yang mana?</h1>
                     <p>Pilih paket sesuai yang kamu mau!</p>
                 </div>
-                <div class="packages-grid">
-                    <div class="package-card card-blue" onclick="selectPackage('Snap Photobox')">
-                        <div class="header"><h2>Snap Photobox</h2><span class="price">25rb</span></div>
-                        <ul class="details-list">
-                            <li><span class="icon"></span>5 Menit sesi Photobox</li>
-                            <li><span class="icon"></span>Buat 1 orang (tambah 15rb/org, max 5)</li>
-                            <li><span class="icon"></span>Dapet GRATIS 1 cetak foto</li>
-                            <li><span class="icon"></span>Dapet semua soft file</li>
-                        </ul>
-                    </div>
-                    <div class="package-card card-pink" onclick="selectPackage('Snap Self Photo')">
-                        <div class="header"><h2>Snap Self Photo</h2><span class="price">80rb</span></div>
-                        <ul class="details-list">
-                            <li><span class="icon"></span>15 Menit sesi Photobox</li>
-                            <li><span class="icon"></span>Buat 1 orang (tambah 15rb/org, max 5)</li>
-                            <li><span class="icon"></span>Dapet GRATIS 1 cetak foto</li>
-                            <li><span class="icon"></span>Dapet semua soft file</li>
-                        </ul>
-                    </div>
-                    <div class="package-card card-yellow" onclick="selectPackage('Snap Personal Photo')">
-                        <div class="header"><h2>Snap Personal Photo</h2><span class="price">50rb</span></div>
-                        <ul class="details-list">
-                            <li><span class="icon"></span>15 Menit sesi Photobox</li>
-                            <li><span class="icon"></span>Buat 1 orang</li>
-                            <li><span class="icon"></span>Difotoin sama fotografer</li>
-                            <li><span class="icon"></span>Dapet GRATIS 1 cetak foto</li>
-                            <li><span class="icon"></span>Dapet semua soft file</li>
-                        </ul>
-                    </div>
-                </div>
+                  <div id="package-container" class="package-grid"></div>
             </section>
 
             <section id="page-pilih-background" class="page">
@@ -442,194 +413,225 @@
             </section>
         </div>
     </main>
+<script>
+    // --- GLOBAL VARIABLES ---
+    const pages = document.querySelectorAll('.page');
+    const backButtonContainer = document.getElementById('backButtonContainer');
+    const timeSlotsGrid = document.getElementById('time-slots-grid');
+    const timeSlotsDateHeader = document.getElementById('time-slots-date-header');
 
-    <script>
-        // --- GLOBAL VARIABLES ---
-        const pages = document.querySelectorAll('.page');
-        const backButtonContainer = document.getElementById('backButtonContainer');
-        const timeSlotsGrid = document.getElementById('time-slots-grid');
-        const timeSlotsDateHeader = document.getElementById('time-slots-date-header');
-        
-        let pageHistory = ['page-pilih-paket'];
-        let calendar;
-        let isCalendarRendered = false;
-        
-        // Data booking sementara
-        let bookingData = {
-            package: null,
-            background: null,
-            date: null,
-            time: null
-        };
-        
-        // --- SIMULATED SERVER DATA ---
-        const closedDays = ['Minggu']; // Hari Minggu tutup
-        const dayMap = { 0: 'Minggu', 1: 'Senin', 2: 'Selasa', 3: 'Rabu', 4: 'Kamis', 5: 'Jumat', 6: 'Sabtu' };
-        const availableSlots = [
-            '10:00', '10:30', '11:00', '11:30', '13:00', '13:30', 
-            '14:00', '14:30', '15:00', '15:30', '16:00', '16:30'
-        ];
-        
-        // --- NAVIGATION FUNCTIONS ---
-        function updateNav() {
-            if (pageHistory.length > 1) {
-                backButtonContainer.innerHTML = `<a href="#" class="back-button" onclick="goBack(event)">&lt;</a>`;
-            } else {
-                backButtonContainer.innerHTML = '';
-            }
+    let pageHistory = ['page-pilih-paket'];
+    let calendar;
+    let isCalendarRendered = false;
+
+    // Data booking sementara
+    let bookingData = {
+        package: null,
+        background: null,
+        date: null,
+        time: null
+    };
+
+    const dayMap = { 0: 'Minggu', 1: 'Senin', 2: 'Selasa', 3: 'Rabu', 4: 'Kamis', 5: 'Jumat', 6: 'Sabtu' };
+    const availableSlots = [
+        '10:00', '10:30', '11:00', '11:30', '13:00', '13:30',
+        '14:00', '14:30', '15:00', '15:30', '16:00', '16:30'
+    ];
+
+    let closedDays = []; // akan diambil dari backend
+
+    // --- NAVIGATION FUNCTIONS ---
+    function updateNav() {
+        if (pageHistory.length > 1) {
+            backButtonContainer.innerHTML = `<a href="#" class="back-button" onclick="goBack(event)">&lt;</a>`;
+        } else {
+            backButtonContainer.innerHTML = '';
+        }
+    }
+
+    function goToPage(pageId) {
+        pages.forEach(page => page.classList.remove('active'));
+        const targetPage = document.getElementById(pageId);
+        if (targetPage) {
+            targetPage.classList.add('active');
         }
 
-        function goToPage(pageId) {
-            pages.forEach(page => page.classList.remove('active'));
-            const targetPage = document.getElementById(pageId);
-            if(targetPage) {
-                targetPage.classList.add('active');
-            }
-
-            if (pageId === 'page-pilih-paket') {
-                pageHistory = ['page-pilih-paket']; // Reset history
-            } else if (pageHistory[pageHistory.length - 1] !== pageId) {
-                pageHistory.push(pageId);
-            }
-            
-            // Render calendar only when its page is active and it hasn't been rendered yet
-            if (pageId === 'page-pilih-jadwal' && !isCalendarRendered) {
-                setTimeout(() => { // Timeout to ensure the element is visible before rendering
-                    calendar.render();
-                    isCalendarRendered = true;
-                }, 0);
-            }
-
-            updateNav();
-            window.scrollTo(0, 0);
+        if (pageId === 'page-pilih-paket') {
+            pageHistory = ['page-pilih-paket'];
+        } else if (pageHistory[pageHistory.length - 1] !== pageId) {
+            pageHistory.push(pageId);
         }
 
-        function goBack(event) {
-            event.preventDefault();
-            if (pageHistory.length > 1) {
+        if (pageId === 'page-pilih-jadwal' && !isCalendarRendered) {
+            setTimeout(() => {
+                calendar.render();
+                isCalendarRendered = true;
+            }, 0);
+        }
+
+        updateNav();
+        window.scrollTo(0, 0);
+    }
+
+    function goBack(event) {
+        event.preventDefault();
+        if (pageHistory.length > 1) {
+            pageHistory.pop();
+            const prevPageId = pageHistory[pageHistory.length - 1];
+            goToPage(prevPageId);
+            if (pageHistory[pageHistory.length - 1] === prevPageId) {
                 pageHistory.pop();
-                const prevPageId = pageHistory[pageHistory.length - 1];
-                goToPage(prevPageId);
-                // This call is needed because we're not adding to history
-                if (pageHistory[pageHistory.length - 1] === prevPageId) {
-                    pageHistory.pop();
-                }
             }
         }
+    }
 
-        // --- BOOKING FLOW FUNCTIONS ---
-        function selectPackage(packageName) {
-            bookingData.package = packageName;
-            document.getElementById('summary-title').textContent = packageName;
-            goToPage('page-pilih-background');
-        }
+    // --- BOOKING FLOW FUNCTIONS ---
+    function selectPackage(packageName) {
+        bookingData.package = packageName;
+        document.getElementById('summary-title').textContent = packageName;
+        goToPage('page-pilih-background');
+    }
 
-        function selectBackground(element, backgroundName) {
-            document.querySelectorAll('.background-item').forEach(item => item.classList.remove('selected'));
-            element.classList.add('selected');
-            bookingData.background = backgroundName;
-        }
-        
-        function updateSlotsForDate(date) {
-            const today = new Date();
-            today.setHours(0,0,0,0);
-            
-            // Clear previous slots
-            timeSlotsGrid.innerHTML = '';
-            
-            const isPast = date < today;
-            const dayName = dayMap[date.getDay()];
-            const isClosed = closedDays.includes(dayName);
+    function selectBackground(element, backgroundName) {
+        document.querySelectorAll('.background-item').forEach(item => item.classList.remove('selected'));
+        element.classList.add('selected');
+        bookingData.background = backgroundName;
+    }
 
-            let headerText;
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            headerText = date.toLocaleDateString('id-ID', options);
+    function updateSlotsForDate(date) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        timeSlotsGrid.innerHTML = '';
 
-            if (isPast) {
-                timeSlotsGrid.innerHTML = `<p style="grid-column: 1 / -1; text-align: center; color: #888;">Tidak bisa booking untuk tanggal yang sudah lewat.</p>`;
-            } else if (isClosed) {
-                timeSlotsGrid.innerHTML = `<p style="grid-column: 1 / -1; text-align: center; color: #888;">Studio tutup pada hari ${dayName}.</p>`;
-            } else {
-                 // Generate new slots
-                availableSlots.forEach(slot => {
-                    const slotEl = document.createElement('div');
-                    slotEl.classList.add('time-slot');
-                    slotEl.textContent = slot;
-                    slotEl.onclick = () => selectTime(slotEl, slot);
-                    timeSlotsGrid.appendChild(slotEl);
-                });
-            }
-            timeSlotsDateHeader.textContent = headerText;
-        }
+        const isPast = date < today;
+        const dayName = dayMap[date.getDay()];
+        const isClosed = closedDays.includes(dayName);
 
-        function selectTime(element, time) {
-            document.querySelectorAll('.time-slot').forEach(item => item.classList.remove('selected'));
-            element.classList.add('selected');
-            bookingData.time = time;
-        }
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        const headerText = date.toLocaleDateString('id-ID', options);
+        timeSlotsDateHeader.textContent = headerText;
 
-        function submitBooking() {
-            // Simple validation
-            const name = document.getElementById('nama').value;
-            const agreement = document.getElementById('agreement').checked;
-            
-            if (!bookingData.package || !bookingData.date || !bookingData.time) {
-                alert("Harap lengkapi pilihan paket, tanggal, dan waktu terlebih dahulu.");
-                return;
-            }
-            if (!name || !agreement) {
-                alert("Harap isi nama dan setujui syarat & ketentuan.");
-                return;
-            }
-            
-            console.log("Booking Dibuat:", bookingData);
-            goToPage('page-sukses');
-        }
-
-        // --- INITIALIZATION ---
-        document.addEventListener('DOMContentLoaded', () => {
-            const calendarEl = document.getElementById('calendar');
-            calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
-                locale: 'id',
-                height: 'auto',
-                selectable: true,
-                validRange: {
-                    start: new Date().toISOString().split('T')[0] // Mulai dari hari ini
-                },
-                headerToolbar: {
-                    left: 'prev',
-                    center: 'title',
-                    right: 'next'
-                },
-                dateClick: function(info) {
-                    const clickedDate = info.date;
-                    const dayName = dayMap[clickedDate.getDay()];
-                    
-                    if (closedDays.includes(dayName)) {
-                        alert(`Hari ${dayName} kami tutup, silahkan pilih hari lain.`);
-                        return;
-                    }
-                    
-                    // Highlight the selected day
-                     document.querySelectorAll('.fc-day-selected').forEach(el => el.classList.remove('fc-day-selected'));
-                    info.dayEl.classList.add('fc-day-selected');
-
-                    bookingData.date = info.dateStr;
-                    bookingData.time = null; // Reset time selection
-                    updateSlotsForDate(info.date);
-                },
-                dayCellDidMount: function(info) {
-                    const dayName = dayMap[info.date.getDay()];
-                    if (closedDays.includes(dayName)) {
-                        info.el.classList.add('fc-day-disabled');
-                    }
-                },
+        if (isPast) {
+            timeSlotsGrid.innerHTML = `<p style="grid-column: 1 / -1; text-align: center; color: #888;">Tidak bisa booking untuk tanggal yang sudah lewat.</p>`;
+        } else if (isClosed) {
+            timeSlotsGrid.innerHTML = `<p style="grid-column: 1 / -1; text-align: center; color: #888;">Studio tutup pada hari ${dayName}.</p>`;
+        } else {
+            availableSlots.forEach(slot => {
+                const slotEl = document.createElement('div');
+                slotEl.classList.add('time-slot');
+                slotEl.textContent = slot;
+                slotEl.onclick = () => selectTime(slotEl, slot);
+                timeSlotsGrid.appendChild(slotEl);
             });
+        }
+    }
 
-            // Start on the first page
-            goToPage('page-pilih-paket');
+    function selectTime(element, time) {
+        document.querySelectorAll('.time-slot').forEach(item => item.classList.remove('selected'));
+        element.classList.add('selected');
+        bookingData.time = time;
+    }
+
+    function submitBooking() {
+        const name = document.getElementById('nama').value;
+        const agreement = document.getElementById('agreement').checked;
+
+        if (!bookingData.package || !bookingData.date || !bookingData.time) {
+            alert("Harap lengkapi pilihan paket, tanggal, dan waktu terlebih dahulu.");
+            return;
+        }
+        if (!name || !agreement) {
+            alert("Harap isi nama dan setujui syarat & ketentuan.");
+            return;
+        }
+
+        console.log("Booking Dibuat:", bookingData);
+        goToPage('page-sukses');
+    }
+
+    // --- LOAD DATA FROM BACKEND ---
+    function loadPackages() {
+        fetch('/packages')
+            .then(res => res.json())
+            .then(data => {
+                const container = document.getElementById('package-container');
+                container.innerHTML = '';
+
+                data.forEach(pkg => {
+                    const div = document.createElement('div');
+                    div.classList.add('package-item');
+                    div.onclick = () => selectPackage(pkg.title);
+                    div.innerHTML = `
+                        <h3>${pkg.title}</h3>
+                        <p>${pkg.description.replace(/\n/g, '<br>')}</p>
+                        <p><strong>Durasi:</strong> ${pkg.duration_minutes} menit</p>
+                        <p><strong>Harga:</strong> Rp${Number(pkg.price).toLocaleString()}</p>
+                    `;
+                    container.appendChild(div);
+                });
+            })
+            .catch(error => {
+                console.error('Gagal load paket:', error);
+            });
+    }
+
+    function loadClosedDays() {
+        fetch('/api/operational-hours')
+            .then(res => res.json())
+            .then(data => {
+                closedDays = data.closed_days || [];
+            })
+            .catch(error => {
+                console.error('Gagal load hari tutup:', error);
+            });
+    }
+
+    // --- INITIALIZATION ---
+    document.addEventListener('DOMContentLoaded', () => {
+        const calendarEl = document.getElementById('calendar');
+
+        calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            locale: 'id',
+            height: 'auto',
+            selectable: true,
+            validRange: {
+                start: new Date().toISOString().split('T')[0]
+            },
+            headerToolbar: {
+                left: 'prev',
+                center: 'title',
+                right: 'next'
+            },
+            dateClick: function (info) {
+                const clickedDate = info.date;
+                const dayName = dayMap[clickedDate.getDay()];
+
+                if (closedDays.includes(dayName)) {
+                    alert(`Hari ${dayName} kami tutup, silakan pilih hari lain.`);
+                    return;
+                }
+
+                document.querySelectorAll('.fc-day-selected').forEach(el => el.classList.remove('fc-day-selected'));
+                info.dayEl.classList.add('fc-day-selected');
+
+                bookingData.date = info.dateStr;
+                bookingData.time = null;
+                updateSlotsForDate(info.date);
+            },
+            dayCellDidMount: function (info) {
+                const dayName = dayMap[info.date.getDay()];
+                if (closedDays.includes(dayName)) {
+                    info.el.classList.add('fc-day-disabled');
+                }
+            },
         });
-    </script>
+
+        goToPage('page-pilih-paket');
+        loadPackages();
+        loadClosedDays();
+    });
+</script>
+
 </body>
 </html>

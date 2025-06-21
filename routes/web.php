@@ -1,5 +1,5 @@
 <?php
-
+use App\Http\Controllers\PackageController;
 use App\Http\Livewire\BookingWizard;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BookingController;
@@ -9,6 +9,8 @@ use App\Http\Controllers\OperationalHourController;
 // --- Untuk booking user biasa ---
 Route::get('/booking', [BookingController::class, 'showCalendar'])->name('booking.calendar');
 Route::get('/home1', [BookingController::class, 'home']);
+
+Route::get('/packages', [PackageController::class, 'index']);
 
 Route::get('/auth/{provider}/redirect', [SocialiteController::class, 'redirect'])
     ->name('socialite.redirect');
