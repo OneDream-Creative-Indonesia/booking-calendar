@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Booking Studio Foto - Snap Fun</title>
-    
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&display=swap" rel="stylesheet">
-    
+
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.14/index.global.min.js'></script>
 
     <style>
@@ -41,7 +41,7 @@
             margin: 0 auto;
             padding: 2rem 1.5rem;
         }
-        
+
         /* Navigasi / Header */
         .navbar {
             display: flex;
@@ -52,7 +52,7 @@
             margin-bottom: 2rem;
             height: 70px;
         }
-        
+
         .navbar-logo-svg {
             transform: scale(0.65);
             transform-origin: right center;
@@ -69,7 +69,7 @@
         /* Konten Halaman yang Dapat Diganti */
         .page { display: none; flex-direction: column; align-items: center; animation: fadeIn 0.5s ease-in-out; }
         .page.active { display: flex; }
-        
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -81,8 +81,8 @@
         .section-header p { font-size: 1.25rem; font-weight: 500; margin: 0; color: #555; }
 
         /* --- Halaman 1: Pemilihan Paket --- */
-        .packages-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; width: 100%; }
-        .package-card { border-radius: var(--border-radius-lg); padding: 2rem; color: var(--text-light); cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease; display: flex; flex-direction: column; }
+        .packages-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; color: var(--text-light); width: 100%; }
+        .package-card { border-radius: var(--border-radius-lg); padding: 2rem; cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease; display: flex; flex-direction: column; }
         .package-card:hover { transform: translateY(-10px); box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15); }
         .package-card .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid rgba(255, 255, 255, 0.3); padding-bottom: 1rem; margin-bottom: 1.5rem; }
         .package-card .header h2 { margin: 0; font-size: 1.5rem; font-weight: 800; }
@@ -94,7 +94,7 @@
         .package-card.card-pink { background-color: var(--primary-pink); }
         .package-card.card-yellow { background-color: var(--primary-yellow); color: var(--text-dark); }
         .package-card.card-yellow .icon { background-color: var(--primary-blue); }
-        
+
         /* --- Halaman 2: Pilih Background --- */
         .background-selection-layout { display: flex; gap: 3rem; width: 100%; align-items: flex-start; }
         .package-summary { flex: 1; max-width: 350px; }
@@ -124,7 +124,7 @@
         .time-slot.selected { background-color: var(--primary-blue); color: white; border-color: var(--primary-blue); }
         .time-slot.disabled { background-color: var(--bg-disabled); color: #aaa; cursor: not-allowed; border-color: var(--border-light); }
         .time-slots-container .btn-primary { margin-top: 1.5rem; }
-        
+
         /* Override FullCalendar Styles */
         .fc { --fc-border-color: transparent; --fc-today-bg-color: rgba(254, 221, 3, 0.2); --fc-button-text-color: var(--text-dark); font-family: 'Montserrat', sans-serif;}
         .fc .fc-toolbar-title { font-size: 1.5rem; font-weight: 800; color: var(--text-dark); }
@@ -172,7 +172,7 @@
         .btn { display: inline-block; padding: 1rem 2rem; font-family: 'Montserrat', sans-serif; font-size: 1rem; font-weight: 700; border-radius: var(--border-radius-lg); border: none; cursor: pointer; text-decoration: none; transition: background-color 0.3s, transform 0.2s; }
         .btn:hover { transform: translateY(-3px); }
         .btn-primary { background-color: var(--primary-blue); color: var(--text-light); width: 100%; text-align: center; box-sizing: border-box; font-size: 1.2rem; }
-        
+
         /* Media Query (Responsif) */
         @media (max-width: 992px) {
             .background-selection-layout { flex-direction: column; align-items: center; }
@@ -185,7 +185,7 @@
             .background-grid-container {z-index: 2;}
             .schedule-layout { gap: 1.5rem;}
         }
-        
+
         @media (max-width: 768px) {
             .main-container { padding: 1rem; }
             .navbar { margin-bottom: 1.5rem; height: auto; }
@@ -222,7 +222,7 @@
                 </div>
             </div>
         </nav>
-        
+
         <div id="page-content">
 
             <section id="page-pilih-paket" class="page">
@@ -359,7 +359,7 @@
                     </div>
                 </div>
             </section>
-            
+
             <section id="page-pilih-jadwal" class="page">
                 <div class="section-header">
                     <h1>Pilih Tanggal & Waktu</h1>
@@ -380,7 +380,7 @@
                     </div>
                 </div>
             </section>
-            
+
             <section id="page-form" class="page">
                 <div class="form-container">
                     <div class="section-header" style="margin-bottom: 2rem; text-align: left;">
@@ -402,7 +402,7 @@
                     <button class="btn btn-primary" onclick="submitBooking()">Booking Sekarang</button>
                 </div>
             </section>
-            
+
             <section id="page-sukses" class="page">
                 <div class="success-container">
                     <div class="success-icon"><svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"><path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/></svg></div>
@@ -556,17 +556,36 @@
             .then(data => {
                 const container = document.getElementById('package-container');
                 container.innerHTML = '';
+                container.className = 'packages-grid'; // Pastikan class-nya sama
 
                 data.forEach(pkg => {
                     const div = document.createElement('div');
-                    div.classList.add('package-item');
+                    div.classList.add('package-card');
+
+                    // Tambahkan class warna sesuai ID (opsional, bisa ubah logic-nya)
+                    if (pkg.id == 1) div.classList.add('card-blue');
+                    if (pkg.id == 2) div.classList.add('card-pink');
+                    if (pkg.id == 3) div.classList.add('card-yellow');
+
                     div.onclick = () => selectPackage(pkg.title);
+
+                    // Buat detail list dari deskripsi (anggap satu item per baris)
+                    const detailItems = pkg.description
+                        .split('\n')
+                        .map(line => `<li><span class="icon"></span>${line}</li>`)
+                        .join('');
+
                     div.innerHTML = `
-                        <h3>${pkg.title}</h3>
-                        <p>${pkg.description.replace(/\n/g, '<br>')}</p>
-                        <p><strong>Durasi:</strong> ${pkg.duration_minutes} menit</p>
-                        <p><strong>Harga:</strong> Rp${Number(pkg.price).toLocaleString()}</p>
+                        <div class="header">
+                            <h2>${pkg.title}</h2>
+                            <span class="price">Rp${Number(pkg.price).toLocaleString()}</span>
+                        </div>
+                        <ul class="details-list">
+                            ${detailItems}
+                            <li><span class="icon"></span>Durasi: ${pkg.duration_minutes} menit</li>
+                        </ul>
                     `;
+
                     container.appendChild(div);
                 });
             })
@@ -574,6 +593,7 @@
                 console.error('Gagal load paket:', error);
             });
     }
+
 
     function loadClosedDays() {
         fetch('/api/operational-hours')
