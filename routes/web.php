@@ -14,8 +14,8 @@ use App\Http\Controllers\{
 // ROUTE UNTUK USER BOOKING PAGE
 // ------------------------------
 Route::get('/', fn () => redirect('/booking', 301)); // Redirect root ke halaman booking
-Route::get('/booking', [BookingController::class, 'showCalendar'])->name('booking.calendar');
-Route::get('/home1', [BookingController::class, 'home']); // versi tampilan frontend custom
+// Route::get('/booking', [BookingController::class, 'showCalendar'])->name('booking.calendar');
+Route::get('/booking', [BookingController::class, 'home']); // versi tampilan frontend custom
 
 // API untuk mendapatkan data paket dan mengirim data booking
 Route::get('/packages', [PackageController::class, 'index']);

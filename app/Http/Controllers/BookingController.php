@@ -16,10 +16,10 @@ class BookingController extends Controller
             'booked_times' => $bookedTimes
         ]);
     }
-    public function showCalendar()
-    {
-        return view('booking.calendar');
-    }
+    // public function showCalendar()
+    // {
+    //     return view('booking.calendar');
+    // }
        public function home()
     {
         return view('home');
