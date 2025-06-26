@@ -1,29 +1,48 @@
 <?php
-use App\Http\Controllers\PackageController;
-use App\Http\Livewire\BookingWizard;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\BookingController;
-use App\Http\Controllers\SocialiteController;
-use App\Http\Controllers\GoogleCalendarController;
-use App\Http\Controllers\OperationalHourController;
-// --- Untuk booking user biasa ---
-Route::get('/booking', [BookingController::class, 'showCalendar'])->name('booking.calendar');
-Route::get('/home1', [BookingController::class, 'home']);
 
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\{
+    BookingController,
+    PackageController,
+    SocialiteController,
+    GoogleCalendarController,
+    OperationalHourController
+};
+
+// ------------------------------
+// ROUTE UNTUK USER BOOKING PAGE
+// ------------------------------
+Route::get('/', fn () => redirect('/booking', 301)); // Redirect root ke halaman booking
+Route::get('/booking', [BookingController::class, 'showCalendar'])->name('booking.calendar');
+Route::get('/home1', [BookingController::class, 'home']); // versi tampilan frontend custom
+
+// API untuk mendapatkan data paket dan mengirim data booking
 Route::get('/packages', [PackageController::class, 'index']);
 Route::post('/api/submit-booking', [BookingController::class, 'submitBooking']);
-Route::get('/auth/{provider}/redirect', [SocialiteController::class, 'redirect'])
-    ->name('socialite.redirect');
-Route::get('/auth/{provider}/callback', [SocialiteController::class, 'callback'])
-    ->name('socialite.callback');
-// --- Untuk Admin connect ke Google Calendar ---
-Route::get('/admin/google/connect', [GoogleCalendarController::class, 'redirectToGoogle'])->name('google.connect');
-Route::get('/google/callback', [GoogleCalendarController::class, 'handleGoogleCallback'])->name('google.callback');
+
+// Ambil waktu yang sudah dibooking pada tanggal tertentu
+Route::get('/booked-times/{date}', [BookingController::class, 'getBookedTimes']);
+
+// Ambil hari dan jam operasional dari backend
 Route::get('/operational-hours', [OperationalHourController::class, 'getOperationalHours']);
 Route::get('/jam-tutup', [OperationalHourController::class, 'closedDays']);
-Route::get('/booked-times/{date}', [BookingController::class, 'getBookedTimes']);
-// --- Welcome ---
-Route::redirect('/', '/booking', 301);
+
+// ------------------------------
+// ROUTE UNTUK AUTH SOCIALITE
+// ------------------------------
+Route::get('/auth/{provider}/redirect', [SocialiteController::class, 'redirect'])->name('socialite.redirect');
+Route::get('/auth/{provider}/callback', [SocialiteController::class, 'callback'])->name('socialite.callback');
+
+// ------------------------------
+// ROUTE UNTUK ADMIN / GOOGLE CALENDAR SYNC
+// ------------------------------
+Route::get('/admin/google/connect', [GoogleCalendarController::class, 'redirectToGoogle'])->name('google.connect');
+Route::get('/google/callback', [GoogleCalendarController::class, 'handleGoogleCallback'])->name('google.callback');
+
+// ------------------------------
+// LOGOUT (khusus untuk admin / user login)
+// ------------------------------
 Route::post('/logout', function () {
     Auth::logout();
     return redirect('/');
