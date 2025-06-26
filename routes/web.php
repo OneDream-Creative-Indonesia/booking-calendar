@@ -11,7 +11,7 @@ Route::get('/booking', [BookingController::class, 'showCalendar'])->name('bookin
 Route::get('/home1', [BookingController::class, 'home']);
 
 Route::get('/packages', [PackageController::class, 'index']);
-
+Route::post('/api/submit-booking', [BookingController::class, 'submitBooking']);
 Route::get('/auth/{provider}/redirect', [SocialiteController::class, 'redirect'])
     ->name('socialite.redirect');
 Route::get('/auth/{provider}/callback', [SocialiteController::class, 'callback'])
@@ -21,6 +21,7 @@ Route::get('/admin/google/connect', [GoogleCalendarController::class, 'redirectT
 Route::get('/google/callback', [GoogleCalendarController::class, 'handleGoogleCallback'])->name('google.callback');
 Route::get('/operational-hours', [OperationalHourController::class, 'getOperationalHours']);
 Route::get('/jam-tutup', [OperationalHourController::class, 'closedDays']);
+Route::get('/booked-times/{date}', [BookingController::class, 'getBookedTimes']);
 // --- Welcome ---
 Route::redirect('/', '/booking', 301);
 Route::post('/logout', function () {

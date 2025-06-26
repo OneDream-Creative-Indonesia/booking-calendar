@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Booking Studio Foto - Snap Fun</title>
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&display=swap" rel="stylesheet">
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.14/index.global.min.js'></script>
 
     <style>
@@ -57,7 +57,29 @@
             transform: scale(0.65);
             transform-origin: right center;
         }
-
+        .modal {
+        position: fixed;
+        z-index: 9999;
+        left: 0; top: 0;
+        width: 100%; height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        display: flex; align-items: center; justify-content: center;
+        }
+        .modal-content {
+        background: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        width: 90%;
+        max-width: 400px;
+        position: relative;
+        text-align: center;
+        }
+        .close {
+        position: absolute;
+        top: 10px; right: 15px;
+        font-size: 24px;
+        cursor: pointer;
+        }
         .navbar .back-button {
             display: flex; align-items: center; justify-content: center;
             width: 40px; height: 40px; background-color: var(--primary-pink);
@@ -79,6 +101,10 @@
         .section-header { text-align: center; margin-bottom: 3rem; }
         .section-header h1 { font-size: 2.5rem; font-weight: 800; margin: 0 0 0.5rem 0; }
         .section-header p { font-size: 1.25rem; font-weight: 500; margin: 0; color: #555; }
+        .time-slot.booked {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
 
         /* --- Halaman 1: Pemilihan Paket --- */
         .packages-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; color: var(--text-light); width: 100%; }
@@ -381,6 +407,15 @@
                 </div>
             </section>
 
+            <!-- Modal QRIS -->
+            <div id="qrisModal" class="modal" style="display:none;">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <h3>Scan QRIS untuk pembayaran DP</h3>
+                <img src="/images/qris.png" alt="QRIS" style="max-width: 100%; height: auto;" />
+            </div>
+            </div>
+
             <section id="page-form" class="page">
                 <div class="form-container">
                     <div class="section-header" style="margin-bottom: 2rem; text-align: left;">
@@ -395,8 +430,8 @@
                     </div>
                     <div class="dp-section">
                         <h3>Down Payment (DP)</h3>
-                        <div class="dp-info"><p>Pembayaran DP via QRIS. <a href="#" class="btn-link">Klik disini</a></p><span class="price">Rp 15.000</span></div>
-                        <div class="dp-info"><p>Kalau ada kendala, tenang~ tinggal chat admin kami aja.</p><button class="btn btn-secondary">💬 Chat Kami</button></div>
+                        <div class="dp-info"><p>Pembayaran DP via QRIS. <a href="#" class="btn-link" onclick="showQRISModal(event)">Klik disini</a></p><span class="price">Rp 15.000</span></div>
+                        <div class="dp-info"><p>Kalau ada kendala, tenang~ tinggal chat admin kami aja.</p><button class="btn btn-secondary" onclick="chatAdmin()">💬 Chat Kami</button></div>
                     </div>
                     <div class="agreement-box"><input type="checkbox" id="agreement"><label for="agreement">Saya setuju, kalau batalin di hari-H, <strong class="red-star">DP sebesar Rp15.000 hangus.</strong><span class="red-star">*</span></label></div>
                     <button class="btn btn-primary" onclick="submitBooking()">Booking Sekarang</button>
@@ -413,18 +448,38 @@
             </section>
         </div>
     </main>
+
+<script>
+    function showQRISModal(event) {
+        event.preventDefault(); // agar tidak pindah halaman
+        document.getElementById('qrisModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('qrisModal').style.display = 'none';
+    }
+
+    function chatAdmin() {
+    const nomor = '6281234567890'; // ganti ke nomor admin
+    const pesan = encodeURIComponent("Halo kak, saya mau tanya tentang booking studio Snap PhotoBox.");
+    window.open(`https://wa.me/${nomor}?text=${pesan}`, '_blank');
+    }
+
+</script>
+
 <script>
     // --- GLOBAL VARIABLES ---
     const pages = document.querySelectorAll('.page');
     const backButtonContainer = document.getElementById('backButtonContainer');
     const timeSlotsGrid = document.getElementById('time-slots-grid');
     const timeSlotsDateHeader = document.getElementById('time-slots-date-header');
-
     let pageHistory = ['page-pilih-paket'];
     let calendar;
     let isCalendarRendered = false;
+    let todayCloseTime;
+    let bookedTimes = [];
 
-    // Data booking sementara
+    // Objek untuk menyimpan data booking sementara
     let bookingData = {
         package: null,
         background: null,
@@ -432,13 +487,17 @@
         time: null
     };
 
+    // Mapping hari dalam seminggu
     const dayMap = { 0: 'Minggu', 1: 'Senin', 2: 'Selasa', 3: 'Rabu', 4: 'Kamis', 5: 'Jumat', 6: 'Sabtu' };
+
+    // Slot waktu yang tersedia dalam satu hari
     const availableSlots = [
-        '10:00', '10:30', '11:00', '11:30', '13:00', '13:30',
-        '14:00', '14:30', '15:00', '15:30', '16:00', '16:30'
+        '10:00', '10:30', '11:00', '11:30',
+        '13:00', '13:30', '14:00', '14:30',
+        '15:00', '15:30', '16:00', '16:30'
     ];
 
-    let closedDays = []; // akan diambil dari backend
+    let closedDays = []; // Hari libur studio (diambil dari backend)
 
     // --- NAVIGATION FUNCTIONS ---
     function updateNav() {
@@ -449,18 +508,14 @@
         }
     }
 
+    // Fungsi untuk navigasi ke halaman tertentu
     function goToPage(pageId) {
         pages.forEach(page => page.classList.remove('active'));
         const targetPage = document.getElementById(pageId);
-        if (targetPage) {
-            targetPage.classList.add('active');
-        }
+        if (targetPage) targetPage.classList.add('active');
 
-        if (pageId === 'page-pilih-paket') {
-            pageHistory = ['page-pilih-paket'];
-        } else if (pageHistory[pageHistory.length - 1] !== pageId) {
-            pageHistory.push(pageId);
-        }
+        if (pageId === 'page-pilih-paket') pageHistory = ['page-pilih-paket'];
+        else if (pageHistory[pageHistory.length - 1] !== pageId) pageHistory.push(pageId);
 
         if (pageId === 'page-pilih-jadwal' && !isCalendarRendered) {
             setTimeout(() => {
@@ -473,6 +528,7 @@
         window.scrollTo(0, 0);
     }
 
+    // Fungsi untuk kembali ke halaman sebelumnya
     function goBack(event) {
         event.preventDefault();
         if (pageHistory.length > 1) {
@@ -485,27 +541,46 @@
         }
     }
 
-    // --- BOOKING FLOW FUNCTIONS ---
-    function selectPackage(packageName) {
+    // --- BOOKING FLOW ---
+
+    // Fungsi pilih paket
+    function selectPackage(packageName, packageId) {
         bookingData.package = packageName;
+        bookingData.package_id = packageId;
         document.getElementById('summary-title').textContent = packageName;
         goToPage('page-pilih-background');
     }
 
+    // Fungsi pilih background foto
     function selectBackground(element, backgroundName) {
         document.querySelectorAll('.background-item').forEach(item => item.classList.remove('selected'));
         element.classList.add('selected');
         bookingData.background = backgroundName;
     }
 
+    // Fungsi pilih jam booking
+    function selectTime(element, time) {
+        document.querySelectorAll('.time-slot').forEach(item => item.classList.remove('selected'));
+        element.classList.add('selected');
+        bookingData.time = time;
+    }
+
+    // Update tampilan slot waktu berdasarkan tanggal yang dipilih
     function updateSlotsForDate(date) {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         timeSlotsGrid.innerHTML = '';
 
+        const isToday = date.toDateString() === new Date().toDateString();
+        const now = new Date();
+        const [closeHour, closeMinute] = todayCloseTime.split(':').map(Number);
+        const closeTime = new Date();
+        closeTime.setHours(closeHour, closeMinute, 0, 0);
+
         const isPast = date < today;
         const dayName = dayMap[date.getDay()];
         const isClosed = closedDays.includes(dayName);
+        const isClosedForToday = isToday && now > closeTime;
 
         const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
         const headerText = date.toLocaleDateString('id-ID', options);
@@ -513,63 +588,85 @@
 
         if (isPast) {
             timeSlotsGrid.innerHTML = `<p style="grid-column: 1 / -1; text-align: center; color: #888;">Tidak bisa booking untuk tanggal yang sudah lewat.</p>`;
-        } else if (isClosed) {
-            timeSlotsGrid.innerHTML = `<p style="grid-column: 1 / -1; text-align: center; color: #888;">Studio tutup pada hari ${dayName}.</p>`;
+        } else if (isClosed || isClosedForToday) {
+            const message = isClosed ? `Studio tutup pada hari ${dayName}.` : `Studio sudah tutup untuk hari ini, Silakan pilih hari lain.`;
+            timeSlotsGrid.innerHTML = `<p style="grid-column: 1 / -1; text-align: center; color: #888;">${message}</p>`;
+            Swal.fire({ icon: 'warning', title: 'Perhatian', text: message });
         } else {
             availableSlots.forEach(slot => {
                 const slotEl = document.createElement('div');
                 slotEl.classList.add('time-slot');
                 slotEl.textContent = slot;
-                slotEl.onclick = () => selectTime(slotEl, slot);
+
+                if (bookedTimes.includes(slot + ':00')) {
+                    slotEl.classList.add('booked');
+                    slotEl.style.opacity = '0.5';
+                    slotEl.style.pointerEvents = 'none';
+                    slotEl.title = 'Sudah dibooking';
+                } else {
+                    slotEl.onclick = () => selectTime(slotEl, slot);
+                }
+
                 timeSlotsGrid.appendChild(slotEl);
             });
         }
     }
 
-    function selectTime(element, time) {
-        document.querySelectorAll('.time-slot').forEach(item => item.classList.remove('selected'));
-        element.classList.add('selected');
-        bookingData.time = time;
+    // --- DATA FETCHING ---
+
+    // Ambil hari tutup dari backend
+    async function loadClosedDays() {
+        try {
+            const res = await fetch('/operational-hours');
+            const data = await res.json();
+            closedDays = data.closed_days || [];
+        } catch (error) {
+            console.error('Gagal load hari tutup:', error);
+        }
     }
 
-    function submitBooking() {
-        const name = document.getElementById('nama').value;
-        const agreement = document.getElementById('agreement').checked;
-
-        if (!bookingData.package || !bookingData.date || !bookingData.time) {
-            alert("Harap lengkapi pilihan paket, tanggal, dan waktu terlebih dahulu.");
-            return;
+    // Ambil jam tutup hari ini
+    async function loadTodayCloseTime() {
+        try {
+            const res = await fetch('/jam-tutup');
+            const data = await res.json();
+            todayCloseTime = data.close_time;
+        } catch (err) {
+            console.error('Gagal ambil jam tutup hari ini:', err);
         }
-        if (!name || !agreement) {
-            alert("Harap isi nama dan setujui syarat & ketentuan.");
-            return;
-        }
-
-        console.log("Booking Dibuat:", bookingData);
-        goToPage('page-sukses');
     }
 
-    // --- LOAD DATA FROM BACKEND ---
+    // Ambil data slot yang sudah dibooking
+    async function loadBookedTimes(dateStr) {
+        try {
+            const res = await fetch(`/booked-times/${dateStr}`);
+            const data = await res.json();
+            bookedTimes = data.booked_times || [];
+        } catch (err) {
+            console.error('Gagal ambil booking yang sudah ada:', err);
+            bookedTimes = [];
+        }
+    }
+
+    // Ambil daftar paket dari backend
     function loadPackages() {
         fetch('/packages')
             .then(res => res.json())
             .then(data => {
                 const container = document.getElementById('package-container');
                 container.innerHTML = '';
-                container.className = 'packages-grid'; // Pastikan class-nya sama
+                container.className = 'packages-grid';
 
                 data.forEach(pkg => {
                     const div = document.createElement('div');
                     div.classList.add('package-card');
 
-                    // Tambahkan class warna sesuai ID (opsional, bisa ubah logic-nya)
                     if (pkg.id == 1) div.classList.add('card-blue');
                     if (pkg.id == 2) div.classList.add('card-pink');
                     if (pkg.id == 3) div.classList.add('card-yellow');
 
-                    div.onclick = () => selectPackage(pkg.title);
+                    div.onclick = () => selectPackage(pkg.title, pkg.id);
 
-                    // Buat detail list dari deskripsi (anggap satu item per baris)
                     const detailItems = pkg.description
                         .split('\n')
                         .map(line => `<li><span class="icon"></span>${line}</li>`)
@@ -589,46 +686,97 @@
                     container.appendChild(div);
                 });
             })
-            .catch(error => {
-                console.error('Gagal load paket:', error);
-            });
+            .catch(error => console.error('Gagal load paket:', error));
     }
 
+    // Submit data booking ke server
+    async function submitBooking() {
+        const name = document.getElementById('nama').value;
+        const email = document.getElementById('email').value;
+        const whatsapp = document.getElementById('whatsapp').value;
+        const peopleCount = parseInt(document.getElementById('jumlah-orang').value);
+        const agreement = document.getElementById('agreement').checked;
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-    function loadClosedDays() {
-        fetch('/api/operational-hours')
-            .then(res => res.json())
-            .then(data => {
-                closedDays = data.closed_days || [];
-            })
-            .catch(error => {
-                console.error('Gagal load hari tutup:', error);
+        // Validasi input
+        if (!bookingData.package || !bookingData.package_id || !bookingData.date || !bookingData.time) {
+            Swal.fire({ icon: 'warning', title: 'Lengkapi Data', text: 'Harap pilih paket, tanggal, dan waktu terlebih dahulu.' });
+            return;
+        }
+
+        if (!name || !email || !whatsapp || !peopleCount || !agreement) {
+            Swal.fire({ icon: 'warning', title: 'Perhatian', text: 'Harap lengkapi semua form dan setujui syarat & ketentuan.' });
+            return;
+        }
+
+        const dataToSend = {
+            name, email, whatsapp, people_count: peopleCount,
+            package_id: bookingData.package_id,
+            date: bookingData.date,
+            time: bookingData.time
+        };
+
+        try {
+            const res = await fetch('/api/submit-booking', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: JSON.stringify(dataToSend)
             });
+
+            const result = await res.json();
+
+            if (res.ok) {
+                resetBookingForm();
+                goToPage('page-sukses');
+                setTimeout(() => location.reload(), 5000); // Refresh otomatis setelah 5 detik
+            } else {
+                Swal.fire({ icon: 'error', title: 'Gagal Booking', text: result.message || 'Terjadi kesalahan saat menyimpan booking.' });
+            }
+        } catch (err) {
+            Swal.fire({ icon: 'error', title: 'Gagal Terhubung', text: 'Tidak bisa terhubung ke server. Coba lagi nanti.' });
+            console.error(err);
+        }
+    }
+
+    // Reset seluruh data form dan UI ke kondisi awal
+    function resetBookingForm() {
+        document.getElementById('nama').value = '';
+        document.getElementById('email').value = '';
+        document.getElementById('whatsapp').value = '';
+        document.getElementById('jumlah-orang').value = '';
+        document.getElementById('agreement').checked = false;
+
+        document.querySelectorAll('.background-item.selected').forEach(item => item.classList.remove('selected'));
+        document.querySelectorAll('.time-slot.selected').forEach(item => item.classList.remove('selected'));
+        document.querySelectorAll('.fc-day-selected').forEach(item => item.classList.remove('fc-day-selected'));
+
+        bookingData = { package: null, background: null, date: null, time: null };
+        pageHistory = ['page-pilih-paket'];
     }
 
     // --- INITIALIZATION ---
     document.addEventListener('DOMContentLoaded', () => {
         const calendarEl = document.getElementById('calendar');
 
+        // Inisialisasi kalender menggunakan FullCalendar
         calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
             locale: 'id',
             height: 'auto',
             selectable: true,
-            validRange: {
-                start: new Date().toISOString().split('T')[0]
-            },
-            headerToolbar: {
-                left: 'prev',
-                center: 'title',
-                right: 'next'
-            },
-            dateClick: function (info) {
+            validRange: { start: new Date().toISOString().split('T')[0] },
+            headerToolbar: { left: 'prev', center: 'title', right: 'next' },
+
+            dateClick: async function (info) {
                 const clickedDate = info.date;
                 const dayName = dayMap[clickedDate.getDay()];
 
                 if (closedDays.includes(dayName)) {
-                    alert(`Hari ${dayName} kami tutup, silakan pilih hari lain.`);
+                    Swal.fire({ icon: 'warning', title: 'Studio Tutup', text: `Hari ${dayName} kami tutup, silakan pilih hari lain.` });
                     return;
                 }
 
@@ -637,21 +785,25 @@
 
                 bookingData.date = info.dateStr;
                 bookingData.time = null;
+
+                await loadBookedTimes(info.dateStr);
                 updateSlotsForDate(info.date);
             },
+
             dayCellDidMount: function (info) {
                 const dayName = dayMap[info.date.getDay()];
-                if (closedDays.includes(dayName)) {
-                    info.el.classList.add('fc-day-disabled');
-                }
-            },
+                if (closedDays.includes(dayName)) info.el.classList.add('fc-day-disabled');
+            }
         });
 
+        // Load data awal dari backend
         goToPage('page-pilih-paket');
         loadPackages();
         loadClosedDays();
+        loadTodayCloseTime();
     });
-</script>
 
+</script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 </html>
