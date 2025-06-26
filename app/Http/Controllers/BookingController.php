@@ -33,6 +33,7 @@ public function submitBooking(Request $request)
         'whatsapp' => 'required|string|max:20',
         'people_count' => 'required|integer|min:1',
         'package_id' => 'required|exists:packages,id',
+        'background' => 'required|string',
         'date' => 'required|date',
         'time' => 'required|string',
     ]);
@@ -51,6 +52,7 @@ public function submitBooking(Request $request)
             'whatsapp' => $request->whatsapp,
             'people_count' => $request->people_count,
             'package_id' => $request->package_id,
+            'background' => $request->background,
             'date' => $request->date,
             'time' => $request->time,
         ]);

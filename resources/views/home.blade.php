@@ -712,6 +712,7 @@
         const dataToSend = {
             name, email, whatsapp, people_count: peopleCount,
             package_id: bookingData.package_id,
+            background: bookingData.background,
             date: bookingData.date,
             time: bookingData.time
         };

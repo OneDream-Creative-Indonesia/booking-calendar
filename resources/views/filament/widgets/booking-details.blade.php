@@ -3,6 +3,7 @@
         <h2 class="text-lg font-semibold">Booking Information</h2>
         <p><strong>Name:</strong> {{ $booking->name }}</p>
         <p><strong>WhatsApp:</strong> {{ $booking->whatsapp }}</p>
+        <p><strong>Background:</strong> {{ $booking->background }}</p>
     </x-filament::card>
 
     <x-filament::card>

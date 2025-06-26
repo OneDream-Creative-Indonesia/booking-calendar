@@ -11,7 +11,7 @@ class Booking extends Model
         'confirmation' => 'boolean',
     ];
 
-    protected $fillable = ['name', 'whatsapp', 'people_count', 'date', 'time', 'package', 'package_id','email','confirmation','status'];
+    protected $fillable = ['name', 'whatsapp', 'people_count', 'date', 'time', 'package', 'package_id','email','confirmation','status', 'background'];
 
     public function package()
     {
