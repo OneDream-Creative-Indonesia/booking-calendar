@@ -36,8 +36,7 @@ class VoucherResource extends Resource
                 ->required()
                 ->minValue(0)
                 ->maxValue(100)
-                ->numeric()
-                ->currencyMask(thousandSeparator: ',',decimalSeparator: '.',precision: 2),
+                ->numeric(),
                  DatePicker::make('start_date')
                 ->label('Start Voucher')
                 ->required(),
