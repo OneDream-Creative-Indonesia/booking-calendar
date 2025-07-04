@@ -51,6 +51,18 @@ Route::get('/storage-link',function(){
     $linkFolder = $_SERVER['DOCUMENT_ROOT'] . '/storage';
     symlink($targetFolder,$linkFolder);
 });
+Route::get('/debug-storage', function() {
+    $info = [
+        'storage_path' => storage_path('app/public'),
+        'document_root' => $_SERVER['DOCUMENT_ROOT'],
+        'storage_exists' => file_exists(storage_path('app/public')),
+        'symlink_exists' => file_exists($_SERVER['DOCUMENT_ROOT'] . '/storage'),
+        'target_file' => storage_path('app/public/backgrounds/01JZASQ6G119RRGCN3AX2YJMSR.png'),
+        'file_exists' => file_exists(storage_path('app/public/backgrounds/01JZASQ6G119RRGCN3AX2YJMSR.png')),
+    ];
+
+    return response()->json($info);
+});
 // ------------------------------
 // LOGOUT (khusus untuk admin / user login)
 // ------------------------------
