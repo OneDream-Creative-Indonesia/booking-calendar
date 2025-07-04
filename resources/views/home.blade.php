@@ -578,13 +578,6 @@
     // Mapping hari dalam seminggu
     const dayMap = { 0: 'Minggu', 1: 'Senin', 2: 'Selasa', 3: 'Rabu', 4: 'Kamis', 5: 'Jumat', 6: 'Sabtu' };
 
-    // Slot waktu yang tersedia dalam satu hari
-    const availableSlots = [
-        '10:00', '10:30', '11:00', '11:30',
-        '13:00', '13:30', '14:00', '14:30',
-        '15:00', '15:30', '16:00', '16:30'
-    ];
-
     let closedDays = []; // Hari libur studio (diambil dari backend)
 
     // --- NAVIGATION FUNCTIONS ---
@@ -756,41 +749,49 @@
     }
 
     // Update tampilan slot waktu berdasarkan tanggal yang dipilih
-    function updateSlotsForDate(date) {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+    async function updateSlotsForDate(date) {
+        const dateStr = date.toISOString().split('T')[0];
         timeSlotsGrid.innerHTML = '';
 
-        const isToday = date.toDateString() === new Date().toDateString();
-        const now = new Date();
-        const [closeHour, closeMinute] = todayCloseTime.split(':').map(Number);
-        const closeTime = new Date();
-        closeTime.setHours(closeHour, closeMinute, 0, 0);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
 
-        const isPast = date < today;
+        const isToday = date.toDateString() === today.toDateString();
+        const now = new Date();
+
         const dayName = dayMap[date.getDay()];
         const isClosed = closedDays.includes(dayName);
-        const isClosedForToday = isToday && now > closeTime;
 
-        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        const headerText = date.toLocaleDateString('id-ID', options);
-        timeSlotsDateHeader.textContent = headerText;
-
-        if (isPast) {
+        if (date < today) {
             timeSlotsGrid.innerHTML = `<p style="grid-column: 1 / -1; text-align: center; color: #888;">Tidak bisa booking untuk tanggal yang sudah lewat.</p>`;
-        } else if (isClosed || isClosedForToday) {
-            const message = isClosed ? `Studio tutup pada hari ${dayName}.` : `Studio sudah tutup untuk hari ini, Silakan pilih hari lain.`;
+            return;
+        }
+
+        if (isClosed) {
+            const message = `Studio tutup pada hari ${dayName}.`;
             timeSlotsGrid.innerHTML = `<p style="grid-column: 1 / -1; text-align: center; color: #888;">${message}</p>`;
             Swal.fire({ icon: 'warning', title: 'Perhatian', text: message });
-        } else {
-            availableSlots.forEach(slot => {
+            return;
+        }
+
+        // Fetch slot dari backend
+        try {
+            const res = await fetch(`/api/time-slots?date=${dateStr}`);
+            const data = await res.json();
+            const slots = data.slots;
+            if (!slots.length) {
+                timeSlotsGrid.innerHTML = `<p style="grid-column: 1 / -1; text-align: center; color: #888;">Tidak ada slot tersedia pada hari ini.</p>`;
+                return;
+            }
+
+            for (const slot of slots) {
                 const slotEl = document.createElement('div');
                 slotEl.classList.add('time-slot');
                 slotEl.textContent = slot;
 
-               const [slotHour, slotMinute] = slot.split(':').map(Number);
+                const [hour, minute] = slot.split(':').map(Number);
                 const slotTime = new Date(date);
-                slotTime.setHours(slotHour, slotMinute, 0, 0);
+                slotTime.setHours(hour, minute, 0, 0);
 
                 const isBooked = bookedTimes.includes(slot + ':00');
                 const isPastTime = isToday && slotTime < now;
@@ -804,11 +805,14 @@
                     slotEl.onclick = () => selectTime(slotEl, slot);
                 }
 
-
                 timeSlotsGrid.appendChild(slotEl);
-            });
+            }
+        } catch (error) {
+            console.error('Gagal ambil slot dari backend:', error);
+            timeSlotsGrid.innerHTML = `<p style="grid-column: 1 / -1; text-align: center; color: #888;">Gagal memuat slot waktu.</p>`;
         }
     }
+
 
     // --- DATA FETCHING ---
 

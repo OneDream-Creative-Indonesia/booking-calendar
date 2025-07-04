@@ -34,7 +34,7 @@ Route::get('/backgrounds', [BookingController::class, 'getBackgrounds']);
 // Ambil hari dan jam operasional dari backend
 Route::get('/operational-hours', [OperationalHourController::class, 'getOperationalHours']);
 Route::get('/jam-tutup', [OperationalHourController::class, 'closedDays']);
-
+Route::get('/api/time-slots', [OperationalHourController::class, 'getTimeSlots']);
 // ------------------------------
 // ROUTE UNTUK AUTH SOCIALITE
 // ------------------------------
