@@ -46,7 +46,11 @@ Route::get('/auth/{provider}/callback', [SocialiteController::class, 'callback']
 // ------------------------------
 Route::get('/admin/google/connect', [GoogleCalendarController::class, 'redirectToGoogle'])->name('google.connect');
 Route::get('/google/callback', [GoogleCalendarController::class, 'handleGoogleCallback'])->name('google.callback');
-
+Route::get('/storage-link',function(){
+    $targetFolder = storage_path('app/public');
+    $linkFolder = $_SERVER['DOCUMENT_ROOT'] . '/storage';
+    symlink($targetFolder,$linkFolder);
+});
 // ------------------------------
 // LOGOUT (khusus untuk admin / user login)
 // ------------------------------
