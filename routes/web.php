@@ -46,11 +46,7 @@ Route::get('/auth/{provider}/callback', [SocialiteController::class, 'callback']
 // ------------------------------
 Route::get('/admin/google/connect', [GoogleCalendarController::class, 'redirectToGoogle'])->name('google.connect');
 Route::get('/google/callback', [GoogleCalendarController::class, 'handleGoogleCallback'])->name('google.callback');
-Route::get('/storage-link',function(){
-    $targetFolder = storage_path('app/public');
-    $linkFolder = $_SERVER['DOCUMENT_ROOT'] . '/storage';
-    symlink($targetFolder,$linkFolder);
-});
+
 Route::get('/debug-storage', function() {
     $info = [
         'storage_path' => storage_path('app/public'),
@@ -63,6 +59,18 @@ Route::get('/debug-storage', function() {
 
     return response()->json($info);
 });
+Route::get('/storage-link', function () {
+    $targetFolder = storage_path('app/public'); // /home/binamuda/booking-calendar/storage/app/public
+    $linkFolder = public_path('storage'); // /home/binamuda/public_html/snapfun.onedream.id/storage
+
+    if (!file_exists($linkFolder)) {
+        symlink($targetFolder, $linkFolder);
+        return 'Symlink berhasil dibuat';
+    } else {
+        return 'Symlink sudah ada';
+    }
+});
+
 // ------------------------------
 // LOGOUT (khusus untuk admin / user login)
 // ------------------------------
