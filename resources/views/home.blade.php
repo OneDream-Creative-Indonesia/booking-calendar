@@ -34,6 +34,29 @@
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
+        .voucher-row {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .voucher-input-wrapper {
+            flex: 1;
+        }
+
+        .voucher-check-btn {
+            background-color: #1f1f22;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            height: 100%;
+            white-space: nowrap;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.95rem;
+        }
 
         /* Kontainer Utama */
         .main-container {
@@ -87,6 +110,23 @@
             font-size: 1.5rem; font-weight: bold; cursor: pointer;
             flex-shrink: 0;
         }
+        .fc-day-selected {
+            background-color: var(--primary-blue) !important; /* putih */
+            border-radius: 8px;
+        }
+
+        .fc-day-selected .fc-daygrid-day-number {
+            color: var(--bg-light) !important; /* angka jadi biru */
+            font-weight: 800;
+        }
+        .fc-day-selected:hover {
+            background-color: var(--primary-blue) !important;
+        }
+
+        .fc-day-selected:hover .fc-daygrid-day-number {
+            color: var(--bg-light) !important;
+        }
+
 
         /* Konten Halaman yang Dapat Diganti */
         .page { display: none; flex-direction: column; align-items: center; animation: fadeIn 0.5s ease-in-out; }
@@ -375,14 +415,6 @@
                     <div class="background-grid-container">
                         <h2>Pilih Background</h2>
                         <div class="background-grid" id="background-grid"></div>
-                        {{-- <div class="background-grid" id="background-grid">
-                            <div class="background-item" onclick="selectBackground(this, 'Tirai Merah')"><div class="preview" style="background-color: #A52A2A;"></div><p>Tirai Merah</p></div>
-                            <div class="background-item" onclick="selectBackground(this, 'Tirai Biru')"><div class="preview" style="background-color: #4682B4;"></div><p>Tirai Biru</p></div>
-                            <div class="background-item" onclick="selectBackground(this, 'Tirai Hijau')"><div class="preview" style="background-color: #2E8B57;"></div><p>Tirai Hijau</p></div>
-                            <div class="background-item" onclick="selectBackground(this, 'Polos Merah')"><div class="preview" style="background-color: #DC143C;"></div><p>Polos Merah</p></div>
-                            <div class="background-item" onclick="selectBackground(this, 'Kotak Biru')"><div class="preview" style="background: repeating-linear-gradient(45deg, #6495ED, #6495ED 10px, #4169E1 10px, #4169E1 20px);"></div><p>Kotak Biru</p></div>
-                            <div class="background-item" onclick="selectBackground(this, 'Polos Hijau')"><div class="preview" style="background-color: #006400;"></div><p>Polos Hijau</p></div>
-                        </div> --}}
                         <button class="btn btn-primary" onclick="goToPage('page-pilih-jadwal')">Lanjut</button>
                     </div>
                 </div>
@@ -469,18 +501,19 @@
                 </div>
 
                 <!-- Kode Voucher -->
-                <div class="form-group">
+                <!-- Kode Voucher -->
+                <div class="form-group" style="grid-column: span 2;">
                     <label for="voucher-code">Kode Voucher</label>
-                    <div class="input-wrapper">
-                        <img src="https://api.iconify.design/solar:ticket-sale-bold-duotone.svg" class="input-icon" alt="voucher icon">
-                        <input type="text" id="voucher-code" placeholder="masukkan kode voucher">
-
+                    <div class="voucher-row">
+                        <div class="input-wrapper voucher-input-wrapper">
+                            <img src="https://api.iconify.design/solar:ticket-sale-bold-duotone.svg" class="input-icon" alt="voucher icon">
+                            <input type="text" id="voucher-code" placeholder="masukkan kode voucher">
+                        </div>
+                        <button type="button" class="voucher-check-btn" onclick="checkVoucher()">Cek</button>
                     </div>
-                    <button type="button" onclick="checkVoucher()" style="margin-top: 8px; padding: 8px 16px; background-color: #1f1f22; color: white; border: none; border-radius: 8px; cursor: pointer;">
-                        Cek Voucher
-                    </button>
-                    <p id="voucher-message" style="margin-top: 6px; font-size: 0.9em; color: #28a745;"></p>
+                    <p id="voucher-message" style="margin-top: 6px; font-size: 0.9em;"></p>
                 </div>
+
             </div>
 
                     <div class="dp-section">

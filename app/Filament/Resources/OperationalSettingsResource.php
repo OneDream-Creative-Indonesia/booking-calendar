@@ -48,9 +48,13 @@ class OperationalSettingsResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('day')->label('Hari'),
                 Tables\Columns\TextColumn::make('open_time')->label('Jam Buka')
-                ->formatStateUsing(fn ($state) => \Carbon\Carbon::parse($state)->format('H:i'))->default("-"),
+                  ->formatStateUsing(function ($state) {
+                    return $state ? \Carbon\Carbon::parse($state)->format('H:i') : '-';
+                }),
                 Tables\Columns\TextColumn::make('close_time')->label('Jam Tutup')
-                    ->formatStateUsing(fn ($state) => \Carbon\Carbon::parse($state)->format('H:i'))->default("-"),
+                ->formatStateUsing(function ($state) {
+                    return $state ? \Carbon\Carbon::parse($state)->format('H:i') : '-';
+                }),
                 Tables\Columns\BooleanColumn::make('is_open')->label('Buka?'),
             ])
             ->filters([
