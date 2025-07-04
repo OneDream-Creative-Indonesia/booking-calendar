@@ -160,6 +160,7 @@
         .fc-day-selected .fc-daygrid-day-number, .fc-day-selected:hover .fc-daygrid-day-number { color: white; }
         .fc-day-disabled { background-color: var(--bg-disabled) !important; color: #ccc !important; cursor: not-allowed; }
         .fc-day-disabled .fc-daygrid-day-number { color: #aaa !important; }
+        .fc .fc-highlight { background: var(--primary-blue); border-radius: 5px; }
 
         /* --- Halaman 4: Form Booking --- */
         .form-container { width: 100%; max-width: 800px; background-color: white; padding: 2rem; border-radius: var(--border-radius-lg); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08); }
@@ -373,14 +374,15 @@
                     </div>
                     <div class="background-grid-container">
                         <h2>Pilih Background</h2>
-                        <div class="background-grid" id="background-grid">
+                        <div class="background-grid" id="background-grid"></div>
+                        {{-- <div class="background-grid" id="background-grid">
                             <div class="background-item" onclick="selectBackground(this, 'Tirai Merah')"><div class="preview" style="background-color: #A52A2A;"></div><p>Tirai Merah</p></div>
                             <div class="background-item" onclick="selectBackground(this, 'Tirai Biru')"><div class="preview" style="background-color: #4682B4;"></div><p>Tirai Biru</p></div>
                             <div class="background-item" onclick="selectBackground(this, 'Tirai Hijau')"><div class="preview" style="background-color: #2E8B57;"></div><p>Tirai Hijau</p></div>
                             <div class="background-item" onclick="selectBackground(this, 'Polos Merah')"><div class="preview" style="background-color: #DC143C;"></div><p>Polos Merah</p></div>
                             <div class="background-item" onclick="selectBackground(this, 'Kotak Biru')"><div class="preview" style="background: repeating-linear-gradient(45deg, #6495ED, #6495ED 10px, #4169E1 10px, #4169E1 20px);"></div><p>Kotak Biru</p></div>
                             <div class="background-item" onclick="selectBackground(this, 'Polos Hijau')"><div class="preview" style="background-color: #006400;"></div><p>Polos Hijau</p></div>
-                        </div>
+                        </div> --}}
                         <button class="btn btn-primary" onclick="goToPage('page-pilih-jadwal')">Lanjut</button>
                     </div>
                 </div>
@@ -422,12 +424,65 @@
                         <h1>Konfirmasi Booking Kamu</h1>
                         <p>Biar sesi foto kamu nggak diambil orang, isi dulu data di bawah ini ya!</p>
                     </div>
-                    <div class="form-grid">
-                        <div class="form-group"><label for="nama">Nama<span class="red-star">*</span></label><div class="input-wrapper"><img src="https://api.iconify.design/solar:user-circle-bold-duotone.svg" class="input-icon" alt="user icon"><input type="text" id="nama" placeholder="ketik nama kamu"></div></div>
-                        <div class="form-group"><label for="whatsapp">Nomor WhatsApp<span class="red-star">*</span></label><div class="input-wrapper"><img src="https://api.iconify.design/solar:phone-bold-duotone.svg" class="input-icon" alt="phone icon"><input type="text" id="whatsapp" placeholder="ketik nomor wa kamu"></div></div>
-                        <div class="form-group"><label for="email">Email<span class="red-star">*</span></label><div class="input-wrapper"><img src="https://api.iconify.design/solar:letter-bold-duotone.svg" class="input-icon" alt="email icon"><input type="email" id="email" placeholder="ketik email kamu"></div></div>
-                        <div class="form-group"><label for="jumlah-orang">Jumlah Orang (Tambah 15 rb/org > 1)<span class="red-star">*</span></label><div class="input-wrapper"><img src="https://api.iconify.design/solar:users-group-rounded-bold-duotone.svg" class="input-icon" alt="group icon"><select id="jumlah-orang"><option value="">pilih jumlah orangnya</option><option value="1">1 Orang</option><option value="2">2 Orang (+ 15rb)</option><option value="3">3 Orang (+ 30rb)</option><option value="4">4 Orang (+ 45rb)</option><option value="5">5 Orang (+ 60rb)</option></select></div></div>
+            <div class="form-grid">
+                <!-- Nama -->
+                <div class="form-group">
+                    <label for="nama">Nama<span class="red-star">*</span></label>
+                    <div class="input-wrapper">
+                        <img src="https://api.iconify.design/solar:user-circle-bold-duotone.svg" class="input-icon" alt="user icon">
+                        <input type="text" id="nama" placeholder="ketik nama kamu">
                     </div>
+                </div>
+
+                <!-- WhatsApp -->
+                <div class="form-group">
+                    <label for="whatsapp">Nomor WhatsApp<span class="red-star">*</span></label>
+                    <div class="input-wrapper">
+                        <img src="https://api.iconify.design/solar:phone-bold-duotone.svg" class="input-icon" alt="phone icon">
+                        <input type="text" id="whatsapp" placeholder="ketik nomor wa kamu">
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="form-group">
+                    <label for="email">Email<span class="red-star">*</span></label>
+                    <div class="input-wrapper">
+                        <img src="https://api.iconify.design/solar:letter-bold-duotone.svg" class="input-icon" alt="email icon">
+                        <input type="email" id="email" placeholder="ketik email kamu">
+                    </div>
+                </div>
+
+                <!-- Jumlah Orang -->
+                <div class="form-group">
+                    <label for="jumlah-orang">Jumlah Orang (Tambah 15 rb/org > 1)<span class="red-star">*</span></label>
+                    <div class="input-wrapper">
+                        <img src="https://api.iconify.design/solar:users-group-rounded-bold-duotone.svg" class="input-icon" alt="group icon">
+                        <select id="jumlah-orang">
+                            <option value="">pilih jumlah orangnya</option>
+                            <option value="1">1 Orang</option>
+                            <option value="2">2 Orang (+ 15rb)</option>
+                            <option value="3">3 Orang (+ 30rb)</option>
+                            <option value="4">4 Orang (+ 45rb)</option>
+                            <option value="5">5 Orang (+ 60rb)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Kode Voucher -->
+                <div class="form-group">
+                    <label for="voucher-code">Kode Voucher</label>
+                    <div class="input-wrapper">
+                        <img src="https://api.iconify.design/solar:ticket-sale-bold-duotone.svg" class="input-icon" alt="voucher icon">
+                        <input type="text" id="voucher-code" placeholder="masukkan kode voucher">
+
+                    </div>
+                    <button type="button" onclick="checkVoucher()" style="margin-top: 8px; padding: 8px 16px; background-color: #1f1f22; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                        Cek Voucher
+                    </button>
+                    <p id="voucher-message" style="margin-top: 6px; font-size: 0.9em; color: #28a745;"></p>
+                </div>
+            </div>
+
                     <div class="dp-section">
                         <h3>Down Payment (DP)</h3>
                         <div class="dp-info"><p>Pembayaran DP via QRIS. <a href="#" class="btn-link" onclick="showQRISModal(event)">Klik disini</a></p><span class="price">Rp 15.000</span></div>
@@ -514,8 +569,11 @@
         const targetPage = document.getElementById(pageId);
         if (targetPage) targetPage.classList.add('active');
 
-        if (pageId === 'page-pilih-paket') pageHistory = ['page-pilih-paket'];
-        else if (pageHistory[pageHistory.length - 1] !== pageId) pageHistory.push(pageId);
+        if (pageId === 'page-pilih-paket') {
+            pageHistory = ['page-pilih-paket'];
+        } else if (pageHistory[pageHistory.length - 1] !== pageId) {
+            pageHistory.push(pageId); // hanya push kalau bukan duplikat
+        }
 
         if (pageId === 'page-pilih-jadwal' && !isCalendarRendered) {
             setTimeout(() => {
@@ -528,35 +586,134 @@
         window.scrollTo(0, 0);
     }
 
+
     // Fungsi untuk kembali ke halaman sebelumnya
     function goBack(event) {
         event.preventDefault();
+
         if (pageHistory.length > 1) {
-            pageHistory.pop();
+            pageHistory.pop(); // keluar dari current
             const prevPageId = pageHistory[pageHistory.length - 1];
-            goToPage(prevPageId);
-            if (pageHistory[pageHistory.length - 1] === prevPageId) {
-                pageHistory.pop();
-            }
+            pages.forEach(page => page.classList.remove('active'));
+            document.getElementById(prevPageId).classList.add('active');
+            updateNav();
         }
     }
+
+  async function checkVoucher() {
+    const code = document.getElementById('voucher-code').value.trim();
+    const peopleCount = parseInt(document.getElementById('jumlah-orang').value);
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    if (!bookingData.price) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Pilih Paket Dulu',
+            text: 'Harap pilih paket sebelum memasukkan kode voucher.'
+        });
+        return;
+    }
+
+    try {
+        const res = await fetch('/get-voucher');
+        const vouchers = await res.json();
+
+        const matched = vouchers.find(v => v.code_voucher === code && v.is_active);
+
+        if (!matched) {
+            document.getElementById('voucher-message').textContent = 'Kode voucher tidak ditemukan atau tidak aktif.';
+            document.getElementById('voucher-message').style.color = 'red';
+            bookingData.voucher_id = null;
+            bookingData.voucher_discount = 0;
+            return;
+        }
+
+        const now = new Date();
+        const start = new Date(matched.start_date);
+        const end = new Date(matched.end_date);
+
+        // 🔴 Cek usage limit dulu
+        if (matched.usage_limit !== null && matched.used_count >= matched.usage_limit) {
+            document.getElementById('voucher-message').textContent = 'Maaf, batas penggunaan voucher sudah terpenuhi.';
+            document.getElementById('voucher-message').style.color = 'red';
+            bookingData.voucher_id = null;
+            bookingData.voucher_discount = 0;
+            return;
+        }
+
+        // ⏳ Cek masa berlaku
+        if (now < start || now > end) {
+            document.getElementById('voucher-message').textContent = 'Voucher sudah tidak berlaku.';
+            document.getElementById('voucher-message').style.color = 'red';
+            bookingData.voucher_id = null;
+            bookingData.voucher_discount = 0;
+            return;
+        }
+
+        // ✅ Valid — baru hitung diskon
+        let finalPrice = bookingData.price;
+        if (peopleCount > 1) {
+            finalPrice += (peopleCount - 1) * 15000;
+        }
+
+        const percent = parseFloat(matched.discount_percent);
+        const discountAmount = Math.round(finalPrice * (percent / 100));
+
+        bookingData.voucher_discount = discountAmount;
+        bookingData.voucher_id = matched.id;
+
+        document.getElementById('voucher-message').textContent = '🎉 Selamat! Voucher berhasil digunakan';
+        document.getElementById('voucher-message').style.color = 'green';
+
+    } catch (err) {
+        document.getElementById('voucher-message').textContent = 'Terjadi kesalahan. Coba lagi.';
+        document.getElementById('voucher-message').style.color = 'red';
+        bookingData.voucher_discount = 0;
+        bookingData.voucher_id = null;
+        console.error(err);
+    }
+}
+
+
 
     // --- BOOKING FLOW ---
 
     // Fungsi pilih paket
-    function selectPackage(packageName, packageId) {
+    async function selectPackage(packageName, packageId, packagePrice) {
         bookingData.package = packageName;
         bookingData.package_id = packageId;
+        bookingData.price = packagePrice;
         document.getElementById('summary-title').textContent = packageName;
         goToPage('page-pilih-background');
     }
+    function loadBackgrounds() {
+        fetch('/backgrounds')
+            .then(res => res.json())
+            .then(data => {
+                const container = document.getElementById('background-grid');
+                container.innerHTML = '';
+
+                data.forEach(bg => {
+                    const div = document.createElement('div');
+                    div.classList.add('background-item');
+                    div.onclick = () => selectBackground(div, bg.id, bg.name);
+                    div.innerHTML = `
+                        <div class="preview" style="background-image: url('/storage/${bg.image}'); background-size: cover; background-position: center;"></div>
+                        <p>${bg.name}</p>
+                    `;
+                    container.appendChild(div);
+                });
+            })
+            .catch(err => console.error('Gagal load background:', err));
+    }
 
     // Fungsi pilih background foto
-    function selectBackground(element, backgroundName) {
+    function selectBackground(element, id, name) {
         document.querySelectorAll('.background-item').forEach(item => item.classList.remove('selected'));
         element.classList.add('selected');
-        bookingData.background = backgroundName;
+        bookingData.background_id = id;
     }
+
 
     // Fungsi pilih jam booking
     function selectTime(element, time) {
@@ -598,14 +755,22 @@
                 slotEl.classList.add('time-slot');
                 slotEl.textContent = slot;
 
-                if (bookedTimes.includes(slot + ':00')) {
+               const [slotHour, slotMinute] = slot.split(':').map(Number);
+                const slotTime = new Date(date);
+                slotTime.setHours(slotHour, slotMinute, 0, 0);
+
+                const isBooked = bookedTimes.includes(slot + ':00');
+                const isPastTime = isToday && slotTime < now;
+
+                if (isBooked || isPastTime) {
                     slotEl.classList.add('booked');
                     slotEl.style.opacity = '0.5';
                     slotEl.style.pointerEvents = 'none';
-                    slotEl.title = 'Sudah dibooking';
+                    slotEl.title = isBooked ? 'Sudah dibooking' : 'Waktu telah lewat';
                 } else {
                     slotEl.onclick = () => selectTime(slotEl, slot);
                 }
+
 
                 timeSlotsGrid.appendChild(slotEl);
             });
@@ -665,7 +830,7 @@
                     if (pkg.id == 2) div.classList.add('card-pink');
                     if (pkg.id == 3) div.classList.add('card-yellow');
 
-                    div.onclick = () => selectPackage(pkg.title, pkg.id);
+                    div.onclick = () => selectPackage(pkg.title, pkg.id, pkg.price);
 
                     const detailItems = pkg.description
                         .split('\n')
@@ -697,8 +862,7 @@
         const peopleCount = parseInt(document.getElementById('jumlah-orang').value);
         const agreement = document.getElementById('agreement').checked;
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-        // Validasi input
+        // Validasi input frontend
         if (!bookingData.package || !bookingData.package_id || !bookingData.date || !bookingData.time) {
             Swal.fire({ icon: 'warning', title: 'Lengkapi Data', text: 'Harap pilih paket, tanggal, dan waktu terlebih dahulu.' });
             return;
@@ -708,13 +872,28 @@
             Swal.fire({ icon: 'warning', title: 'Perhatian', text: 'Harap lengkapi semua form dan setujui syarat & ketentuan.' });
             return;
         }
+        let finalPrice = bookingData.price;
+        if (peopleCount > 1) {
+            finalPrice += (peopleCount - 1) * 15000;
+        }
+        if (bookingData.voucher_discount) {
+            finalPrice -= bookingData.voucher_discount;
+        }
+
+        if (finalPrice < 0) finalPrice = 0;
 
         const dataToSend = {
-            name, email, whatsapp, people_count: peopleCount,
+            name,
+            email,
+            whatsapp,
+            people_count: peopleCount,
             package_id: bookingData.package_id,
-            background: bookingData.background,
+            background_id: bookingData.background_id,
             date: bookingData.date,
-            time: bookingData.time
+            time: bookingData.time,
+            price: finalPrice,
+            voucher_id: bookingData.voucher_id ?? null,
+            confirmation: agreement ? 1 : 0
         };
 
         try {
@@ -733,7 +912,7 @@
             if (res.ok) {
                 resetBookingForm();
                 goToPage('page-sukses');
-                setTimeout(() => location.reload(), 5000); // Refresh otomatis setelah 5 detik
+                setTimeout(() => location.reload(), 5000);
             } else {
                 Swal.fire({ icon: 'error', title: 'Gagal Booking', text: result.message || 'Terjadi kesalahan saat menyimpan booking.' });
             }
@@ -742,6 +921,7 @@
             console.error(err);
         }
     }
+
 
     // Reset seluruh data form dan UI ke kondisi awal
     function resetBookingForm() {
@@ -802,6 +982,7 @@
         loadPackages();
         loadClosedDays();
         loadTodayCloseTime();
+        loadBackgrounds();
     });
 
 </script>

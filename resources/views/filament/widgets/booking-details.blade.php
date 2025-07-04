@@ -4,6 +4,7 @@
         <p><strong>Name:</strong> {{ $booking->name }}</p>
         <p><strong>WhatsApp:</strong> {{ $booking->whatsapp }}</p>
         <p><strong>Background:</strong> {{ $booking->background }}</p>
+        <p><strong>Total Harga:</strong> {{ $booking->price }}</p>
     </x-filament::card>
 
     <x-filament::card>

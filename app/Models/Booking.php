@@ -11,10 +11,15 @@ class Booking extends Model
         'confirmation' => 'boolean',
     ];
 
-    protected $fillable = ['name', 'whatsapp', 'people_count', 'date', 'time', 'package', 'package_id','email','confirmation','status', 'background'];
+    protected $fillable = ['name', 'whatsapp', 'people_count', 'date', 'time', 'package', 'package_id','email','confirmation','status', 'background_id','price', 'voucher_code', 'voucher_id'];
 
     public function package()
     {
         return $this->belongsTo(\App\Models\Package::class);
     }
+    public function background()
+    {
+        return $this->belongsTo(Background::class);
+    }
+
 }

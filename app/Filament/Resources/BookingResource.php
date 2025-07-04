@@ -99,38 +99,38 @@
                     TextColumn::make('status')->sortable()->searchable()->label('Status'),
                 ])
                 ->filters([
-                        // SelectFilter::make('package_id')
-                        //     ->label('Paket')
-                        //     ->options(\App\Models\Package::pluck('title', 'id'))
-                        //     ->searchable(),
+                            // SelectFilter::make('package_id')
+                            //     ->label('Paket')
+                            //     ->options(\App\Models\Package::pluck('title', 'id'))
+                            //     ->searchable(),
 
-                        // SelectFilter::make('confirmation')
-                        //     ->label('Konfirmasi')
-                        //     ->options([
-                        //         '1' => 'Confirmed',
-                        //         '0' => 'Not Confirmed',
-                        //     ]),
+                            // SelectFilter::make('confirmation')
+                            //     ->label('Konfirmasi')
+                            //     ->options([
+                            //         '1' => 'Confirmed',
+                            //         '0' => 'Not Confirmed',
+                            //     ]),
 
-                        // SelectFilter::make('status')
-                        //     ->label('Status')
-                        //     ->options([
-                        //         'pending' => 'Pending',
-                        //         'confirmed' => 'Confirmed',
-                        //         'canceled' => 'Canceled',
-                        //     ]),
+                            // SelectFilter::make('status')
+                            //     ->label('Status')
+                            //     ->options([
+                            //         'pending' => 'Pending',
+                            //         'confirmed' => 'Confirmed',
+                            //         'canceled' => 'Canceled',
+                            //     ]),
 
-                        //     Filter::make('date_range')
-                        //     ->label('Rentang Tanggal')
-                        //     ->form([
-                        //         DatePicker::make('start_date')->label('Dari'),
-                        //         DatePicker::make('end_date')->label('Sampai'),
-                        //     ])
-                        //     ->query(fn (Builder $query, array $data) =>
-                        //         $query->when(
-                        //             $data['start_date'] && $data['end_date'],
-                        //             fn ($query) => $query->whereBetween('date', [$data['start_date'], $data['end_date']])
-                        //         )
-                        //     ),
+                            //     Filter::make('date_range')
+                            //     ->label('Rentang Tanggal')
+                            //     ->form([
+                            //         DatePicker::make('start_date')->label('Dari'),
+                            //         DatePicker::make('end_date')->label('Sampai'),
+                            //     ])
+                            //     ->query(fn (Builder $query, array $data) =>
+                            //         $query->when(
+                            //             $data['start_date'] && $data['end_date'],
+                            //             fn ($query) => $query->whereBetween('date', [$data['start_date'], $data['end_date']])
+                            //         )
+                            //     ),
                 ])
                 ->actions([
                     EditAction::make(),

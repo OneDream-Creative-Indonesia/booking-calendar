@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\{
     BookingController,
+    VoucherController,
     PackageController,
     SocialiteController,
     GoogleCalendarController,
@@ -24,6 +25,12 @@ Route::post('/api/submit-booking', [BookingController::class, 'submitBooking']);
 // Ambil waktu yang sudah dibooking pada tanggal tertentu
 Route::get('/booked-times/{date}', [BookingController::class, 'getBookedTimes']);
 
+//untuk ambil dan code voucher
+Route::get('/get-voucher', [VoucherController::class, 'getVoucher']);
+Route::get('/check-voucher', [VoucherController::class, 'checkVoucher']);
+
+//ambil background dari backend
+Route::get('/backgrounds', [BookingController::class, 'getBackgrounds']);
 // Ambil hari dan jam operasional dari backend
 Route::get('/operational-hours', [OperationalHourController::class, 'getOperationalHours']);
 Route::get('/jam-tutup', [OperationalHourController::class, 'closedDays']);
