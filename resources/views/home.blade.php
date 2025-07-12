@@ -212,6 +212,7 @@
         .form-group .input-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; opacity: 0.5; }
         .form-group input, .form-group select { width: 100%; padding: 1rem 1rem 1rem 3rem; border-radius: var(--border-radius-md); border: 1px solid var(--border-light); font-size: 1rem; font-family: 'Montserrat', sans-serif; box-sizing: border-box; }
         .form-group select { appearance: none; padding-right: 3rem; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%231759CA'%3E%3Cpath d='M7 10l5 5 5-5H7z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1.5em; }
+        .voucher-code-container{grid-column: span 2;}
         .dp-section { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-light); }
         .dp-section h3 { margin: 0 0 1rem 0; font-size: 1.1rem; }
         .dp-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; gap: 1rem; flex-wrap: wrap;}
@@ -266,6 +267,7 @@
             .time-slots-grid { grid-template-columns: 1fr 1fr; }
             .success-container h1 { font-size: 1.5rem; }
             .success-container p { font-size: 1rem; }
+            .voucher-code-container{grid-column: 1;}
         }
     </style>
 </head>
@@ -304,12 +306,7 @@
                  <div class="background-selection-layout">
                     <div class="package-summary">
                         <h2 id="summary-title">Snap Photobox</h2>
-                        <ul>
-                            <li><span class="icon"></span>5 Menit sesi Photobox</li>
-                            <li><span class="icon"></span>Buat 1 orang (tambah 15rb/org, max 5)</li>
-                            <li><span class="icon"></span>Dapet GRATIS 1 cetak foto</li>
-                            <li><span class="icon"></span>Dapet semua soft file</li>
-                        </ul>
+                        <ul id="package-detail-list"></ul>
                         <div class="character-art-desktop">
                             <div style="left: 214.75px; top: 160.46px; position: absolute"><svg width="129" height="164" viewBox="0 0 129 164" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M116.699 163.507C111.405 162.696 113.595 153.123 114.953 149.978C108.23 163.563 99.1513 164.346 102.672 146.596C95.3533 161.201 87.4247 158.168 91.1118 142.137C96.7117 71.5437 82.5733 37.5675 7.3489 39.4264C5.00636 26.9456 2.85787 14.4229 0.750977 1.88628C104.654 -10.6923 134.4 61.914 127.58 151.725C126.402 157.204 121.981 164.332 116.699 163.521V163.507Z" fill="#1759CA"/></svg></div>
                             <div style="left: 5.26px; top: 76.29px; position: absolute"><svg width="129" height="164" viewBox="0 0 129 164" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12.063 0.366212C17.358 1.17683 15.1679 10.7505 13.8095 13.8952C20.5322 0.310307 29.6113 -0.472362 26.0905 17.2774C33.4092 2.67228 41.3378 5.70512 37.6507 21.7358C32.0508 92.3296 46.1892 126.306 121.414 124.447C123.756 136.928 125.905 149.45 128.012 161.987C24.1084 174.566 -5.63765 101.959 1.18204 12.1482C2.36024 6.66948 6.78194 -0.458381 12.063 0.352238V0.366212Z" fill="#1759CA"/></svg></div>
@@ -501,8 +498,7 @@
                 </div>
 
                 <!-- Kode Voucher -->
-                <!-- Kode Voucher -->
-                <div class="form-group" style="grid-column: span 2;">
+                <div class="form-group voucher-code-container">
                     <label for="voucher-code">Kode Voucher</label>
                     <div class="voucher-row">
                         <div class="input-wrapper voucher-input-wrapper">
@@ -705,13 +701,27 @@
     // --- BOOKING FLOW ---
 
     // Fungsi pilih paket
-    async function selectPackage(packageName, packageId, packagePrice) {
+    async function selectPackage(packageName, packageId, packagePrice,packageDescription) {
         bookingData.package = packageName;
+        bookingData.packageDescription = packageDescription;
         bookingData.package_id = packageId;
         bookingData.price = packagePrice;
         document.getElementById('summary-title').textContent = packageName;
+        const ul = document.getElementById('package-detail-list');
+        ul.innerHTML = '';
+
+        // Tambah deskripsi (pisah berdasarkan baris kalau multi-line)
+        if (packageDescription) {
+            const lines = packageDescription.split('\n');
+            lines.forEach(line => {
+                const li = document.createElement('li');
+                li.innerHTML = `<span class="icon"></span>${line}`;
+                ul.appendChild(li);
+            });
+        }
         goToPage('page-pilih-background');
     }
+
     function loadBackgrounds() {
         fetch('/backgrounds')
             .then(res => res.json())
@@ -779,6 +789,7 @@
             const res = await fetch(`/api/time-slots?date=${dateStr}`);
             const data = await res.json();
             const slots = data.slots;
+
             if (!slots.length) {
                 timeSlotsGrid.innerHTML = `<p style="grid-column: 1 / -1; text-align: center; color: #888;">Tidak ada slot tersedia pada hari ini.</p>`;
                 return;
@@ -867,7 +878,7 @@
                     if (pkg.id == 2) div.classList.add('card-pink');
                     if (pkg.id == 3) div.classList.add('card-yellow');
 
-                    div.onclick = () => selectPackage(pkg.title, pkg.id, pkg.price);
+                    div.onclick = () => selectPackage(pkg.title, pkg.id, pkg.price, pkg.description);
 
                     const detailItems = pkg.description
                         .split('\n')
@@ -1005,7 +1016,7 @@
                 bookingData.time = null;
 
                 await loadBookedTimes(info.dateStr);
-                updateSlotsForDate(info.date);
+                updateSlotsForDate(new Date(info.dateStr));
             },
 
             dayCellDidMount: function (info) {
