@@ -60,16 +60,17 @@ Route::get('/debug-storage', function() {
     return response()->json($info);
 });
 Route::get('/storage-link', function () {
-    $targetFolder = '/home/binamuda/booking-calendar/storage/app/public';
-    $linkFolder = '/home/binamuda/public_html/snapfun.onedream.id/storage';
+    $targetFolder = base_path('storage/app/public');
+    $linkFolder = public_path('storage');
 
     if (!file_exists($linkFolder)) {
         symlink($targetFolder, $linkFolder);
         return '✅ Symlink berhasil dibuat';
     } else {
-        return '⚠️ Symlink sudah ada atau salah path';
+        return '⚠️ Symlink sudah ada atau path salah';
     }
 });
+
 // ------------------------------
 // LOGOUT (khusus untuk admin / user login)
 // ------------------------------
