@@ -60,8 +60,8 @@ Route::get('/debug-storage', function() {
     return response()->json($info);
 });
 Route::get('/storage-link', function () {
-        $target = '/home/binamuda/booking-calendar/storage/app/public';
-    $link = '/home/binamuda/public_html/snapfun.onedream.id/storage';
+        $targetFolder = '/home/binamuda/booking-calendar/storage/app/public';
+    $linkFolder = '/home/binamuda/public_html/snapfun.onedream.id/storage';
 
     if (!file_exists($linkFolder)) {
         symlink($targetFolder, $linkFolder);
