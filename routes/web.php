@@ -30,7 +30,7 @@ Route::get('/get-voucher', [VoucherController::class, 'getVoucher']);
 Route::get('/check-voucher', [VoucherController::class, 'checkVoucher']);
 
 //ambil background dari backend
-Route::get('/backgrounds', [BookingController::class, 'getBackgrounds']);
+Route::get('/api/backgrounds', [BookingController::class, 'getBackgrounds']);
 // Ambil hari dan jam operasional dari backend
 Route::get('/operational-hours', [OperationalHourController::class, 'getOperationalHours']);
 Route::get('/jam-tutup', [OperationalHourController::class, 'closedDays']);
@@ -60,17 +60,16 @@ Route::get('/debug-storage', function() {
     return response()->json($info);
 });
 Route::get('/storage-link', function () {
-    $targetFolder = storage_path('app/public'); // /home/binamuda/booking-calendar/storage/app/public
-    $linkFolder = public_path('storage'); // /home/binamuda/public_html/snapfun.onedream.id/storage
+    $targetFolder = '/home/binamuda/booking-calendar/storage/app/public';
+    $linkFolder = '/home/binamuda/public_html/snapfun.onedream.id/storage';
 
     if (!file_exists($linkFolder)) {
         symlink($targetFolder, $linkFolder);
-        return 'Symlink berhasil dibuat';
+        return '✅ Symlink berhasil dibuat';
     } else {
-        return 'Symlink sudah ada';
+        return '⚠️ Symlink sudah ada atau salah path';
     }
 });
-
 // ------------------------------
 // LOGOUT (khusus untuk admin / user login)
 // ------------------------------

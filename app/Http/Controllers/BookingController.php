@@ -2,9 +2,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Booking;
+use App\Models\Background;
 use App\Models\Package;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 
 class BookingController extends Controller
 {
@@ -16,10 +18,10 @@ class BookingController extends Controller
             'booked_times' => $bookedTimes
         ]);
     }
-    // public function showCalendar()
-    // {
-    //     return view('booking.calendar');
-    // }
+    public function showCalendar()
+    {
+        return view('background');
+    }
        public function home()
     {
         return view('home');
@@ -107,10 +109,53 @@ class BookingController extends Controller
         }
     }
 
-    public function getBackgrounds()
+
+    public function getBackgrounds(Request $request)
     {
-        $backgrounds = \App\Models\Background::all();
-        return response()->json($backgrounds);
+        try {
+            $packageId = $request->query('package_id');
+
+            if (!$packageId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Parameter package_id wajib diisi.'
+                ], 400);
+            }
+
+            $package = \App\Models\Package::with('backgrounds')->find($packageId);
+
+            if (!$package) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Paket tidak ditemukan.'
+                ], 404);
+            }
+
+            $backgrounds = $package->backgrounds->map(function ($bg) {
+                return [
+                    'id' => $bg->id,
+                    'name' => $bg->name,
+                    'image_url' => $bg->getFirstMediaUrl('image'),
+                ];
+            });
+
+            \Log::info('Berhasil ambil backgrounds:', $backgrounds->toArray());
+
+            return response()->json([
+                'success' => true,
+                'data' => $backgrounds
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Gagal ambil backgrounds: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat mengambil data background.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
+
 
 }

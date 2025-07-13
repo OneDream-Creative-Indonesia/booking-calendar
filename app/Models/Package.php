@@ -15,4 +15,9 @@ class Package extends Model
         'price',
         'extras',
     ];
+    public function backgrounds()
+    {
+        return $this->belongsToMany(Background::class);
+    }
+
 }

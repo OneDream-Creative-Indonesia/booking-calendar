@@ -719,27 +719,36 @@
                 ul.appendChild(li);
             });
         }
+        loadBackgrounds();
         goToPage('page-pilih-background');
     }
 
     function loadBackgrounds() {
-        fetch('/backgrounds')
+        fetch(`/api/backgrounds?package_id=${bookingData.package_id}`)
             .then(res => res.json())
-            .then(data => {
+            .then(response => {
                 const container = document.getElementById('background-grid');
                 container.innerHTML = '';
+
+                const data = response.data;
+
+                if (!Array.isArray(data)) {
+                    console.warn('Data background bukan array:', data);
+                    return;
+                }
 
                 data.forEach(bg => {
                     const div = document.createElement('div');
                     div.classList.add('background-item');
                     div.onclick = () => selectBackground(div, bg.id, bg.name);
                     div.innerHTML = `
-                        <div class="preview" style="background-image: url('/storage/${bg.image}'); background-size: cover; background-position: center;"></div>
+                        <div class="preview" style="background-image: url('${bg.image_url}'); background-size: cover; background-position: center;"></div>
                         <p>${bg.name}</p>
                     `;
                     container.appendChild(div);
                 });
             })
+
             .catch(err => console.error('Gagal load background:', err));
     }
 
@@ -1030,7 +1039,6 @@
         loadPackages();
         loadClosedDays();
         loadTodayCloseTime();
-        loadBackgrounds();
     });
 
 </script>

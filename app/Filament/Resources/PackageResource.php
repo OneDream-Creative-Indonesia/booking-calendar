@@ -14,6 +14,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Select;
+
 class PackageResource extends Resource
 {
     protected static ?string $model = Package::class;
@@ -28,9 +30,6 @@ class PackageResource extends Resource
                 ->label('Nama Paket')
                 ->required()
                 ->unique(ignoreRecord: true),
-            Textarea::make('description')
-                ->label('Deskripsi')
-                ->rows(3),
             TextInput::make('duration_minutes')
                 ->label('Durasi (menit)')
                 ->required()
@@ -42,6 +41,15 @@ class PackageResource extends Resource
             TextInput::make('extras')
                 ->label('Bonus Tambahan')
                 ->placeholder('Contoh: Cetak 4R, Album'),
+            Select::make('backgrounds')
+                ->label('Pilih Background')
+                ->multiple()
+                ->relationship('backgrounds', 'name')
+                ->preload()
+                ->searchable(),
+            Textarea::make('description')
+                ->label('Deskripsi')
+                ->rows(3),
         ]);
     }
 

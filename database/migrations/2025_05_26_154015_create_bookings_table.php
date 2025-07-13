@@ -16,6 +16,10 @@ return new class extends Migration
             $table->date('date');
             $table->time('time');
             $table->foreignId('package_id')->constrained()->onDelete('cascade');
+            $table->foreignId('background_id')->nullable()->constrained('backgrounds');
+            $table->integer('price')->nullable();
+            $table->unsignedBigInteger('voucher_id')->nullable();
+            $table->foreign('voucher_id')->references('id')->on('vouchers')->nullOnDelete();
             $table->string('name');
             $table->string('whatsapp');
             $table->integer('people_count');

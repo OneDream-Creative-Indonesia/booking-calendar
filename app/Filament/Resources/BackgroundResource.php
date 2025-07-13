@@ -13,6 +13,8 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 class BackgroundResource extends Resource
 {
     protected static ?string $model = Background::class;
@@ -30,13 +32,13 @@ class BackgroundResource extends Resource
                 ->required()
                 ->maxLength(255),
 
-                Forms\Components\FileUpload::make('image')
-                ->label('Gambar Background')
-                ->image()
-                ->directory('backgrounds')
-                ->imagePreviewHeight('150')
-                ->imageEditor()
-                ->required(),
+                SpatieMediaLibraryFileUpload::make('image')
+                    ->collection('image')
+                    ->label('Gambar Background')
+                    ->image()
+                    ->imagePreviewHeight('150')
+                    ->required()
+                    ->required(),
                 ])
             ]);
     }
@@ -45,9 +47,9 @@ class BackgroundResource extends Resource
     {
         return $table
             ->columns([
-                 Tables\Columns\ImageColumn::make('image')
+                SpatieMediaLibraryImageColumn::make('image')
                 ->label('Preview')
-                ->disk('public')
+                ->collection('image')
                 ->height(60)
                 ->width(80),
 
