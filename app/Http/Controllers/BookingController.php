@@ -62,45 +62,66 @@ class BookingController extends Controller
             if ($request->voucher_id) {
                $voucher = \App\Models\Voucher::find($request->voucher_id);
 
-                if (!$voucher) {
-        return response()->json(['message' => 'Voucher tidak ditemukan.'], 400);
-    }
+            if (!$voucher) {
+                return response()->json(['message' => 'Voucher tidak ditemukan.'], 400);
+            }
 
-    if (!$voucher->is_active) {
-        return response()->json(['message' => 'Voucher tidak aktif.'], 400);
-    }
+            if (!$voucher->is_active) {
+                return response()->json(['message' => 'Voucher tidak aktif.'], 400);
+            }
 
-    if ($voucher->start_date && $voucher->start_date > now()->toDateString()) {
-        return response()->json(['message' => 'Voucher belum berlaku.'], 400);
-    }
+            if ($voucher->start_date && $voucher->start_date > now()->toDateString()) {
+                return response()->json(['message' => 'Voucher belum berlaku.'], 400);
+            }
 
-    if ($voucher->end_date && $voucher->end_date < now()->toDateString()) {
-        return response()->json(['message' => 'Voucher sudah kedaluwarsa.'], 400);
-    }
+            if ($voucher->end_date && $voucher->end_date < now()->toDateString()) {
+                return response()->json(['message' => 'Voucher sudah kedaluwarsa.'], 400);
+            }
 
-    if ($voucher->usage_limit && $voucher->used_count >= $voucher->usage_limit) {
-        return response()->json(['message' => 'Voucher sudah mencapai batas pemakaian.'], 400);
-    }
+            if ($voucher->usage_limit && $voucher->used_count >= $voucher->usage_limit) {
+                return response()->json(['message' => 'Voucher sudah mencapai batas pemakaian.'], 400);
+            }
 
-                $package = \App\Models\Package::find($request->package_id);
+               $package = \App\Models\Package::find($request->package_id);
                 $basePrice = $package->price;
+
+                // Harga tambahan per orang
                 $extraPricePerPerson = match ($package->id) {
                     1 => 15000,
                     2 => 20000,
                     default => 0
                 };
 
+                // Hitung total base price berdasarkan jumlah orang
+                $totalPrice = $basePrice;
                 if ($request->people_count > 1) {
-                    $basePrice += ($request->people_count - 1) * $extraPricePerPerson;
+                    $totalPrice += ($request->people_count - 1) * $extraPricePerPerson;
                 }
-                $expectedDiscount = intval(round($basePrice * ($voucher->discount_percent / 100)));
-                $expectedFinalPrice = max(0, $basePrice - $expectedDiscount);
 
-                if ($request->price != $expectedFinalPrice) {
+                // Hitung diskon
+                $discountAmount = intval(round($totalPrice * ($voucher->discount_percent / 100)));
+                $finalPrice = max(0, $totalPrice - $discountAmount);
+
+                // Tambahkan log agar bisa dicek
+                \Log::info('Perhitungan Booking:', [
+                    'package_id' => $package->id,
+                    'base_price' => $basePrice,
+                    'people_count' => $request->people_count,
+                    'extra_price_per_person' => $extraPricePerPerson,
+                    'total_price' => $totalPrice,
+                    'discount_percent' => $voucher->discount_percent,
+                    'discount_amount' => $discountAmount,
+                    'final_price' => $finalPrice,
+                    'request_price' => $request->price,
+                ]);
+
+                // Validasi harga
+                if ($request->price != $finalPrice) {
                     return response()->json([
                         'message' => 'Harga tidak valid. Cek kembali perhitungan.',
                     ], 400);
                 }
+
             }
 
             // Simpan booking
