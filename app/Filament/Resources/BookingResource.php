@@ -94,7 +94,7 @@
                     TextColumn::make('people_count')->sortable()->label('Jumlah Orang'),
                     TextColumn::make('date')->sortable()->label('Tanggal')->date(),
                     TextColumn::make('time')->sortable()->label('Waktu')->Time(),
-                    TextColumn::make('package.id')->sortable()->label('Package')->searchable()->getStateUsing(fn ($record) => \App\Models\Package::where('id', $record->package_id)->value('title')),
+                    TextColumn::make('package.title')->label('Package')->sortable()->searchable(),
                     TextColumn::make('email')->sortable()->searchable()->label('Email'),
                     TextColumn::make('status')->sortable()->searchable()->label('Status'),
                 ])

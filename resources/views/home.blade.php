@@ -584,7 +584,7 @@
                     <div class="success-icon"><svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"><path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/></svg></div>
                     <h1>Booking kamu udah masuk!</h1>
                     <p>Jangan lupa <strong>kirim bukti transfer DP ke WhatsApp admin</strong> buat konfirmasi ya! Tanpa konfirmasi, jadwal belum kami kunci.</p>
-                    <button class="btn btn-primary" onclick="goToPage('page-pilih-paket')">Selesai</button>
+                    <button class="whatsapp btn btn-primary" onclick="confirmBookingViaWA()">💬 Konfirmasi via WhatsApp</button>
                 </div>
             </section>
         </div>
@@ -609,7 +609,7 @@
 
     function confirmBookingViaWA() {
         const nomor = '+6285117607254';
-        const pesan = encodeURIComponent(`Halo kak! Saya sudah melakukan pembayaran DP Snupfun Photostudio via QRIS. Mohon dicek ya 🙏`);
+        const pesan = encodeURIComponent(`Hallo kak, aku udah booking nih, ini bukti dp aku ya…`);
         window.open(`https://wa.me/${nomor}?text=${pesan}`, '_blank');
     }
        function chatAdmin() {
