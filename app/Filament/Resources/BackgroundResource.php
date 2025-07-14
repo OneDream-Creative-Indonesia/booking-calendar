@@ -36,8 +36,6 @@ class BackgroundResource extends Resource
                     ->collection('image')
                     ->label('Gambar Background')
                     ->image()
-                    ->imagePreviewHeight('150')
-                    ->required()
                     ->required(),
                 ])
             ]);
