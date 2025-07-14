@@ -1019,7 +1019,6 @@
         console.log('Jumlah orang:', peopleCount);
         console.log('Diskon:', bookingData.voucher_discount);
         console.log('FinalPrice:', finalPrice);
-        console.log('Voucher %:', percent);
         console.log('Diskon:', discountAmount);
         const dataToSend = {
             name,
