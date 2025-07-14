@@ -37,7 +37,7 @@ class BookingController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'email' => 'required|email',
+            'email' => 'required|string|email|max:255',
             'whatsapp' => 'required|string|max:20',
             'people_count' => 'required|integer|min:1',
             'package_id' => 'required|exists:packages,id',
@@ -108,6 +108,11 @@ class BookingController extends Controller
                 'booking' => $booking
             ]);
         } catch (\Exception $e) {
+             \Log::error('Gagal menyimpan booking', [
+                    'message' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                    'request' => $request->all(),
+                ]);
             return response()->json([
                 'message' => 'Terjadi kesalahan saat menyimpan booking',
                 'error' => $e->getMessage()
@@ -145,15 +150,12 @@ class BookingController extends Controller
                 ];
             });
 
-            \Log::info('Berhasil ambil backgrounds:', $backgrounds->toArray());
-
             return response()->json([
                 'success' => true,
                 'data' => $backgrounds
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Gagal ambil backgrounds: ' . $e->getMessage());
 
             return response()->json([
                 'success' => false,
