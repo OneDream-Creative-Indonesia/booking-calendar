@@ -9,7 +9,7 @@
         "ariaieboy/filament-currency": "*",
         "bezhansalleh/filament-shield": "^3.2",
         "blade-ui-kit/blade-icons": "^1.8",
-        "filament/filament": "3.2",
+        "filament/filament": "3.3",
         "filament/spatie-laravel-media-library-plugin": "3.2",
         "google/apiclient": "^2.18",
         "guzzlehttp/guzzle": "^7.2",
