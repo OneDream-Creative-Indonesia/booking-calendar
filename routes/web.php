@@ -24,36 +24,28 @@ Route::post('/api/submit-booking', [BookingController::class, 'submitBooking']);
 Route::get('/booked-times/{date}', [BookingController::class, 'getBookedTimes']);
 
 // Voucher
-Route::prefix('voucher')->group(function () {
-    Route::get('/get', [VoucherController::class, 'getVoucher']);
-    Route::get('/check', [VoucherController::class, 'checkVoucher']);
-});
+
+Route::get('/get-voucher', [VoucherController::class, 'getVoucher']);
+Route::get('/check-voucher', [VoucherController::class, 'checkVoucher']);
 
 // Background
 Route::get('/api/backgrounds', [BookingController::class, 'getBackgrounds']);
 
 // Operasional
-Route::prefix('operational')->group(function () {
-    Route::get('/hours', [OperationalHourController::class, 'getOperationalHours']);
-    Route::get('/close-time', [OperationalHourController::class, 'closedDays']);
-    Route::get('/time-slots', [OperationalHourController::class, 'getTimeSlots']);
-});
+Route::get('/operational-hours', [OperationalHourController::class, 'getOperationalHours']);
+Route::get('/jam-tutup', [OperationalHourController::class, 'closedDays']);
+Route::get('/api/time-slots', [OperationalHourController::class, 'getTimeSlots']);
+// ------------------------------
+// ROUTE UNTUK AUTH SOCIALITE
+// ------------------------------
+Route::get('/auth/{provider}/redirect', [SocialiteController::class, 'redirect'])->name('socialite.redirect');
+Route::get('/auth/{provider}/callback', [SocialiteController::class, 'callback'])->name('socialite.callback');
 
-// =====================================================
-// 🔐 ROUTES: SOCIALITE AUTHENTICATION
-// =====================================================
-Route::prefix('auth/{provider}')->group(function () {
-    Route::get('/redirect', [SocialiteController::class, 'redirect'])->name('socialite.redirect');
-    Route::get('/callback', [SocialiteController::class, 'callback'])->name('socialite.callback');
-});
-
-// =====================================================
-// 🛠 ROUTES: ADMIN / SYNC GOOGLE CALENDAR
-// =====================================================
-Route::prefix('admin/google')->group(function () {
-    Route::get('/connect', [GoogleCalendarController::class, 'redirectToGoogle'])->name('google.connect');
-    Route::get('/callback', [GoogleCalendarController::class, 'handleGoogleCallback'])->name('google.callback');
-});
+// ------------------------------
+// ROUTE UNTUK ADMIN / GOOGLE CALENDAR SYNC
+// ------------------------------
+Route::get('/admin/google/connect', [GoogleCalendarController::class, 'redirectToGoogle'])->name('google.connect');
+Route::get('/google/callback', [GoogleCalendarController::class, 'handleGoogleCallback'])->name('google.callback');
 
 //optimize filament
 
