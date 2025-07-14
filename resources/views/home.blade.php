@@ -608,12 +608,12 @@
     }
 
     function confirmBookingViaWA() {
-        const nomor = '085117607254';
+        const nomor = '+6285117607254';
         const pesan = encodeURIComponent(`Halo kak! Saya sudah melakukan pembayaran DP Snap PhotoBox via QRIS. Mohon dicek ya 🙏`);
         window.open(`https://wa.me/${nomor}?text=${pesan}`, '_blank');
     }
        function chatAdmin() {
-        const nomor = '085117607254';
+        const nomor = '+6285117607254';
         const pesan = encodeURIComponent("Halo kak, saya mau tanya tentang booking studio Snap PhotoBox.");
         window.open(`https://wa.me/${nomor}?text=${pesan}`, '_blank');
     }
