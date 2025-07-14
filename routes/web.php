@@ -58,6 +58,12 @@ Route::prefix('admin/google')->group(function () {
 //optimize filament
 
 Route::get('/filament-optimize-clear', function () {
+    Artisan::call('cache:clear');
+Artisan::call('config:clear');
+Artisan::call('route:clear');
+Artisan::call('view:clear');
+Artisan::call('clear-compiled');
+Artisan::call('optimize:clear');
     Artisan::call('filament:optimize-clear');
     return '✅ Filament cache cleared.';
 });
