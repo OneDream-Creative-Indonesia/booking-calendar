@@ -19,7 +19,7 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Filament\Enums\ThemeMode;
-
+use Filament\View\PanelsRenderHook;
 class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
