@@ -543,10 +543,13 @@
                         <select id="jumlah-orang">
                             <option value="">pilih jumlah orangnya</option>
                             <option value="1">1 Orang</option>
-                            <option value="2">2 Orang (+ 15rb)</option>
-                            <option value="3">3 Orang (+ 30rb)</option>
-                            <option value="4">4 Orang (+ 45rb)</option>
-                            <option value="5">5 Orang (+ 60rb)</option>
+                            <option value="2">2 Orang</option>
+                            <option value="3">3 Orang</option>
+                            <option value="4">4 Orang</option>
+                            <option value="5">5 Orang</option>
+                            <option value="4">6 Orang</option>
+                            <option value="5">7 Orang</option>
+                            <option value="4">8 Orang</option>
                         </select>
                     </div>
                 </div>
