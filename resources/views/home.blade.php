@@ -741,10 +741,14 @@
             return;
         }
 
-        // ✅ Valid — baru hitung diskon
-        let finalPrice = bookingData.price;
+        let finalPrice = Number(bookingData.price);
+        let extraPerPerson = 0;
+        switch (bookingData.package_id) {
+            case 1: extraPerPerson = 15000; break;
+            case 2: extraPerPerson = 20000; break;
+        }
         if (peopleCount > 1) {
-            finalPrice += (peopleCount - 1) * 15000;
+            finalPrice += (peopleCount - 1) * extraPerPerson;
         }
 
         const percent = parseFloat(matched.discount_percent);
@@ -1014,8 +1018,9 @@
         console.log('Harga awal:', bookingData.price);
         console.log('Jumlah orang:', peopleCount);
         console.log('Diskon:', bookingData.voucher_discount);
-        console.log('Final price:', finalPrice);
-
+        console.log('FinalPrice:', finalPrice);
+        console.log('Voucher %:', percent);
+        console.log('Diskon:', discountAmount);
         const dataToSend = {
             name,
             email,
