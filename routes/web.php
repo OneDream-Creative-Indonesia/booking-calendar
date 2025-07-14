@@ -10,6 +10,7 @@ use App\Http\Controllers\{
     GoogleCalendarController,
     OperationalHourController
 };
+use Illuminate\Support\Facades\Artisan;
 
 // =====================================================
 // 🧍 ROUTES: PUBLIC BOOKING PAGE
@@ -52,6 +53,13 @@ Route::prefix('auth/{provider}')->group(function () {
 Route::prefix('admin/google')->group(function () {
     Route::get('/connect', [GoogleCalendarController::class, 'redirectToGoogle'])->name('google.connect');
     Route::get('/callback', [GoogleCalendarController::class, 'handleGoogleCallback'])->name('google.callback');
+});
+
+//optimize filament
+
+Route::get('/filament-optimize-clear', function () {
+    Artisan::call('filament:optimize-clear');
+    return '✅ Filament cache cleared.';
 });
 // =====================================================
 // 🚪 ROUTES: LOGOUT
