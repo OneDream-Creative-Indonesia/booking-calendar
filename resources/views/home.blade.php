@@ -81,21 +81,69 @@
             transform-origin: right center;
         }
         .modal {
-        position: fixed;
-        z-index: 9999;
-        left: 0; top: 0;
-        width: 100%; height: 100%;
-        background-color: rgba(0,0,0,0.5);
-        display: flex; align-items: center; justify-content: center;
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0,0,0,0.6);
         }
+
         .modal-content {
-        background: #fff;
-        padding: 20px;
-        border-radius: 10px;
-        width: 90%;
-        max-width: 400px;
-        position: relative;
-        text-align: center;
+            background-color: #fff;
+            padding: 24px;
+            border-radius: 10px;
+            max-width: 90%;
+            width: 400px;
+            text-align: center;
+            position: relative;
+        }
+
+        .modal-content h3 {
+            margin-top: 0;
+        }
+
+        .modal-content img {
+            width: 100%;
+            max-height: 400px;
+            object-fit: contain;
+            margin-bottom: 16px;
+        }
+
+        .modal-content .close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .modal-content .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .modal-content button {
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+
+        .modal-content button.download {
+            background-color: #f0f0f0;
+        }
+
+        .modal-content button.whatsapp {
+            background-color: #25D366;
+            color: white;
         }
         .close {
         position: absolute;
@@ -439,13 +487,19 @@
             </section>
 
             <!-- Modal QRIS -->
-            <div id="qrisModal" class="modal" style="display:none;">
-            <div class="modal-content">
-                <span class="close" onclick="closeModal()">&times;</span>
-                <h3>Scan QRIS untuk pembayaran DP</h3>
-                <img src="/images/qris.png" alt="QRIS" style="max-width: 100%; height: auto;" />
+          <div id="qrisModal" class="modal">
+                <div class="modal-content">
+                    <span class="close" onclick="closeModal()">&times;</span>
+                    <h3>Scan QRIS untuk pembayaran DP</h3>
+                    <img id="qrisImage" src="/img/qrcode.jpeg" alt="QRIS" />
+
+                    <div class="button-group">
+                        <button class="download" onclick="downloadQRIS()">📥 Unduh QRIS</button>
+                        <button class="whatsapp" onclick="confirmBookingViaWA()">💬 Konfirmasi via WhatsApp</button>
+                    </div>
+                </div>
             </div>
-            </div>
+
 
             <section id="page-form" class="page">
                 <div class="form-container">
@@ -535,7 +589,7 @@
 
 <script>
     function showQRISModal(event) {
-        event.preventDefault(); // agar tidak pindah halaman
+        event.preventDefault();
         document.getElementById('qrisModal').style.display = 'flex';
     }
 
@@ -543,13 +597,20 @@
         document.getElementById('qrisModal').style.display = 'none';
     }
 
-    function chatAdmin() {
-    const nomor = '6281234567890'; // ganti ke nomor admin
-    const pesan = encodeURIComponent("Halo kak, saya mau tanya tentang booking studio Snap PhotoBox.");
-    window.open(`https://wa.me/${nomor}?text=${pesan}`, '_blank');
+    function downloadQRIS() {
+        const link = document.createElement('a');
+        link.href = document.getElementById('qrisImage').src;
+        link.download = 'QRIS-SnapPhotobox.jpeg';
+        link.click();
     }
 
+    function confirmBookingViaWA() {
+        const nomor = '085117607254';
+        const pesan = encodeURIComponent(`Halo kak! Saya sudah melakukan pembayaran DP Snap PhotoBox via QRIS. Mohon dicek ya 🙏`);
+        window.open(`https://wa.me/${nomor}?text=${pesan}`, '_blank');
+    }
 </script>
+
 
 <script>
     // --- GLOBAL VARIABLES ---
@@ -861,7 +922,8 @@
     // Ambil data slot yang sudah dibooking
     async function loadBookedTimes(dateStr) {
         try {
-            const res = await fetch(`/booked-times/${dateStr}`);
+            const res = await fetch(`/booked-times/${dateStr}?package_id=${bookingData.package_id}`);
+
             const data = await res.json();
             bookedTimes = data.booked_times || [];
         } catch (err) {

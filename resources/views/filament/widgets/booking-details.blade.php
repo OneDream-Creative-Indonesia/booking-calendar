@@ -2,8 +2,9 @@
     <x-filament::card>
         <h2 class="text-lg font-semibold">Booking Information</h2>
         <p><strong>Name:</strong> {{ $booking->name }}</p>
+        <p><strong>Paket:</strong> {{ $booking->package->title }}</p>
         <p><strong>WhatsApp:</strong> {{ $booking->whatsapp }}</p>
-        <p><strong>Background:</strong> {{ $booking->background }}</p>
+        <p><strong>Background:</strong> {{ $booking->background->name }}</p>
         <p><strong>Total Harga:</strong> {{ $booking->price }}</p>
     </x-filament::card>
 

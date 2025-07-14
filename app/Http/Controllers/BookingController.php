@@ -12,12 +12,18 @@ class BookingController extends Controller
 {
     public function getBookedTimes($date)
     {
-        $bookedTimes = Booking::where('date', $date)->pluck('time');
+        $packageId = request()->query('package_id');
+
+        $booked = Booking::whereDate('date', $date)
+            ->when($packageId, fn ($q) => $q->where('package_id', $packageId))
+            ->pluck('time')
+            ->toArray();
 
         return response()->json([
-            'booked_times' => $bookedTimes
+            'booked_times' => $booked,
         ]);
     }
+
     public function showCalendar()
     {
         return view('background');
