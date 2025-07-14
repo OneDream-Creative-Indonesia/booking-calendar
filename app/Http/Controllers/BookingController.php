@@ -37,7 +37,7 @@ class BookingController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'email' => 'required|string|max:255',
+            'email' => 'required|email',
             'whatsapp' => 'required|string|max:20',
             'people_count' => 'required|integer|min:1',
             'package_id' => 'required|exists:packages,id',
@@ -68,9 +68,14 @@ class BookingController extends Controller
 
                 $package = \App\Models\Package::find($request->package_id);
                 $basePrice = $package->price;
+                $extraPricePerPerson = match ($package->id) {
+                    1 => 15000,
+                    2 => 20000,
+                    default => 0
+                };
 
                 if ($request->people_count > 1) {
-                    $basePrice += ($request->people_count - 1) * 15000;
+                    $basePrice += ($request->people_count - 1) * $extraPricePerPerson;
                 }
                 $expectedDiscount = intval(round($basePrice * ($voucher->discount_percent / 100)));
                 $expectedFinalPrice = max(0, $basePrice - $expectedDiscount);

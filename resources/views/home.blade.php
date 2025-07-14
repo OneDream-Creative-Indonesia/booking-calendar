@@ -547,9 +547,9 @@
                             <option value="3">3 Orang</option>
                             <option value="4">4 Orang</option>
                             <option value="5">5 Orang</option>
-                            <option value="4">6 Orang</option>
-                            <option value="5">7 Orang</option>
-                            <option value="4">8 Orang</option>
+                            <option value="6">6 Orang</option>
+                            <option value="7">7 Orang</option>
+                            <option value="8">8 Orang</option>
                         </select>
                     </div>
                 </div>
@@ -798,7 +798,6 @@
             .then(response => {
                 const container = document.getElementById('background-grid');
                 container.innerHTML = '';
-
                 const data = response.data;
 
                 if (!Array.isArray(data)) {
@@ -958,7 +957,6 @@
                     if (pkg.id == 3) div.classList.add('card-yellow');
 
                     div.onclick = () => selectPackage(pkg.title, pkg.id, pkg.price, pkg.description);
-
                     const detailItems = pkg.description
                         .split('\n')
                         .map(line => `<li><span class="icon"></span>${line}</li>`)
@@ -999,15 +997,24 @@
             Swal.fire({ icon: 'warning', title: 'Perhatian', text: 'Harap lengkapi semua form dan setujui syarat & ketentuan.' });
             return;
         }
-        let finalPrice = bookingData.price;
+        let finalPrice = Number(bookingData.price);
+        let extraPerPerson = 0;
+        switch (bookingData.package_id) {
+            case 1: extraPerPerson = 15000; break;
+            case 2: extraPerPerson = 20000; break;
+        }
         if (peopleCount > 1) {
-            finalPrice += (peopleCount - 1) * 15000;
+            finalPrice += (peopleCount - 1) * extraPerPerson;
         }
         if (bookingData.voucher_discount) {
             finalPrice -= bookingData.voucher_discount;
         }
 
         if (finalPrice < 0) finalPrice = 0;
+        console.log('Harga awal:', bookingData.price);
+        console.log('Jumlah orang:', peopleCount);
+        console.log('Diskon:', bookingData.voucher_discount);
+        console.log('Final price:', finalPrice);
 
         const dataToSend = {
             name,
