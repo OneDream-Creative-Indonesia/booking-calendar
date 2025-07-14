@@ -62,9 +62,25 @@ class BookingController extends Controller
             if ($request->voucher_id) {
                $voucher = \App\Models\Voucher::find($request->voucher_id);
 
-                if (!$voucher || !$voucher->isValid()) {
-                    return response()->json(['message' => 'Voucher tidak tersedia atau tidak valid'], 400);
-                }
+                if (!$voucher) {
+        return response()->json(['message' => 'Voucher tidak ditemukan.'], 400);
+    }
+
+    if (!$voucher->is_active) {
+        return response()->json(['message' => 'Voucher tidak aktif.'], 400);
+    }
+
+    if ($voucher->start_date && $voucher->start_date > now()->toDateString()) {
+        return response()->json(['message' => 'Voucher belum berlaku.'], 400);
+    }
+
+    if ($voucher->end_date && $voucher->end_date < now()->toDateString()) {
+        return response()->json(['message' => 'Voucher sudah kedaluwarsa.'], 400);
+    }
+
+    if ($voucher->usage_limit && $voucher->used_count >= $voucher->usage_limit) {
+        return response()->json(['message' => 'Voucher sudah mencapai batas pemakaian.'], 400);
+    }
 
                 $package = \App\Models\Package::find($request->package_id);
                 $basePrice = $package->price;
