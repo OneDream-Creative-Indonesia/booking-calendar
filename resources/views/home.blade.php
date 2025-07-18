@@ -738,8 +738,10 @@
         }
 
         const now = new Date();
-        const start = new Date(matched.start_date);
-        const end = new Date(matched.end_date);
+        console.log(new Date('2025-07-19T00:00:00Z'))
+        const nowUtc = new Date(now.getTime() + now.getTimezoneOffset() * 60000);
+        const start = new Date(matched.start_date + 'Z'); // pastikan ada 'Z' untuk UTC
+        const end = new Date(matched.end_date + 'Z');
 
         // 🔴 Cek usage limit dulu
         if (matched.usage_limit !== null && matched.used_count >= matched.usage_limit) {
