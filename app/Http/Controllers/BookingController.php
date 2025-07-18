@@ -75,7 +75,7 @@ class BookingController extends Controller
                 'start_gt_now' => $voucher->start_date > now(),
             ]);
 
-            if ($voucher->start_date && $voucher->start_date > now()->toDateString()) {
+            if ($voucher->start_date && $voucher->start_date > now()) {
                 return response()->json(['message' => 'Voucher belum berlaku.'], 400);
             }
 
