@@ -69,6 +69,11 @@ class BookingController extends Controller
             if (!$voucher->is_active) {
                 return response()->json(['message' => 'Voucher tidak aktif.'], 400);
             }
+            \Log::info('Waktu voucher vs sekarang', [
+                'start_date' => $voucher->start_date,
+                'now' => now(),
+                'start_gt_now' => $voucher->start_date > now(),
+            ]);
 
             if ($voucher->start_date && $voucher->start_date > now()->toDateString()) {
                 return response()->json(['message' => 'Voucher belum berlaku.'], 400);
