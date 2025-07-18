@@ -46,7 +46,14 @@ Route::get('/auth/{provider}/callback', [SocialiteController::class, 'callback']
 // ------------------------------
 Route::get('/admin/google/connect', [GoogleCalendarController::class, 'redirectToGoogle'])->name('google.connect');
 Route::get('/google/callback', [GoogleCalendarController::class, 'handleGoogleCallback'])->name('google.callback');
+Route::get('/clear-config-cache', function () {
+    Artisan::call('config:clear');
+    Artisan::call('cache:clear');
+    Artisan::call('view:clear');
+    Artisan::call('route:clear');
 
+    return '✅ Config, cache, route, dan view berhasil di-clear!';
+});
 // =====================================================
 // 🚪 ROUTES: LOGOUT
 // =====================================================
