@@ -5,6 +5,7 @@
         <p><strong>Paket:</strong> {{ $booking->package->title }}</p>
         <p><strong>WhatsApp:</strong> {{ $booking->whatsapp }}</p>
         <p><strong>Background:</strong> {{ $booking->background->name }}</p>
+        <p><strong>Jumlah Orang:</strong> {{ $booking->people_count }}</p>
         <p><strong>Total Harga:</strong> {{ $booking->price }}</p>
         <p><strong>Voucher:</strong> {{ $booking->voucher->code_voucher ?? '-' }}</p>
     </x-filament::card>
