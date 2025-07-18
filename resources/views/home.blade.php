@@ -481,7 +481,7 @@
                         <div class="time-slots-grid" id="time-slots-grid">
                             <p style="grid-column: 1 / -1; text-align: center; color: #888;">Jadwal akan muncul di sini setelah kamu memilih tanggal.</p>
                         </div>
-                        <button class="btn btn-primary" onclick="goToPage('page-form')">Lanjut</button>
+                        <button class="btn btn-primary" onclick="goToPage('page-form',bookingData)">Lanjut</button>
                     </div>
                 </div>
             </section>
@@ -491,11 +491,10 @@
                 <div class="modal-content">
                     <span class="close" onclick="closeModal()">&times;</span>
                     <h3>Scan QRIS untuk pembayaran DP</h3>
-                    <img id="qrisImage" src="/img/qrcode.jpeg" alt="QRIS" />
+                    <img id="qrisImage" src="/img/qrcode.png" alt="QRIS" />
 
                     <div class="button-group">
                         <button class="download" onclick="downloadQRIS()">📥 Unduh QRIS</button>
-                        <button class="whatsapp" onclick="confirmBookingViaWA()">💬 Konfirmasi via WhatsApp</button>
                     </div>
                 </div>
             </div>
@@ -537,7 +536,7 @@
 
                 <!-- Jumlah Orang -->
                 <div class="form-group">
-                    <label for="jumlah-orang">Jumlah Orang (Tambah 15 rb/org > 1)<span class="red-star">*</span></label>
+                    <label for="jumlah-orang">Jumlah Orang (Tambah 15 rb/org jika lebih dari 1)<span class="red-star">*</span></label>
                     <div class="input-wrapper">
                         <img src="https://api.iconify.design/solar:users-group-rounded-bold-duotone.svg" class="input-icon" alt="group icon">
                         <select id="jumlah-orang">
@@ -548,8 +547,6 @@
                             <option value="4">4 Orang</option>
                             <option value="5">5 Orang</option>
                             <option value="6">6 Orang</option>
-                            <option value="7">7 Orang</option>
-                            <option value="8">8 Orang</option>
                         </select>
                     </div>
                 </div>
@@ -571,7 +568,7 @@
 
                     <div class="dp-section">
                         <h3>Down Payment (DP)</h3>
-                        <div class="dp-info"><p>Pembayaran DP via QRIS. <a href="#" class="btn-link" onclick="showQRISModal(event)">Klik disini</a></p><span class="price">Rp 15.000</span></div>
+                        <div class="dp-info"><p>Pembayaran DP via QRIS. <a href="#" class="btn-link" onclick="showQRISModal(event)">Klik disini</a></p><span id="dp-price" class="price"></span></div>
                         <div class="dp-info"><p>Kalau ada kendala, tenang~ tinggal chat admin kami aja.</p><button class="btn btn-secondary" onclick="chatAdmin()">💬 Chat Kami</button></div>
                     </div>
                     <div class="agreement-box"><input type="checkbox" id="agreement"><label for="agreement">Saya setuju, kalau batalin di hari-H, <strong class="red-star">DP sebesar Rp15.000 hangus.</strong><span class="red-star">*</span></label></div>
@@ -583,7 +580,10 @@
                 <div class="success-container">
                     <div class="success-icon"><svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"><path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/></svg></div>
                     <h1>Booking kamu udah masuk!</h1>
-                    <p>Jangan lupa <strong>kirim bukti transfer DP ke WhatsApp admin</strong> buat konfirmasi ya! Tanpa konfirmasi, jadwal belum kami kunci.</p>
+                    <h4 id="totalPriceQRIS" style="margin-top: 1rem; text-align: center;"></h4>
+                    <h4 id="dpPriceQRIS" style="margin-top: 0.5rem; text-align: center; color: #555;"></h4>
+                    <p>Jangan lupa <strong>kirim bukti transfer DP ke WhatsApp admin</strong> untuk konfirmasi, ya! Tanpa konfirmasi, jadwal belum bisa kami kunci.
+                    Kamu juga bisa tambah cetak foto saat di lokasi, tinggal konfirmasi langsung ke tim kami di sana.</p>
                     <button class="whatsapp btn btn-primary" onclick="confirmBookingViaWA()">💬 Konfirmasi via WhatsApp</button>
                 </div>
             </section>
@@ -603,7 +603,7 @@
     function downloadQRIS() {
         const link = document.createElement('a');
         link.href = document.getElementById('qrisImage').src;
-        link.download = 'QRIS-SnapPhotobox.jpeg';
+        link.download = 'QRIS-SnapPhotobox.jpg';
         link.click();
     }
 
@@ -655,7 +655,7 @@
     }
 
     // Fungsi untuk navigasi ke halaman tertentu
-    function goToPage(pageId) {
+    function goToPage(pageId, data = null) {
         pages.forEach(page => page.classList.remove('active'));
         const targetPage = document.getElementById(pageId);
         if (targetPage) targetPage.classList.add('active');
@@ -672,7 +672,25 @@
                 isCalendarRendered = true;
             }, 0);
         }
-
+        if (pageId === 'page-form') {
+            let dp = 0;
+            if (data.package_id === 1) {
+                dp = 15000;
+            } else if (data.package_id === 2 || data.package_id === 3) {
+                dp = 30000;
+            }
+            document.getElementById('dp-price').textContent = `Rp ${dp.toLocaleString()}`;
+        }
+        if (pageId === 'page-sukses') {
+            let dp = 0;
+            if (data.package_id === 1) {
+                dp = 15000;
+            } else if (data.package_id === 2 || data.package_id === 3) {
+                dp = 30000;
+            }
+            document.getElementById('totalPriceQRIS').textContent = `Total harga sementara: Rp ${data.price.toLocaleString()}`;
+            document.getElementById('dpPriceQRIS').textContent = `Total DP: Rp ${dp.toLocaleString()}`;
+        }
         updateNav();
         window.scrollTo(0, 0);
     }
@@ -1015,10 +1033,6 @@
         }
 
         if (finalPrice < 0) finalPrice = 0;
-        console.log('Harga awal:', bookingData.price);
-        console.log('Jumlah orang:', peopleCount);
-        console.log('Diskon:', bookingData.voucher_discount);
-        console.log('FinalPrice:', finalPrice);
         const dataToSend = {
             name,
             email,
@@ -1048,8 +1062,8 @@
 
             if (res.ok) {
                 resetBookingForm();
-                goToPage('page-sukses');
-                setTimeout(() => location.reload(), 5000);
+                goToPage('page-sukses', dataToSend);
+                setTimeout(() => location.reload(), 50000);
             } else {
                 Swal.fire({ icon: 'error', title: 'Gagal Booking', text: result.message || 'Terjadi kesalahan saat menyimpan booking.' });
             }

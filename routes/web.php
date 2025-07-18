@@ -47,18 +47,6 @@ Route::get('/auth/{provider}/callback', [SocialiteController::class, 'callback']
 Route::get('/admin/google/connect', [GoogleCalendarController::class, 'redirectToGoogle'])->name('google.connect');
 Route::get('/google/callback', [GoogleCalendarController::class, 'handleGoogleCallback'])->name('google.callback');
 
-//optimize filament
-
-Route::get('/filament-optimize-clear', function () {
-    Artisan::call('cache:clear');
-Artisan::call('config:clear');
-Artisan::call('route:clear');
-Artisan::call('view:clear');
-Artisan::call('clear-compiled');
-Artisan::call('optimize:clear');
-    Artisan::call('filament:optimize-clear');
-    return '✅ Filament cache cleared.';
-});
 // =====================================================
 // 🚪 ROUTES: LOGOUT
 // =====================================================

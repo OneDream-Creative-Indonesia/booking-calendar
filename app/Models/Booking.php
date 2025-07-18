@@ -19,7 +19,11 @@ class Booking extends Model
     }
     public function background()
     {
-        return $this->belongsTo(Background::class);
+        return $this->belongsTo(\App\Models\Background::class);
+    }
+    public function voucher()
+    {
+        return $this->belongsTo(\App\Models\Voucher::class);
     }
 
 }

@@ -62,7 +62,7 @@ class CalendarWidget extends FullCalendarWidget
                 }
 
                 return view('filament.widgets.booking-details', [
-                    'booking' => Booking::find($this->record->id),
+                    'booking' => Booking::with(['voucher', 'package', 'background'])->find($this->record->id),
                 ]);
             });
     }
