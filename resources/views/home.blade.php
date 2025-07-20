@@ -571,7 +571,7 @@
                         <div class="dp-info"><p>Pembayaran DP via QRIS. <a href="#" class="btn-link" onclick="showQRISModal(event)">Klik disini</a></p><span id="dp-price" class="price"></span></div>
                         <div class="dp-info"><p>Kalau ada kendala, tenang~ tinggal chat admin kami aja.</p><button class="btn btn-secondary" onclick="chatAdmin()">💬 Chat Kami</button></div>
                     </div>
-                    <div class="agreement-box"><input type="checkbox" id="agreement"><label for="agreement">Saya setuju, kalau batalin di hari-H, <strong class="red-star">DP sebesar Rp15.000 hangus.</strong><span class="red-star">*</span></label></div>
+                    <div class="agreement-box"><input type="checkbox" id="agreement"><label for="agreement">Saya setuju, kalau batalin di hari-H, <strong id="confirmedDp" class="red-star"></strong><span class="red-star">*</span></label></div>
                     <button class="btn btn-primary" onclick="submitBooking()">Booking Sekarang</button>
                 </div>
             </section>
@@ -680,6 +680,7 @@
                 dp = 30000;
             }
             document.getElementById('dp-price').textContent = `Rp ${dp.toLocaleString()}`;
+            document.getElementById('confirmedDp').textContent = `DP sebesar Rp ${dp.toLocaleString()} hangus`;
         }
         if (pageId === 'page-sukses') {
             let dp = 0;
