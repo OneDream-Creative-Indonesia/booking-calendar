@@ -15,7 +15,7 @@ class ListBookings extends ListRecords
     {
         return [
             Action::make('Export CSV')
-                ->label('Export CSV')
+                ->label('Export Bookings')
                 ->icon('heroicon-o-arrow-down-tray')
                 ->url(route('export.bookings'))
                 ->openUrlInNewTab(),
