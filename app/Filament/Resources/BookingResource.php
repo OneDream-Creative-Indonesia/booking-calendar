@@ -64,25 +64,43 @@
                     ->required()
                     ->disabled(!auth()->user()->hasRole('admin')),
 
+                Forms\Components\Select::make('voucher_id')
+                    ->label('Code Voucher')
+                    ->relationship('voucher', 'code_voucher')
+                    ->searchable()
+                    ->disabled(!auth()->user()->hasRole('admin')),
+
+                Forms\Components\Select::make('background_id')
+                    ->label('Nama Background')
+                    ->relationship('background', 'name')
+                    ->searchable()
+                    ->disabled(!auth()->user()->hasRole('admin')),
+
                 Forms\Components\TextInput::make('email')
                     ->label('Email')
                     ->email()
                     ->required()
                     ->disabled(!auth()->user()->hasRole('admin')),
 
+                Forms\Components\TextInput::make('price')
+                    ->label('Total Harga')
+                    ->numeric()
+                    ->prefix('Rp')
+                    ->disabled(!auth()->user()->hasRole('admin')),
+
                 Forms\Components\Toggle::make('confirmation')
                     ->label('Confirmed')
                     ->disabled(!auth()->user()->hasRole('admin')),
 
-            Forms\Components\Select::make('status')
-                ->label('Status')
-                ->options([
-                    'pending' => 'Pending',
-                    'confirmed' => 'Confirmed',
-                    'canceled' => 'Canceled',
-                ])
-                ->required(),
-                ]);
+                Forms\Components\Select::make('status')
+                    ->label('Status')
+                    ->options([
+                        'pending' => 'Pending',
+                        'confirmed' => 'Confirmed',
+                        'canceled' => 'Canceled',
+                    ])
+                    ->required(),
+                    ]);
         }
 
         public static function table(Table $table): Table
@@ -99,6 +117,7 @@
                     TextColumn::make('package.title')->label('Package')->sortable()->searchable(),
                     TextColumn::make('email')->sortable()->searchable()->label('Email'),
                     TextColumn::make('status')->sortable()->searchable()->label('Status'),
+                    TextColumn::make('price')->sortable()->searchable()->label('Total Harga')->getStateUsing(fn ($record) => 'Rp' . number_format($record->price, 0, ',', '.')),
                 ])
                 ->filters([
                             // SelectFilter::make('package_id')
