@@ -93,7 +93,7 @@
                     TextColumn::make('whatsapp')->sortable()->searchable()->label('WhatsApp'),
                     TextColumn::make('people_count')->sortable()->label('Jumlah Orang'),
                     TextColumn::make('voucher.code_voucher')->sortable()->searchable()->label('Kode Voucher')->getStateUsing(fn ($record) => $record->voucher?->code_voucher ?? '-'),
-                    TextColumn::make('background.name')->sortable()->searchable()->label('Kode Voucher')->getStateUsing(fn ($record) => $record->background?->name ?? '-'),
+                    TextColumn::make('background.name')->sortable()->searchable()->label('Nama Background')->getStateUsing(fn ($record) => $record->background?->name ?? '-'),
                     TextColumn::make('date')->sortable()->label('Tanggal')->date(),
                     TextColumn::make('time')->sortable()->label('Waktu')->Time(),
                     TextColumn::make('package.title')->label('Package')->sortable()->searchable(),
