@@ -8,7 +8,8 @@ use App\Http\Controllers\{
     PackageController,
     SocialiteController,
     GoogleCalendarController,
-    OperationalHourController
+    OperationalHourController,
+    BookingExportController
 };
 use Illuminate\Support\Facades\Artisan;
 
@@ -47,6 +48,11 @@ Route::get('/auth/{provider}/callback', [SocialiteController::class, 'callback']
 Route::get('/admin/google/connect', [GoogleCalendarController::class, 'redirectToGoogle'])->name('google.connect');
 Route::get('/google/callback', [GoogleCalendarController::class, 'handleGoogleCallback'])->name('google.callback');
 
+
+// =====================================================
+// Export Booking Csv
+// =====================================================
+Route::get('/export-bookings', [BookingExportController::class, 'exportCsv'])->name('export.bookings');
 // =====================================================
 // 🚪 ROUTES: LOGOUT
 // =====================================================
