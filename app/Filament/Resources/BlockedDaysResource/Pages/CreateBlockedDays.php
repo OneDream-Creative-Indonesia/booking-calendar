@@ -9,4 +9,5 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateBlockedDays extends CreateRecord
 {
     protected static string $resource = BlockedDaysResource::class;
+    protected ?string $heading = 'Tambahkan Waktu Studio Tidak Tersedia';
 }
