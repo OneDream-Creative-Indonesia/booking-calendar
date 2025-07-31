@@ -22,7 +22,7 @@ class PackageResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-inbox-stack';
     protected static ?string $navigationGroup = 'Settings';
     protected static ?string $navigationLabel = 'Paket Settings';
-
+    protected static ?int $navigationSort = 2;
     public static function form(Form $form): Form
     {
         return $form->schema([

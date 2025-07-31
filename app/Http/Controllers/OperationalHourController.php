@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use Carbon\Carbon;
+use App\Models\BlockedDate;
+use Illuminate\Http\Request;
 use App\Models\OperationalHour;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+
 class OperationalHourController extends Controller
 {
     public function getOperationalHours()
@@ -17,6 +19,9 @@ class OperationalHourController extends Controller
         return response()->json([
             'closed_days' => $closedDays,
         ]);
+    }
+    public function blockedTimes(){
+        return BlockedDate::all(['date', 'reason']);
     }
     public function closedDays()
     {

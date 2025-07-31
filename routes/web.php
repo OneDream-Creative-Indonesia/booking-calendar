@@ -36,6 +36,7 @@ Route::get('/api/backgrounds', [BookingController::class, 'getBackgrounds']);
 Route::get('/operational-hours', [OperationalHourController::class, 'getOperationalHours']);
 Route::get('/jam-tutup', [OperationalHourController::class, 'closedDays']);
 Route::get('/api/time-slots', [OperationalHourController::class, 'getTimeSlots']);
+Route::get('/blocked-dates', [OperationalHourController::class, 'blockedTimes']);
 // ------------------------------
 // ROUTE UNTUK AUTH SOCIALITE
 // ------------------------------

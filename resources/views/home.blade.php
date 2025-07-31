@@ -640,7 +640,7 @@
     let isCalendarRendered = false;
     let todayCloseTime;
     let bookedTimes = [];
-
+    let blockedDates = [];
     // Objek untuk menyimpan data booking sementara
     let bookingData = {
         package: null,
@@ -748,7 +748,6 @@
         }
 
         const now = new Date();
-        console.log(new Date('2025-07-19T00:00:00Z'))
         const nowUtc = new Date(now.getTime() + now.getTimezoneOffset() * 60000);
         const start = new Date(matched.start_date + 'Z'); // pastikan ada 'Z' untuk UTC
         const end = new Date(matched.end_date + 'Z');
@@ -853,6 +852,16 @@
 
             .catch(err => console.error('Gagal load background:', err));
     }
+    //ambil data blocked dates
+    async function loadBlockedDates() {
+            try {
+                const res = await fetch('/blocked-dates');
+                const data = await res.json();
+                blockedDates = data || []; // Pastikan selalu array
+            } catch (err) {
+                console.error('Gagal load blocked dates:', err);
+            }
+        }
 
     // Fungsi pilih background foto
     function selectBackground(element, id, name) {
@@ -873,7 +882,20 @@
     async function updateSlotsForDate(date) {
         const dateStr = date.toISOString().split('T')[0];
         timeSlotsGrid.innerHTML = '';
+        const blocked = blockedDates.find(b => b.date === dateStr);
+            if (blocked) {
+                const reasonMsg = blocked.reason === 'holiday'
+                    ? 'Studio libur pada tanggal ini.'
+                    : 'Studio telah disewa seharian.';
 
+                timeSlotsGrid.innerHTML = `<p style="grid-column: 1 / -1; text-align: center; color: #888;">${reasonMsg}</p>`;
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Tidak Tersedia',
+                    text: reasonMsg
+                });
+                return;
+            }
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
@@ -1114,11 +1136,26 @@
             selectable: true,
             validRange: { start: new Date().toISOString().split('T')[0] },
             headerToolbar: { left: 'prev', center: 'title', right: 'next' },
-
             dateClick: async function (info) {
                 const clickedDate = info.date;
+                const clickedDateStr = info.dateStr;
                 const dayName = dayMap[clickedDate.getDay()];
+                const blocked = blockedDates.find(b => b.date === clickedDateStr);
+                 if (blocked) {
+                    let message = 'Studio tidak tersedia pada tanggal ini.';
+                    if (blocked.reason === 'holiday') {
+                        message = 'Hari ini libur, studio tidak beroperasi.';
+                    } else if (blocked.reason === 'bookingall') {
+                        message = 'Studio telah disewa seharian pada tanggal ini.';
+                    }
 
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Tanggal Tidak Tersedia',
+                        text: message
+                    });
+                    return;
+                }
                 if (closedDays.includes(dayName)) {
                     Swal.fire({ icon: 'warning', title: 'Studio Tutup', text: `Hari ${dayName} kami tutup, silakan pilih hari lain.` });
                     return;
@@ -1145,6 +1182,7 @@
         loadPackages();
         loadClosedDays();
         loadTodayCloseTime();
+        loadBlockedDates();
     });
 
 </script>
