@@ -223,7 +223,7 @@
         .package-summary { flex: 1; max-width: 350px; }
         .package-summary h2 { font-size: 2rem; margin-top: 0; }
         .package-summary ul { list-style-type: none; padding-left: 0; }
-        .package-summary ul li { display: flex; align-items: center; margin-bottom: 1rem; font-weight: 500; }
+        .package-summary ul li { display: flex; align-items: start; margin-bottom: 1rem; font-weight: 500; }
         .package-summary ul .icon { width: 18px; height: 18px; aspect-ratio: 1/1; border-radius: 50%; background-color: var(--primary-blue); margin-right: 1rem; }
         .character-art-desktop { margin-top: 2rem; width: 347px; height: 330.13px; flex-shrink: 0; position: relative; }
         .character-art-desktop svg { position: absolute; }
@@ -485,7 +485,7 @@
                     </div>
                     <div class="time-slots-container">
                         <div class="time-slots-header">
-                            <h3 id="time-slots-date-header">Pilih Tanggal Dulu</h3>
+                            <h3 id="time-slots-date-header">Pilih Waktu Dulu</h3>
                         </div>
                         <div class="time-slots-grid" id="time-slots-grid">
                             <p style="grid-column: 1 / -1; text-align: center; color: #888;">Jadwal akan muncul di sini setelah kamu memilih tanggal.</p>
