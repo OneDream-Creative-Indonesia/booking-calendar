@@ -13,7 +13,8 @@ class Package extends Model
         'description',
         'duration_minutes',
         'price',
-        'extras',
+        'extras_people',
+        'downpayment',
     ];
     public function backgrounds()
     {

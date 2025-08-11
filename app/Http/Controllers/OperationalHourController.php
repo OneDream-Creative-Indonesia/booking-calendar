@@ -21,7 +21,7 @@ class OperationalHourController extends Controller
         ]);
     }
     public function blockedTimes(){
-        return BlockedDate::all(['date', 'reason']);
+        return BlockedDate::all(['date', 'start_time', 'end_time', 'package_ids']);
     }
     public function closedDays()
     {

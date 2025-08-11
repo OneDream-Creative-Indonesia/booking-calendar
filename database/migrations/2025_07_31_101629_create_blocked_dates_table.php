@@ -14,8 +14,12 @@ return new class extends Migration
         Schema::create('blocked_dates', function (Blueprint $table) {
             $table->id();
             $table->date('date')->unique();
-            $table->string('reason')->nullable();
+             $table->time('start_time');
+            $table->time('end_time');
+            $table->json('package_ids');
             $table->timestamps();
+
+            $table->unique(['date', 'start_time', 'end_time'], 'blocked_date_time_unique');
         });
 
     }

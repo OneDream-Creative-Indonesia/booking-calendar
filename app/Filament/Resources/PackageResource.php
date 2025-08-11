@@ -38,9 +38,16 @@ class PackageResource extends Resource
                 ->label('Harga (Rp)')
                 ->required()
                 ->numeric(),
-            TextInput::make('extras')
-                ->label('Bonus Tambahan')
-                ->placeholder('Contoh: Cetak 4R, Album'),
+            TextInput::make('downpayment')
+                ->label('DP (Rp)')
+                ->required()
+                ->numeric(),
+
+            TextInput::make('extras_people')
+                ->label('Harga per Orang Tambahan (Rp)')
+                ->numeric()
+                ->placeholder('Masukkan harga per orang jika lebih dari kuota'),
+
             Select::make('backgrounds')
                 ->label('Pilih Background')
                 ->multiple()
@@ -58,6 +65,12 @@ class PackageResource extends Resource
         return $table->columns([
             Tables\Columns\TextColumn::make('title')->searchable()->label('Nama Paket'),
             Tables\Columns\TextColumn::make('price')  ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.'))->label('Harga'),
+             Tables\Columns\TextColumn::make('downpayment')
+                ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.'))
+                ->label('DP'),
+            Tables\Columns\TextColumn::make('extras_people')
+                ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.'))
+                ->label('Harga per Orang Tambahan'),
             Tables\Columns\TextColumn::make('duration_minutes')->label('Durasi (menit)'),
         ]) ->filters([
             //

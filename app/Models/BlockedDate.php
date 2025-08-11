@@ -8,5 +8,15 @@ use Illuminate\Database\Eloquent\Model;
 class BlockedDate extends Model
 {
     use HasFactory;
-    protected $fillable = ['date', 'reason'];
+
+    protected $fillable = [
+        'date',
+        'start_time',
+        'end_time',
+        'package_ids',
+    ];
+
+    protected $casts = [
+        'package_ids' => 'array',
+    ];
 }

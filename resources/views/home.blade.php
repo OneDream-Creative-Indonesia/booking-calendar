@@ -545,7 +545,7 @@
 
                 <!-- Jumlah Orang -->
                 <div class="form-group">
-                    <label for="jumlah-orang">Jumlah Orang (Tambah 15 rb/org jika lebih dari 1)<span class="red-star">*</span></label>
+                    <label for="jumlah-orang"><span class="red-star">*</span></label>
                     <div class="input-wrapper">
                         <img src="https://api.iconify.design/solar:users-group-rounded-bold-duotone.svg" class="input-icon" alt="group icon">
                         <select id="jumlah-orang">
@@ -682,22 +682,16 @@
             }, 0);
         }
         if (pageId === 'page-form') {
-            let dp = 0;
-            if (data.package_id === 1) {
-                dp = 15000;
-            } else if (data.package_id === 2 || data.package_id === 3) {
-                dp = 30000;
-            }
+            let dp = data.downPayment ?? 0;;
+            let extraPerPersonShort = (data.extras_people / 1000).toLocaleString('id-ID') + " rb";
+
+            document.querySelector('label[for="jumlah-orang"]').innerHTML =
+            `Jumlah Orang (Tambah ${extraPerPersonShort}/org jika lebih dari 1)<span class="red-star">*</span>`;
             document.getElementById('dp-price').textContent = `Rp ${dp.toLocaleString()}`;
             document.getElementById('confirmedDp').textContent = `DP sebesar Rp ${dp.toLocaleString()} hangus`;
         }
         if (pageId === 'page-sukses') {
-            let dp = 0;
-            if (data.package_id === 1) {
-                dp = 15000;
-            } else if (data.package_id === 2 || data.package_id === 3) {
-                dp = 30000;
-            }
+            let dp = data.downPayment ?? 0;
             document.getElementById('totalPriceQRIS').textContent = `Total harga sementara: Rp ${data.price.toLocaleString()}`;
             document.getElementById('dpPriceQRIS').textContent = `Total DP: Rp ${dp.toLocaleString()}`;
         }
@@ -771,11 +765,7 @@
         }
 
         let finalPrice = Number(bookingData.price);
-        let extraPerPerson = 0;
-        switch (bookingData.package_id) {
-            case 1: extraPerPerson = 15000; break;
-            case 2: extraPerPerson = 20000; break;
-        }
+        let extraPerPerson = Number(bookingData.extras_people) || 0;
         if (peopleCount > 1) {
             finalPrice += (peopleCount - 1) * extraPerPerson;
         }
@@ -803,11 +793,13 @@
     // --- BOOKING FLOW ---
 
     // Fungsi pilih paket
-    async function selectPackage(packageName, packageId, packagePrice,packageDescription) {
+    async function selectPackage(packageName, packageId, packagePrice,packageDescription, packageDownPayment, packageExtrasPeople) {
         bookingData.package = packageName;
         bookingData.packageDescription = packageDescription;
         bookingData.package_id = packageId;
         bookingData.price = packagePrice;
+        bookingData.downPayment = packageDownPayment;
+        bookingData.extras_people = packageExtrasPeople;
         document.getElementById('summary-title').textContent = packageName;
         const ul = document.getElementById('package-detail-list');
         ul.innerHTML = '';
@@ -857,7 +849,7 @@
             try {
                 const res = await fetch('/blocked-dates');
                 const data = await res.json();
-                blockedDates = data || []; // Pastikan selalu array
+                blockedDates = Array.isArray(data) ? data : [];
             } catch (err) {
                 console.error('Gagal load blocked dates:', err);
             }
@@ -879,23 +871,9 @@
     }
 
     // Update tampilan slot waktu berdasarkan tanggal yang dipilih
-    async function updateSlotsForDate(date) {
+    async function updateSlotsForDate(date, selectedPackageId) {
         const dateStr = date.toISOString().split('T')[0];
         timeSlotsGrid.innerHTML = '';
-        const blocked = blockedDates.find(b => b.date === dateStr);
-            if (blocked) {
-                const reasonMsg = blocked.reason === 'holiday'
-                    ? 'Studio libur pada tanggal ini.'
-                    : 'Studio telah disewa seharian.';
-
-                timeSlotsGrid.innerHTML = `<p style="grid-column: 1 / -1; text-align: center; color: #888;">${reasonMsg}</p>`;
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Tidak Tersedia',
-                    text: reasonMsg
-                });
-                return;
-            }
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
@@ -916,6 +894,10 @@
             Swal.fire({ icon: 'warning', title: 'Perhatian', text: message });
             return;
         }
+        const blockedTimeRanges = blockedDates
+            .filter(b => b.date === dateStr)
+            .filter(b => b.package_ids.includes(String(selectedPackageId)) || b.package_ids.includes(parseInt(selectedPackageId)))
+            .map(b => ({ start: b.start_time, end: b.end_time }));
 
         // Fetch slot dari backend
         try {
@@ -940,11 +922,20 @@
                 const isBooked = bookedTimes.includes(slot + ':00');
                 const isPastTime = isToday && slotTime < now;
 
-                if (isBooked || isPastTime) {
+                // Cek apakah slot ini masuk dalam blockedTimeRanges
+                const isBlocked = blockedTimeRanges.some(range => {
+                    return slot >= range.start.slice(0,5) && slot < range.end.slice(0,5);
+                });
+
+                if (isBooked || isPastTime || isBlocked) {
                     slotEl.classList.add('booked');
                     slotEl.style.opacity = '0.5';
                     slotEl.style.pointerEvents = 'none';
-                    slotEl.title = isBooked ? 'Sudah dibooking' : 'Waktu telah lewat';
+                    slotEl.title = isBlocked
+                        ? 'Waktu diblokir'
+                        : isBooked
+                            ? 'Sudah dibooking'
+                            : 'Waktu telah lewat';
                 } else {
                     slotEl.onclick = () => selectTime(slotEl, slot);
                 }
@@ -1012,7 +1003,7 @@
                 if (pkg.id == 2) div.classList.add('card-pink');
                 if (pkg.id == 3) div.classList.add('card-yellow');
 
-                div.onclick = () => selectPackage(pkg.title, pkg.id, pkg.price, pkg.description);
+                div.onclick = () => selectPackage(pkg.title, pkg.id, pkg.price, pkg.description, pkg.downpayment, pkg.extras_people);
 
                 const icons = [
                     `<!-- Icon jam --> <svg width="20" height="18" viewBox="0 0 20 18" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1092,11 +1083,7 @@
             return;
         }
         let finalPrice = Number(bookingData.price);
-        let extraPerPerson = 0;
-        switch (bookingData.package_id) {
-            case 1: extraPerPerson = 15000; break;
-            case 2: extraPerPerson = 20000; break;
-        }
+        let extraPerPerson = Number(bookingData.extras_people) || 0;
         if (peopleCount > 1) {
             finalPrice += (peopleCount - 1) * extraPerPerson;
         }
@@ -1116,7 +1103,9 @@
             time: bookingData.time,
             price: finalPrice,
             voucher_id: bookingData.voucher_id ?? null,
-            confirmation: agreement ? 1 : 0
+            confirmation: agreement ? 1 : 0,
+            extras_people: bookingData.extras_people,
+            downPayment: bookingData.downPayment,
         };
 
         try {
@@ -1176,24 +1165,7 @@
             headerToolbar: { left: 'prev', center: 'title', right: 'next' },
             dateClick: async function (info) {
                 const clickedDate = info.date;
-                const clickedDateStr = info.dateStr;
                 const dayName = dayMap[clickedDate.getDay()];
-                const blocked = blockedDates.find(b => b.date === clickedDateStr);
-                 if (blocked) {
-                    let message = 'Studio tidak tersedia pada tanggal ini.';
-                    if (blocked.reason === 'holiday') {
-                        message = 'Hari ini libur, studio tidak beroperasi.';
-                    } else if (blocked.reason === 'bookingall') {
-                        message = 'Studio telah disewa seharian pada tanggal ini.';
-                    }
-
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Tanggal Tidak Tersedia',
-                        text: message
-                    });
-                    return;
-                }
                 if (closedDays.includes(dayName)) {
                     Swal.fire({ icon: 'warning', title: 'Studio Tutup', text: `Hari ${dayName} kami tutup, silakan pilih hari lain.` });
                     return;
@@ -1206,7 +1178,7 @@
                 bookingData.time = null;
 
                 await loadBookedTimes(info.dateStr);
-                updateSlotsForDate(new Date(info.dateStr));
+                updateSlotsForDate(new Date(info.dateStr), bookingData.package_id);
             },
 
             dayCellDidMount: function (info) {

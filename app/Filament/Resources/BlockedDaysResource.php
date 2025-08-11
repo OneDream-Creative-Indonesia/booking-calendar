@@ -2,21 +2,23 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\BlockedDaysResource\Pages;
-use App\Filament\Resources\BlockedDaysResource\RelationManagers;
-use App\Models\BlockedDate;
+use Carbon\Carbon;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
 use Filament\Tables;
+use App\Models\Package;
+use Filament\Forms\Form;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Models\BlockedDate;
+use Filament\Resources\Resource;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Section;
 use Filament\Tables\Columns\TextColumn;
-use Carbon\Carbon;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\TimePicker;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Resources\BlockedDaysResource\Pages;
+use App\Filament\Resources\BlockedDaysResource\RelationManagers;
 
 
 class BlockedDaysResource extends Resource
@@ -38,13 +40,21 @@ class BlockedDaysResource extends Resource
                         ->label('Tanggal')
                         ->required(),
 
-                    Select::make('reason')
-                        ->label('Alasan')
+                    TimePicker::make('start_time')
+                            ->label('Mulai')
+                            ->seconds(false)
+                            ->required(),
+
+                    TimePicker::make('end_time')
+                            ->label('Selesai')
+                            ->seconds(false)
+                            ->required(),
+                    Select::make('package_ids')
+                        ->label('Paket yang Diblokir')
+                        ->multiple()
+                        ->options(Package::pluck('title', 'id')->toArray())
                         ->required()
-                        ->options([
-                            'holiday' => 'Libur Studio',
-                            'bookingall' => 'Disewa Seharian',
-                        ]),
+                        ->placeholder('Pilih paket'),
                     ]),
             ]);
     }
@@ -53,28 +63,33 @@ class BlockedDaysResource extends Resource
     {
         return $table
             ->columns([
-                 TextColumn::make('date')
-                    ->label('Tanggal')
-                    ->date()
-                    ->sortable()
-                    ->searchable()
-                    ->formatStateUsing(fn ($state) => Carbon::parse($state)->translatedFormat('d F Y')),
+                  TextColumn::make('date')
+                ->label('Tanggal')
+                ->date()
+                ->sortable()
+                ->searchable()
+                ->formatStateUsing(fn ($state) => \Carbon\Carbon::parse($state)->translatedFormat('d F Y')),
 
-                TextColumn::make('reason')
-                    ->label('Alasan')
-                    ->formatStateUsing(fn ($state) => match ($state) {
-                        'holiday' => 'Libur Studio',
-                        'bookingall' => 'Disewa Seharian',
-                        default => $state,
-                    })
-                    ->badge()
-                    ->color(fn ($state) => match ($state) {
-                        'holiday' => 'danger',
-                        'bookingall' => 'warning',
-                        default => 'gray',
-                    })
-                    ->sortable()
-                    ->searchable(),
+            TextColumn::make('start_time')
+                ->label('Mulai')
+                ->formatStateUsing(fn ($state) => \Carbon\Carbon::parse($state)->format('H:i')),
+
+            TextColumn::make('end_time')
+                ->label('Selesai')
+                ->formatStateUsing(fn ($state) => \Carbon\Carbon::parse($state)->format('H:i')),
+            TextColumn::make('package_ids')
+                    ->label('Paket')
+                    ->formatStateUsing(function ($state) {
+                        if (!$state) return '-';
+
+                        if (is_string($state) && str_starts_with($state, '[')) {
+                            $ids = json_decode($state, true) ?: [];
+                        } else {
+                            $ids = (array) $state;
+                        }
+
+                        return \App\Models\Package::whereIn('id', $ids)->pluck('title')->implode(', ');
+                    }),
             ])
             ->filters([
                 //
