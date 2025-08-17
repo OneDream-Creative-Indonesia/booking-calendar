@@ -787,8 +787,12 @@
 
         let finalPrice = Number(bookingData.price);
         let extraPerPerson = Number(bookingData.extras_people) || 0;
-        if (peopleCount > 1) {
-            finalPrice += (peopleCount - 1) * extraPerPerson;
+        let includedPeople = 1;
+        if (Number(bookingData.package_id) === 2) {
+            includedPeople = 2;
+        }
+        if (peopleCount > includedPeople) {
+            finalPrice += (peopleCount - includedPeople) * extraPerPerson;
         }
 
         const percent = parseFloat(matched.discount_percent);
@@ -1105,8 +1109,12 @@
         }
         let finalPrice = Number(bookingData.price);
         let extraPerPerson = Number(bookingData.extras_people) || 0;
-        if (peopleCount > 1) {
-            finalPrice += (peopleCount - 1) * extraPerPerson;
+        let includedPeople = 1;
+        if (Number(bookingData.package_id) === 2) {
+            includedPeople = 2;
+        }
+        if (peopleCount > includedPeople) {
+            finalPrice += (peopleCount - includedPeople) * extraPerPerson;
         }
         if (bookingData.voucher_discount) {
             finalPrice -= bookingData.voucher_discount;
