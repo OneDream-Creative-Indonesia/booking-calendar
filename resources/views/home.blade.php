@@ -665,6 +665,27 @@
 
     // Fungsi untuk navigasi ke halaman tertentu
     function goToPage(pageId, data = null) {
+         if (pageId === 'page-pilih-jadwal') {
+                if (!bookingData.background_id) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Pilih Background',
+                        text: 'Harap pilih background terlebih dahulu sebelum melanjutkan.'
+                    });
+                    return; // jangan lanjut
+                }
+            }
+
+            if (pageId === 'page-form') {
+                if (!bookingData.time) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Pilih Waktu',
+                        text: 'Harap pilih waktu terlebih dahulu sebelum melanjutkan.'
+                    });
+                    return; // jangan lanjut
+                }
+            }
         pages.forEach(page => page.classList.remove('active'));
         const targetPage = document.getElementById(pageId);
         if (targetPage) targetPage.classList.add('active');
