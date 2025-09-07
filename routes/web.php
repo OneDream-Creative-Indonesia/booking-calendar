@@ -9,7 +9,10 @@ use App\Http\Controllers\{
     SocialiteController,
     GoogleCalendarController,
     OperationalHourController,
-    BookingExportController
+    BookingExportController,
+    PhotoGridController,
+    KeychainController,
+    PhotoOrderController,
 };
 use Illuminate\Support\Facades\Artisan;
 
@@ -18,7 +21,13 @@ use Illuminate\Support\Facades\Artisan;
 // =====================================================
 Route::redirect('/', '/booking', 301);
 Route::get('/booking', [BookingController::class, 'home']); // Custom frontend booking view
+Route::get('/qrcode', function() {
+     return view('qrcode');
+    });
 
+route::get('/photo-grids', [PhotoGridController::class, 'index']);
+route::get('/keychains', [KeychainController::class, 'index']);
+route::post('/photo-orders', [PhotoOrderController::class, 'store']);
 // Paket & Booking
 Route::get('/packages', [PackageController::class, 'index']);
 Route::post('/api/submit-booking', [BookingController::class, 'submitBooking']);
