@@ -13,7 +13,7 @@
 
             <div class="photo-title">Ketik Nomor Foto</div>
                 <div class="photo-grid16 capture-wrapper" id="photo-grid-capture">
-                    <input type="text" class="photo-grid-input keychain-slot-1" placeholder="" />
+                    <input type="text" class="photo-grid-input keychain-slot-love keychain-slot-1" placeholder="" />
                 </div>
               <div class="user-input">
                 <label for="username">Masukkan Nama Kamu:</label>

@@ -793,6 +793,9 @@ body {
 .photo-grid6 { background-image: url('img/grid/photo/grid(6).png'); }
 
 /* Input field styles for all grids */
+.keychain-slot-love{
+    top: 150px;
+}
 .photo-grid-input-stikers, .photo-grid-input, .photo-grid-input-kecil,
 .keychain-slot-1, .photo-grid-1, .photo-grid-2, .photo-grid-3,
 .photo-grid-4, .photo-grid-6 {
