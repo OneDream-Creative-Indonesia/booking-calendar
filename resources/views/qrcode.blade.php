@@ -27,7 +27,8 @@
     left: 0;
     width: 100%;
     height: 100vh;
-    display: none; /* sembunyikan default */
+    display: none;
+    overflow-y:auto;
 }
 
 .page.active {
@@ -796,6 +797,9 @@ body {
 .keychain-slot-love{
     top: 150px;
 }
+.keychain-slot-persegiPanjang{
+    top: 200px;
+}
 .photo-grid-input-stikers, .photo-grid-input, .photo-grid-input-kecil,
 .keychain-slot-1, .photo-grid-1, .photo-grid-2, .photo-grid-3,
 .photo-grid-4, .photo-grid-6 {
@@ -1019,6 +1023,46 @@ body {
     font-size: 16px;
     top: 680px;
 }
+.confirm-button17 {
+    position: absolute;
+    width: calc(100% - 55px);
+    max-width: 320px;
+    height: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 20px;
+    background: #CE004F;
+    border-radius: 25px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-family: 'Montserrat';
+    font-weight: 700;
+    font-size: 16px;
+}
+.confirm-button9 {
+    position: absolute;
+    width: calc(100% - 55px);
+    max-width: 320px;
+    height: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 30px;
+    background: #CE004F;
+    border-radius: 25px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-family: 'Montserrat';
+    font-weight: 700;
+    font-size: 16px;
+}
 
 .confirm-button2 {
     position: absolute;
@@ -1069,7 +1113,7 @@ body {
     height: 50px;
     left: 50%;
     transform: translateX(-50%);
-    top: 550px;
+    top: 460px;
     background: #CE004F;
     border-radius: 25px;
     border: none;
@@ -1082,7 +1126,46 @@ body {
     font-weight: 700;
     font-size: 16px;
 }
-
+.confirm-button14 {
+    position: absolute;
+    width: calc(100% - 55px);
+    max-width: 320px;
+    height: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 30px;
+    background: #CE004F;
+    border-radius: 25px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-family: 'Montserrat';
+    font-weight: 700;
+    font-size: 16px;
+}
+.confirm-button16 {
+    position: absolute;
+    width: calc(100% - 55px);
+    max-width: 320px;
+    height: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 30px;
+    background: #CE004F;
+    border-radius: 25px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-family: 'Montserrat';
+    font-weight: 700;
+    font-size: 16px;
+}
 /* PAGE 4 - Konfirmasi - Responsive */
 .success-icon {
     position: absolute;

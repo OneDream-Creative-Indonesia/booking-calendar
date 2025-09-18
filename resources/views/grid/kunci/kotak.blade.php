@@ -19,12 +19,6 @@
                 <label for="username">Masukkan Nama Kamu:</label>
                 <input type="text" id="username" placeholder="Contoh: Dedik" />
             </div>
-            <div class="frame-title15">Pilih Warna Frame</div>
-            <div class="frame-colors15">
-                <div class="color-option color-white" onclick="selectColor(this)"></div>
-                <div class="color-option color-black selected" onclick="selectColor(this)"></div>
-                <div class="color-option color-blue" onclick="selectColor(this)"></div>
-            </div>
 
             <button class="confirm-button15" onclick="confirmSelection()">Konfirmasi</button>
             <div class="footer">Snap Fun Studio by One Dream Creative</div>

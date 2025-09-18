@@ -13,19 +13,12 @@
 
             <div class="photo-title">Ketik Nomor Foto</div>
                 <div class="photo-grid17 capture-wrapper" id="photo-grid-capture">
-                    <input type="text" class="photo-grid-input keychain-slot-1" placeholder="" />
+                    <input type="text" class="photo-grid-input keychain-slot-1 keychain-slot-persegiPanjang" placeholder="" />
                 </div>
               <div class="user-input">
                 <label for="username">Masukkan Nama Kamu:</label>
                 <input type="text" id="username" placeholder="Contoh: Dedik" />
             </div>
-            <div class="frame-title">Pilih Warna Frame</div>
-            <div class="frame-colors">
-                <div class="color-option color-white" onclick="selectColor(this)"></div>
-                <div class="color-option color-black selected" onclick="selectColor(this)"></div>
-                <div class="color-option color-blue" onclick="selectColor(this)"></div>
-            </div>
-
-            <button class="confirm-button" onclick="confirmSelection()">Konfirmasi</button>
+            <button class="confirm-button17" onclick="confirmSelection()">Konfirmasi</button>
             <div class="footer">Snap Fun Studio by One Dream Creative</div>
         </div>
