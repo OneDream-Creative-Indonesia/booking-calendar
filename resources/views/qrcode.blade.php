@@ -1030,7 +1030,7 @@ body {
     height: 50px;
     left: 50%;
     transform: translateX(-50%);
-    bottom: 20px;
+    top: 600px;
     background: #CE004F;
     border-radius: 25px;
     border: none;
@@ -1050,7 +1050,7 @@ body {
     height: 50px;
     left: 50%;
     transform: translateX(-50%);
-    bottom: 30px;
+    top: 600px;
     background: #CE004F;
     border-radius: 25px;
     border: none;
@@ -1133,7 +1133,7 @@ body {
     height: 50px;
     left: 50%;
     transform: translateX(-50%);
-    bottom: 30px;
+    top: 600px;
     background: #CE004F;
     border-radius: 25px;
     border: none;
@@ -1153,7 +1153,7 @@ body {
     height: 50px;
     left: 50%;
     transform: translateX(-50%);
-    bottom: 30px;
+    top: 600px;
     background: #CE004F;
     border-radius: 25px;
     border: none;
