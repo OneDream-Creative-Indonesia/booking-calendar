@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('type');
-            $table->string('warna');
+            $table->string('warna')->nullable();
             $table->longText('layout_image');
             $table->string('status')->default('pending');
             $table->timestamps();

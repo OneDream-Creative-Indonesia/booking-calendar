@@ -1616,7 +1616,6 @@ body {
    async function confirmSelection() {
         const name = getUserName();
         const captureElement = document.querySelector(`#page${currentPage} .capture-wrapper`);
-        console.log('Nama:', name);
         if (!name) {
             alert("Masukkan nama dulu sebelum konfirmasi!");
             return;
@@ -1625,7 +1624,9 @@ body {
             alert("Pilih tipe dulu sebelum konfirmasi!");
             return;
         }
-
+         if (selectedType === "stiker" || selectedType === "gantungan_kunci") {
+            color = null;
+        }
         try {
             const canvas = await html2canvas(captureElement, {
                 allowTaint: true,
@@ -1633,8 +1634,6 @@ body {
             });
 
             const layoutImage = canvas.toDataURL("image/png");
-            console.log('layoutImage:', layoutImage);
-            console.log('selectedType:', selectedType);
 
             const response = await fetch('/photo-orders', {
                 method: 'POST',

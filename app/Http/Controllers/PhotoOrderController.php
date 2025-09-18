@@ -13,7 +13,7 @@ class PhotoOrderController extends Controller
             'name' => 'required|string|max:255',
             'type' => 'required|string|max:255',
             'layout_image' => 'required|string',  // base64 image
-            'warna' => 'required|string',
+            'warna' => 'nullable|string',
         ]);
 
         // Cek jika validasi gagal
