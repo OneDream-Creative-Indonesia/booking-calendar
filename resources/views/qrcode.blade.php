@@ -575,7 +575,7 @@ body {
 .grid-item-bg {
     position: absolute;
     width: 100%;
-    height: 90px;
+    height: 110px;
     background: #FFFFFF;
     border: 1px solid rgba(23, 89, 202, 0.3);
     box-shadow: 0px 2px 8px rgba(23, 89, 202, 0.1);
