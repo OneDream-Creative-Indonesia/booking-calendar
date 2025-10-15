@@ -39,13 +39,13 @@
                 <div class="layout-card-yellow"></div>
             </div>
             <div class="layout-card card-2" onclick="setTypeAndGo('stiker', 9)">
-                <div class="layout-card-yellow"></div>
+                <div class="layout-card-yellow2"></div>
             </div>
             <div class="layout-card card-3" onclick="setTypeAndGo('photostrip_kicik', 8)">
-                <div class="layout-card-yellow"></div>
+                <div class="layout-card-yellow3"></div>
             </div>
             <div class="layout-card card-4" onclick="setTypeAndGo('photostrip_gede', 7)">
-                <div class="layout-card-yellow"></div>
+                <div class="layout-card-yellow4"></div>
             </div>
 
             <!-- Labels -->

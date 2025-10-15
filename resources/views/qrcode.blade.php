@@ -300,7 +300,7 @@ body {
 .nav-header-bg {
     position: absolute;
     width: calc(100% - 50px);
-    max-width: 325px;
+    max-width: 370px;
     height: 88px;
     left: 50%;
     transform: translateX(-50%);
@@ -315,7 +315,8 @@ body {
     height: 40px;
     left: 47px;
     top: 174px;
-    background: #1759CA;
+    background-image: url('/img/group(5).png');
+    background-size: cover;
     border-radius: 10px;
     cursor: pointer;
     display: flex;
@@ -359,12 +360,39 @@ body {
     cursor: pointer;
     overflow: hidden;
 }
-
 .layout-card-yellow {
     position: absolute;
     width: 100%;
     height: 101px;
-    background: #FEDD03;
+    background-image: url('/img/group(1).png');
+    background-size: cover;
+    border-radius: 10px 10px 0px 0px;
+    top: 0;
+}
+.layout-card-yellow2 {
+    position: absolute;
+    width: 100%;
+    height: 101px;
+    background-image: url('/img/group(2).png');
+    background-size: cover;
+    border-radius: 10px 10px 0px 0px;
+    top: 0;
+}
+.layout-card-yellow3 {
+    position: absolute;
+    width: 100%;
+    height: 101px;
+    background-image: url('/img/group(3).png');
+    background-size: cover;
+    border-radius: 10px 10px 0px 0px;
+    top: 0;
+}
+.layout-card-yellow4 {
+    position: absolute;
+    width: 100%;
+    height: 101px;
+    background-image: url('/img/group(4).png');
+    background-size: cover;
     border-radius: 10px 10px 0px 0px;
     top: 0;
 }
@@ -1599,7 +1627,10 @@ body {
                     <div class="grid-arrow"></div>
                 `;
 
-                gridItem.style.top = `${135 + (index * 100)}px`;
+                gridItem.style.position = 'absolute';
+                gridItem.style.left = '50%';
+                gridItem.style.transform = 'translateX(-50%)';
+                gridItem.style.top = `${150 + (index * 120)}px`;
 
                 container.appendChild(gridItem);
             });
