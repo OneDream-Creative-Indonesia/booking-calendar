@@ -82,20 +82,18 @@ class BookingController extends Controller
                 return response()->json(['message' => 'Voucher sudah mencapai batas pemakaian.'], 400);
             }
 
-               $package = \App\Models\Package::find($request->package_id);
+                $package = \App\Models\Package::find($request->package_id);
                 $basePrice = $package->price;
-
+                $extraPricePerPerson = (int) $package->extras_people;
                 // Harga tambahan per orang
-                $extraPricePerPerson = match ($package->id) {
-                    1 => 15000,
-                    2 => 20000,
-                    default => 0
+                $includedPeople = match ($package->id) {
+                    2 => 2, // package 2 include 2 orang
+                    default => 1 // package 1 & 3 include 1 orang
                 };
-
                 // Hitung total base price berdasarkan jumlah orang
                 $totalPrice = $basePrice;
                 if ($request->people_count > 1) {
-                    $totalPrice += ($request->people_count - 1) * $extraPricePerPerson;
+                    $totalPrice += ($request->people_count - $includedPeople) * $extraPricePerPerson;
                 }
 
                 // Hitung diskon
