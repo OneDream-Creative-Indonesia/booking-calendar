@@ -32,66 +32,51 @@
                 Forms\Components\TextInput::make('name')
                     ->label('Name')
                     ->required()
-                    ->maxLength(255)
-                    ->disabled(!auth()->user()->hasRole('admin')),
+                    ->maxLength(255),
 
                 Forms\Components\TextInput::make('whatsapp')
                     ->label('WhatsApp')
                     ->required()
-                    ->maxLength(15)
-                    ->disabled(!auth()->user()->hasRole('admin')),
+                    ->maxLength(15),
 
                 Forms\Components\TextInput::make('people_count')
                     ->label('Jumlah Orang')
                     ->numeric()
-                    ->required()
-                    ->disabled(!auth()->user()->hasRole('admin')),
+                    ->required(),
 
                 Forms\Components\DatePicker::make('date')
                     ->label('Tanggal')
-                    ->required()
-                    ->disabled(!auth()->user()->hasRole('admin')),
+                    ->required(),
 
                 Forms\Components\TimePicker::make('time')
                     ->label('Waktu')
-                    ->required()
-                    ->disabled(!auth()->user()->hasRole('admin')),
+                    ->required(),
 
                 Forms\Components\Select::make('package_id')
                     ->label('Paket')
                     ->relationship('package', 'title')
                     ->searchable()
-                    ->required()
-                    ->disabled(!auth()->user()->hasRole('admin')),
+                    ->required(),
 
                 Forms\Components\Select::make('voucher_id')
                     ->label('Code Voucher')
                     ->relationship('voucher', 'code_voucher')
-                    ->searchable()
-                    ->disabled(!auth()->user()->hasRole('admin')),
+                    ->searchable(),
 
                 Forms\Components\Select::make('background_id')
                     ->label('Nama Background')
                     ->relationship('background', 'name')
-                    ->searchable()
-                    ->disabled(!auth()->user()->hasRole('admin')),
+                    ->searchable(),
 
                 Forms\Components\TextInput::make('email')
                     ->label('Email')
                     ->email()
-                    ->required()
-                    ->disabled(!auth()->user()->hasRole('admin')),
+                    ->required(),
 
                 Forms\Components\TextInput::make('price')
-                    ->label('Total Harga')
+                    ->label('Total Harga Booking')
                     ->numeric()
-                    ->prefix('Rp')
-                    ->disabled(!auth()->user()->hasRole('admin')),
-
-                Forms\Components\Toggle::make('confirmation')
-                    ->label('Confirmed')
-                    ->disabled(!auth()->user()->hasRole('admin')),
-
+                    ->prefix('Rp'),
                 Forms\Components\Select::make('status')
                     ->label('Status')
                     ->options([
@@ -100,7 +85,19 @@
                         'canceled' => 'Canceled',
                     ])
                     ->required(),
-                    ]);
+                     Forms\Components\TextInput::make('price_notes')
+                    ->label('Catatan Tambahan Harga')
+                    ->placeholder('Contoh: Rp 50.000')
+                    ->numeric()
+                    ->prefix('Rp'),
+                Forms\Components\Textarea::make('keychain_notes')
+                    ->label('Catatan Keychain')
+                    ->placeholder('Contoh: Tambah 2 keychain')
+                    ->rows(3),
+                Forms\Components\Toggle::make('confirmation')
+                    ->label('Confirmed'),
+            ])
+            ->columns(2);
         }
 
         public static function table(Table $table): Table
@@ -117,8 +114,10 @@
                     TextColumn::make('package.title')->label('Package')->sortable()->searchable(),
                     TextColumn::make('email')->sortable()->searchable()->label('Email'),
                     TextColumn::make('status')->sortable()->searchable()->label('Status'),
-                    TextColumn::make('price')->sortable()->searchable()->label('Total Harga')->getStateUsing(fn ($record) => 'Rp' . number_format($record->price, 0, ',', '.')),
-                ])
+                    TextColumn::make('keychain_notes')->sortable()->searchable()->label('Tambahan Keychain'),
+                    TextColumn::make('price_notes')->sortable()->searchable()->label('Tambahan Harga')->getStateUsing(fn ($record) => 'Rp' . number_format($record->price_notes, 0, ',', '.')),
+                    TextColumn::make('price')->sortable()->searchable()->label('Total Harga')->getStateUsing(fn ($record) => 'Rp' . number_format($record->price + $record->price_notes, 0, ',', '.')),
+                    ])
                 ->filters([
                             // SelectFilter::make('package_id')
                             //     ->label('Paket')

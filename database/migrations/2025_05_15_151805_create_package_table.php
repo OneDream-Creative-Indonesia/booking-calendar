@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->integer('duration_minutes');
             $table->integer('price');
             $table->string('extras_people')->nullable();
-            $table->integer('downpayment')->after('price');
+            $table->integer('downpayment');
             $table->timestamps();
         });
     }

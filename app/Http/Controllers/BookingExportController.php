@@ -14,13 +14,15 @@ class BookingExportController extends Controller
         // Header
         $csv->insertOne([
             'Nama', 'WhatsApp', 'Jumlah Orang', 'Tanggal', 'Waktu',
-            'Paket', 'Kode Voucher', 'Background', 'Email', 'Status', 'Total Harga'
+            'Paket', 'Kode Voucher', 'Background', 'Email', 'Status','Total Harga Booking',
+            'Tambahan Keychain' ,'Tambahan Harga','Total Harga'
         ]);
 
         // Data
         $bookings = Booking::with(['package', 'voucher', 'background'])->get();
 
         foreach ($bookings as $booking) {
+            $totalPrice = $booking->price + $booking->price_notes;
             $csv->insertOne([
                 $booking->name,
                 $booking->whatsapp,
@@ -33,6 +35,9 @@ class BookingExportController extends Controller
                 $booking->email,
                 ucfirst($booking->status),
                 'Rp' . number_format($booking->price, 0, ',', '.'),
+                $booking->keychain_notes ?? '-',
+                'Rp' . number_format($booking->price_notes, 0, ',', '.'),
+                'Rp' . number_format($totalPrice, 0, ',', '.'),
             ]);
         }
 
