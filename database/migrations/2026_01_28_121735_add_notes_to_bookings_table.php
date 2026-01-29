@@ -12,8 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('bookings', function (Blueprint $table) {
-            $table->text('keychain_notes')->nullable()->after('status');
-            $table->decimal('price_notes')->nullable()->after('keychain_notes');
+         
         });
     }
 
