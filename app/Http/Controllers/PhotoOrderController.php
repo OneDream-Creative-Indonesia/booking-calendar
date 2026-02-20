@@ -14,6 +14,7 @@ class PhotoOrderController extends Controller
             'type' => 'required|string|max:255',
             'layout_image' => 'required|string',  // base64 image
             'warna' => 'nullable|string',
+            'frame_id' => 'nullable|exists:frames,id',
         ]);
 
         // Cek jika validasi gagal
@@ -31,6 +32,7 @@ class PhotoOrderController extends Controller
             'type' => $request->type,
             'layout_image' => $request->layout_image,
             'warna' => $request->warna,
+            'frame_id' => $request->frame_id, 
             // status otomatis 'pending'
         ]);
         $image = $request->input('layout_image');

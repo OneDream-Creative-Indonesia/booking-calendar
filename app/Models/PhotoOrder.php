@@ -9,5 +9,9 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 class PhotoOrder extends Model implements HasMedia
 {
     use InteractsWithMedia;
-    protected $fillable = ['name','status', 'type', 'layout_image','warna'];
+    protected $fillable = ['name','status', 'type', 'layout_image','warna','frame_id'];
+    public function frame()
+    {
+        return $this->belongsTo(Frame::class);
+    }
 }

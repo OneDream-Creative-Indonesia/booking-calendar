@@ -1,0 +1,13 @@
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+# ──  Show every PHP error right in the browser  ─────────────
+php_flag  display_startup_errors  On
+php_flag  display_errors          On
+php_value error_reporting         32767   # == E_ALL for newer PHP versions
+
+# (Optional) also log them to a file you can inspect later
+php_flag  log_errors  On
+php_value error_log   /home/u232199593/domains/snapfun.onedream.id/public_html/php-errors.log

@@ -1,5 +1,5 @@
 <!--Ketik Nomor Stiker-->
-        <div class="page page9 slide-right" id="page9">
+        <div class="page page9 slide-right" id="pageSticker">
             <div class="header-rect"></div>
             <div class="content-bg"></div>
             <div class="logo"><svg width="25" height="30" viewBox="0 0 25 30" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -7,7 +7,7 @@
 <path d="M7.31563 8.37942C9.49163 8.37942 11.2556 6.55309 11.2556 4.30019C11.2556 2.04729 9.49163 0.220947 7.31563 0.220947C5.13962 0.220947 3.37563 2.04729 3.37563 4.30019C3.37563 6.55309 5.13962 8.37942 7.31563 8.37942Z" fill="#FEDD03"/>
 <path d="M19.9938 8.59807C19.7342 8.59807 19.4727 8.52712 19.2401 8.37777L15.4966 5.98063C14.898 5.59791 14.5409 4.97063 14.5409 4.30413C14.5409 3.63764 14.8962 3.01035 15.493 2.62763L19.2383 0.22116C19.8748 -0.187697 20.7313 -0.0140718 21.1497 0.613216C21.5662 1.23864 21.3877 2.07875 20.7512 2.48948L17.9291 4.30226L20.7494 6.10758C21.3877 6.51644 21.568 7.35656 21.1515 7.98385C20.8864 8.3815 20.4446 8.59807 19.9938 8.59807Z" fill="#FEDD03"/>
 </svg></div>
-            <div class="back-button" onclick="goBack()">←</div>
+            <div class="back-button" onclick="goBack()"><span>←</span></div>
             <div class="header-text">Pilih Foto</div>
 
             <div class="photo-title">Ketik Nomor Foto</div>

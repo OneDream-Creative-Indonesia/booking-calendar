@@ -556,6 +556,8 @@
                             <option value="4">4 Orang</option>
                             <option value="5">5 Orang</option>
                             <option value="6">6 Orang</option>
+                            <option value="7">7 Orang</option>
+                            <option value="8">8 Orang</option>
                         </select>
                     </div>
                 </div>
@@ -769,6 +771,8 @@
 
         // 🔴 Cek usage limit dulu
         if (matched.usage_limit !== null && matched.used_count >= matched.usage_limit) {
+            console.log(matched.usage_limit);
+            console.log(matched.used_count);
             document.getElementById('voucher-message').textContent = 'Maaf, batas penggunaan voucher sudah terpenuhi.';
             document.getElementById('voucher-message').style.color = 'red';
             bookingData.voucher_id = null;

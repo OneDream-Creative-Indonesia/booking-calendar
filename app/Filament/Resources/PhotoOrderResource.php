@@ -9,12 +9,13 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class PhotoOrderResource extends Resource
 {
     protected static ?string $model = PhotoOrder::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-shopping-bag';
 
     public static function form(Form $form): Form
     {
@@ -29,6 +30,12 @@ class PhotoOrderResource extends Resource
                     ->label('Tipe')
                     ->required()
                     ->maxLength(255),
+                Forms\Components\Select::make('frame_id')
+                    ->label('Frame')
+                    ->relationship('frame', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->nullable(),
 
                 Forms\Components\Select::make('warna')
                     ->label('Warna')
@@ -39,9 +46,20 @@ class PhotoOrderResource extends Resource
                     ])
                     ->required(),
 
-                Forms\Components\SpatieMediaLibraryFileUpload::make('layout')
-                    ->collection('layout')
-                    ->columnSpanFull(),
+                Forms\Components\Placeholder::make('frame_preview')
+                    ->label('Preview Frame')
+                    ->content(function ($record) {
+                        if (!$record || !$record->frame) return '-';
+
+                        $url = $record->frame->getFirstMediaUrl('frames');
+
+                        if (!$url) return '-';
+
+                        return new \Illuminate\Support\HtmlString(
+                            "<img src='{$url}' style='height:200px;' />"
+                        );
+                    })
+                    ->visible(fn ($record) => $record && $record->frame),
 
                 Forms\Components\Select::make('status')
                     ->label('Status')
@@ -52,6 +70,9 @@ class PhotoOrderResource extends Resource
                     ])
                     ->default('pending')
                     ->required(),
+                Forms\Components\SpatieMediaLibraryFileUpload::make('layout')
+                    ->collection('layout')
+                    ->columnSpanFull(),
             ]);
     }
 
@@ -69,6 +90,11 @@ class PhotoOrderResource extends Resource
                 Tables\Columns\TextColumn::make('type')
                     ->label('Tipe')
                     ->sortable(),
+                
+                 Tables\Columns\TextColumn::make('frame.name')
+                    ->label('Frame')
+                    ->badge()
+                    ->color('primary'),
 
                 Tables\Columns\TextColumn::make('warna')
                     ->label('Warna')
@@ -88,6 +114,13 @@ class PhotoOrderResource extends Resource
                     ->collection('layout')
                     ->label('Layout')
                     ->size(200),
+                Tables\Columns\ImageColumn::make('frame_image')
+                    ->label('Frame Image')
+                    ->getStateUsing(function ($record) {
+                        return $record->frame?->getFirstMediaUrl('frames');
+                    })
+                    ->size(200),
+
             ])
             ->filters([])
             ->actions([
@@ -105,7 +138,10 @@ class PhotoOrderResource extends Resource
     {
         return [];
     }
-
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->with('frame');
+    }
     public static function getPages(): array
     {
         return [

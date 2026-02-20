@@ -13,6 +13,8 @@ use App\Http\Controllers\{
     PhotoGridController,
     KeychainController,
     PhotoOrderController,
+    FrameController,
+    TickettingReport,
 };
 use Illuminate\Support\Facades\Artisan;
 
@@ -70,3 +72,8 @@ Route::post('/logout', function () {
     Auth::logout();
     return redirect('/');
 })->name('logout');
+
+//Frame
+Route::get('/api/frames', [FrameController::class, 'index']);
+//ticketing
+Route::get('/ticketing/export', [TickettingReport::class, 'exportCsv'])->name('ticketings_reports.export');

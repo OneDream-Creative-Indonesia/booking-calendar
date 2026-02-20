@@ -1,5 +1,5 @@
  <!-- PAGE 1: Pilih Layout Foto -->
-        <div class="page page1 active" id="page1">
+        <div class="page page1 active" id="pageHome">
             <div class="header-rect"></div>
             <div class="content-bg"></div>
             <div class="logo"><svg width="63" height="40" viewBox="0 0 63 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -29,39 +29,39 @@
 
             <div class="nav-header-bg"></div>
             <div class="nav-back-btn" onclick="goBack()"></div>
-            <div class="nav-title" onclick="setTypeAndGo('layout_photo', 2)">
+            <div class="nav-title" onclick="setTypeAndGo('layout_photo', 'pageSelectGrid')">
                 Pilih Layout Foto
                 <span class="nav-arrow">›</span>
             </div>
 
             <!-- Layout Cards -->
-            <div class="layout-card card-1" onclick="setTypeAndGo('gantungan_kunci', 5)">
+            <div class="layout-card card-1" onclick="setTypeAndGo('gantungan_kunci', 'pageKeychain')">
                 <div class="layout-card-yellow"></div>
             </div>
-            <div class="layout-card card-2" onclick="setTypeAndGo('stiker', 9)">
+            <div class="layout-card card-2" onclick="setTypeAndGo('stiker', 'pageSticker')">
                 <div class="layout-card-yellow2"></div>
             </div>
-            <div class="layout-card card-3" onclick="setTypeAndGo('photostrip_kicik', 8)">
+            <div class="layout-card card-3" onclick="setTypeAndGo('photostrip_kicik', 'pageKecil')">
                 <div class="layout-card-yellow3"></div>
             </div>
-            <div class="layout-card card-4" onclick="setTypeAndGo('photostrip_gede', 7)">
+            <div class="layout-card card-4" onclick="setTypeAndGo('photostrip_gede', 'pageGede')">
                 <div class="layout-card-yellow4"></div>
             </div>
 
             <!-- Labels -->
-            <div class="card-label label-1" onclick="setTypeAndGo('gantungan_kunci', 5)">
+            <div class="card-label label-1" onclick="setTypeAndGo('gantungan_kunci', 'pageKeychain')">
                 <div>Tambah<br>Gantungan Kunci</div>
                 <span class="card-arrow">›</span>
             </div>
-            <div class="card-label label-2" onclick="setTypeAndGo('stiker', 9)">
+            <div class="card-label label-2" onclick="setTypeAndGo('stiker', 'pageSticker')">
                 <div>Tambah<br>Stiker</div>
                 <span class="card-arrow">›</span>
             </div>
-            <div class="card-label label-3" onclick="setTypeAndGo('photostrip_kicik', 8)">
+            <div class="card-label label-3" onclick="setTypeAndGo('photostrip_kicik', 'pageKecil')">
                 <div>Cetak<br>Photostrip Kicik</div>
                 <span class="card-arrow">›</span>
             </div>
-            <div class="card-label label-4" onclick="setTypeAndGo('photostrip_gede', 7)">
+            <div class="card-label label-4" onclick="setTypeAndGo('photostrip_gede', 'pageGede')">
                 <div>Cetak<br>Photostrip GEDE</div>
                 <span class="card-arrow">›</span>
             </div>

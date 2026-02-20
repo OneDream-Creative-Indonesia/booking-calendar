@@ -105,6 +105,19 @@ body {
     font-size: 8px;
 }
 
+.logoGrid, .logoFrame {
+    position: absolute;
+    right: calc(50% - 24.75px/2 - 133px);
+    top: 39px;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1759CA;
+    font-weight: 800;
+    font-size: 8px;
+}
+
 .footer {
     position: absolute;
     height: 11px;
@@ -119,22 +132,32 @@ body {
     color: #282828;
     top: 760px;
 }
-
 .back-button {
     position: absolute;
     width: 40px;
     height: 40px;
     left: 25px;
     top: 35px;
+
+    display: flex;              /* WAJIB */
+    align-items: center;        /* center vertical */
+    justify-content: center;    /* center horizontal */
+
     cursor: pointer;
     color: white;
     font-size: 20px;
-    display: none;
-    align-items: center;
-    justify-content: center;
+    line-height: 1;             /* biar nggak naik turun */
+    padding: 0;
+
     background: rgba(255,255,255,0.2);
     border-radius: 10px;
+    z-index: 20;
 }
+
+.back-button span {
+    transform: translateY(-1px);
+}
+
 
 /* User Input Styling - Responsive positioning */
 .user-input {
@@ -296,7 +319,30 @@ body {
     text-align: right;
     color: #FFFFFF;
 }
-
+#pagePilihFrame .header-text {
+     position: absolute;
+    height: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 44px;
+    font-family: 'Montserrat';
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 99%;
+    color: #FFFFFF;
+}
+#pagePhotoGrid .header-text {
+     position: absolute;
+    height: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 44px;
+    font-family: 'Montserrat';
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 99%;
+    color: #FFFFFF;
+}
 .nav-header-bg {
     position: absolute;
     width: calc(100% - 50px);
@@ -561,16 +607,16 @@ body {
 .keychain-3 { top: 335px; }
 .keychain-4 { top: 435px; }
 .keychain-5 { top: 535px; }
-
 .grid-item {
-    position: absolute;
+    position: relative; /* ganti absolute */
     width: calc(100% - 48px);
     max-width: 327px;
-    height: 90px;
-    left: 50%;
-    transform: translateX(-50%);
+    height: 20px;
+    margin: 0 auto; /* center */
     cursor: pointer;
+    display: flex;
 }
+
 
 .grid-item-bg {
     position: absolute;
@@ -788,7 +834,7 @@ body {
     max-width: 300px;
     height: 350px;
     transform: translateX(-50%);
-    top: 170px;
+    top: 150px;
     background-size: 65%;
     background-position: center;
     background-repeat: no-repeat;
@@ -905,6 +951,63 @@ body {
 .slot-4 { right: 90px; }
 .slot-5 { top: 270px; left: 90px; }
 .slot-6 { top: 270px; right: 90px; }
+#pagePilihFrame .frame-content {
+    position: absolute;
+    top: 131px;
+    bottom: 0;
+    width: 100%;
+    overflow-y: auto;
+}
+
+#frames-grid-container {
+    padding: 30px 20px 140px 20px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.lanjut-button {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 55px);
+    max-width: 320px;
+    height: 50px;
+    background: #CE004F;
+    border-radius: 25px;
+    border: none;
+    color: white;
+    font-weight: 700;
+}
+.frame-card {
+    background: white;
+    border-radius: 15px;
+    padding: 10px;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.frame-card.selected {
+    border: 3px solid #FEDD03;
+}
+
+.frame-dummy {
+    width: 100%;
+    height: 180px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: white;
+}
+
+.frame-dummy.blue { background: #1759CA; }
+.frame-dummy.black { background: #000; }
+.frame-dummy.yellow { background: #FEDD03; color: black; }
+.frame-dummy.pink { background: #CE004F; }
+
 
 /* Frame Title and Colors - Responsive */
 .frame-title {
@@ -1304,7 +1407,7 @@ body {
     .photo-grid17{
         max-width: 300px;
     }
-    ..photo-grid14{
+    .photo-grid14{
         max-width: 300px;
     }
     .photo-grid15, .photo-grid1,
@@ -1467,13 +1570,10 @@ body {
     <div class="app-container">
         @include('pages.page1')
         @include('pages.page2')
+        @include('pages.page_pilih_frame')
         @include('pages.page4')
         @include('pages.page5')
         @include('grid.photo.grid1')
-        @include('grid.photo.grid2')
-        @include('grid.photo.grid3')
-        @include('grid.photo.grid4')
-        @include('grid.photo.grid6')
         @include('grid.photo.gede')
         @include('grid.photo.kecil')
         @include('grid.kunci.kotak')
@@ -1484,63 +1584,62 @@ body {
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script>
-    let currentPage = 1;
+    let currentPage = 'pageHome';
     let pageHistory = [];
     let selectedType = null;
     let name = '';
-    let color = '';
-    function setTypeAndGo(type, pageNum) {
+    let color = 'putih';
+    let selectedGridId = null;
+    let selectedFrameId = null;
+        
+    function setTypeAndGo(type, targetId) {
         selectedType = type;
-        goToPage(pageNum);
+        goToPage(targetId);
     }
 
-    function goToPage(pageNum) {
-        if (pageNum === currentPage) return;
-        const currentPageEl = document.getElementById(`page${currentPage}`);
-        const nextPageEl = document.getElementById(`page${pageNum}`);
-        const backButtons = document.querySelectorAll('.back-button');
+    function goToPage(targetId) {
 
-        // Add current page to history if moving forward
-        if (pageNum > currentPage) {
-            pageHistory.push(currentPage);
+        if (targetId === currentPage) return;
+
+        const currentPageEl = document.getElementById(currentPage);
+        const nextPageEl = document.getElementById(targetId);
+
+        if (!currentPageEl || !nextPageEl) {
+            console.error('Page tidak ditemukan:', targetId);
+            return;
         }
-
-        // Show/hide back button
-        backButtons.forEach(btn => {
-            btn.style.display = pageNum === 1 ? 'none' : 'flex';
-        });
-
-        // Animate transition
-        if (pageNum > currentPage) {
-            // Moving forward - slide left
-            currentPageEl.classList.remove('active');
-            currentPageEl.classList.add('slide-left');
-
-            nextPageEl.classList.remove('slide-right');
-            nextPageEl.classList.add('active');
-        } else {
-            // Moving backward - slide right
-            currentPageEl.classList.remove('active');
-            currentPageEl.classList.add('slide-right');
-
-            nextPageEl.classList.remove('slide-left');
-            nextPageEl.classList.add('active');
-
-            // Clear history if going back to page 1
-            if (pageNum === 1) {
-                pageHistory = [];
-                selectedType = null; // reset kalau balik ke awal
+        document.querySelectorAll('.back-button').forEach(btn => {
+            if (targetId === 'pageHome') {
+                btn.style.display = 'none';
+            } else {
+                btn.style.display = 'flex';
             }
+        });
+        document.querySelectorAll('.page').forEach(page => {
+            page.classList.remove('active', 'slide-left', 'slide-right');
+        });
+        if (targetId === 'pagePilihFrame') {
+            loadFrames();
         }
 
-        currentPage = pageNum;
+        nextPageEl.classList.add('active');
+
+        pageHistory.push(currentPage);
+        currentPage = targetId;
     }
+
 
     function goBack() {
-        if (pageHistory.length > 0) {
-            const prevPage = pageHistory.pop();
-            goToPage(prevPage);
-        }
+        if (pageHistory.length === 0) return;
+
+        const prevPageId = pageHistory.pop();
+
+        document.querySelectorAll('.page').forEach(page => {
+            page.classList.remove('active', 'slide-left', 'slide-right');
+        });
+
+        document.getElementById(prevPageId).classList.add('active');
+        currentPage = prevPageId;
     }
 
     function selectColor(element) {
@@ -1552,47 +1651,90 @@ body {
         if (element.classList.contains('color-black')) color = 'hitam';
         if (element.classList.contains('color-blue')) color = 'biru';
     }
-    async function loadKeychains() {
-        try {
-            const response = await fetch('/keychains');
-            const keychains = await response.json();
-            const container = document.getElementById('keychains-container-page5');
-            container.innerHTML = '';
+  async function loadKeychains() {
+    try {
+        const response = await fetch('/keychains');
+        const keychains = await response.json();
+        const container = document.getElementById('keychains-container-page5');
+        container.innerHTML = '';
 
-            const svgs = [
-                `<img src="/img/persegiPanjang.png" width="38" height="55" alt="Grid 1" />`,
-                `<img src="/img/kotak.png" width="38" height="55" alt="Grid 2" />`,
-                `<img src="/img/bulet.png" width="38" height="55" alt="Grid 3" />`,
-                `<img src="/img/love.png" width="38" height="55" alt="Grid 4" />`,
-            ];
+        const svgs = {
+            1: `<img src="/img/persegiPanjang.png" width="38" height="55" />`,
+            2: `<img src="/img/kotak.png" width="38" height="55" />`,
+            3: `<img src="/img/bulet.png" width="38" height="55" />`,
+            4: `<img src="/img/love.png" width="38" height="55" />`,
+        };
 
-            keychains.forEach((keychain, index) => {
-                const keychainItem = document.createElement('div');
-                keychainItem.className = `keychain-item keychain-${index+1}`;
+        const pageMap = {
+            1: 'page17',
+            2: 'page15',
+            3: 'page14',
+            4: 'page16',
+        };
 
-                let targetPage = 3;
-                if (keychain.id === 1) targetPage = 17;
-                if (keychain.id === 2) targetPage = 15;
-                if (keychain.id === 3) targetPage = 14;
-                if (keychain.id === 4) targetPage = 16;
+        keychains.forEach((keychain, index) => {
 
-                keychainItem.setAttribute('onclick', `goToPage(${targetPage})`);
+            const keychainItem = document.createElement('div');
+            keychainItem.className = `keychain-item keychain-${index + 1}`;
 
-                keychainItem.innerHTML = `
-                    <div class="keychain-item-bg"></div>
-                    <div class="keychain-icon">${svgs[index] || ''}</div>
-                    <div class="keychain-title">${keychain.title}</div>
-                    <div class="keychain-arrow"></div>
-                `;
+            keychainItem.innerHTML = `
+                <div class="keychain-item-bg"></div>
+                <div class="keychain-icon">${svgs[keychain.id] || ''}</div>
+                <div class="keychain-title">${keychain.title}</div>
+                <div class="keychain-arrow"></div>
+            `;
 
-                keychainItem.style.top = `${135 + (index * 100)}px`;
+            keychainItem.style.top = `${135 + (index * 100)}px`;
 
-                container.appendChild(keychainItem);
-            });
-        } catch (error) {
-            console.error('Gagal load keychains:', error);
+            keychainItem.onclick = function () {
+                selectedType = 'gantungan_kunci';
+                selectedGridId = keychain.id;
+
+                const targetPage = pageMap[keychain.id];
+                if (targetPage) {
+                    goToPage(targetPage);
+                }
+            };
+
+            container.appendChild(keychainItem);
+        });
+
+    } catch (error) {
+        console.error('Gagal load keychains:', error);
+    }
+}
+
+    function loadPhotoGridById(gridId) {
+
+        const container = document.getElementById('photoGridCapture');
+
+        // reset class
+        container.className = 'capture-wrapper';
+
+        // tambahkan class sesuai CSS kamu
+        container.classList.add(`photo-grid${gridId}`);
+
+        container.innerHTML = '';
+
+        let slotCount = 1;
+
+        if (gridId == 2) slotCount = 2;
+        if (gridId == 3) slotCount = 3;
+        if (gridId == 4) slotCount = 4;
+        if (gridId == 6) slotCount = 6;
+
+        for (let i = 1; i <= slotCount; i++) {
+
+            const input = document.createElement('input');
+            input.type = 'text';
+
+            // class slot tetap sesuai CSS lama kamu
+            input.className = `photo-grid-input photo-grid-${gridId}-slot-${i}`;
+
+            container.appendChild(input);
         }
     }
+
     async function loadPhotoGrids() {
         try {
             const response = await fetch('/photo-grids');
@@ -1600,24 +1742,25 @@ body {
 
             const container = document.getElementById('grid-container-page2');
             container.innerHTML = '';
+
             const svgs = [
-                `<img src="/img/grid(1).png" width="50" height="45" alt="Grid 1" />`,
-                `<img src="/img/grid(2).png" width="50" height="45" alt="Grid 2" />`,
-                `<img src="/img/grid(3).png" width="50" height="45" alt="Grid 3" />`,
-                `<img src="/img/grid(4).png" width="50" height="45" alt="Grid 4" />`,
-                `<img src="/img/grid(6).png" width="50" height="45" alt="Grid 6" />`,
+                `<img src="/img/grid(1).png" width="50" height="45" />`,
+                `<img src="/img/grid(2).png" width="50" height="45" />`,
+                `<img src="/img/grid(3).png" width="50" height="45" />`,
+                `<img src="/img/grid(4).png" width="50" height="45" />`,
+                `<img src="/img/grid(6).png" width="50" height="45" />`,
             ];
 
             grids.forEach((grid, index) => {
+
                 const gridItem = document.createElement('div');
-                gridItem.className = `grid-item grid-${index+1}`;
-                let targetPage = 3;
-                if (grid.id === 1) targetPage = 3;
-                if (grid.id === 2) targetPage = 10;
-                if (grid.id === 3) targetPage = 11;
-                if (grid.id === 4) targetPage = 12;
-                if (grid.id === 5) targetPage = 13;
-                gridItem.setAttribute('onclick', `goToPage(${targetPage})`);
+                gridItem.className = `grid-item grid-${index + 1}`;
+
+               gridItem.onclick = function () {
+                    selectedType = 'layout_photo';
+                    selectedGridId = grid.id; // simpan grid
+                    goToPage('pagePilihFrame'); // masuk frame dulu
+                };
 
                 gridItem.innerHTML = `
                     <div class="grid-item-bg"></div>
@@ -1627,26 +1770,96 @@ body {
                     <div class="grid-arrow"></div>
                 `;
 
-                gridItem.style.position = 'absolute';
-                gridItem.style.left = '50%';
-                gridItem.style.transform = 'translateX(-50%)';
-                gridItem.style.top = `${150 + (index * 120)}px`;
+                gridItem.style.top = `${135 + (index * 100)}px`;
 
                 container.appendChild(gridItem);
             });
+
         } catch (error) {
             console.error('Gagal load grids:', error);
         }
     }
+    async function loadFrames() {
+        try {
+
+            const container = document.getElementById('frames-grid-container');
+            container.innerHTML = ''; // bersihkan dulu
+
+            const response = await fetch('/api/frames');
+            const result = await response.json();
+
+            if (!result.success) {
+                console.error('Gagal load frames');
+                return;
+            }
+
+            const frames = result.data;
+
+            frames.forEach(frame => {
+
+                const frameCard = document.createElement('div');
+                frameCard.className = 'frame-card';
+                frameCard.setAttribute('data-frame-id', frame.id);
+
+                frameCard.innerHTML = `
+                    <img 
+                        src="${frame.image_url}" 
+                        alt="${frame.name}" 
+                        style="width:100%; height:180px; object-fit:cover; border-radius:10px;"
+                    />
+                    <div style="text-align:center; margin-top:8px; font-weight:600;">
+                        ${frame.name}
+                    </div>
+                `;
+
+                frameCard.onclick = function () {
+                    selectFrame(frame.id);
+                };
+
+                container.appendChild(frameCard);
+            });
+
+        } catch (error) {
+            console.error('Error load frames:', error);
+        }
+    }
+
+    function proceedAfterFrameSelection() {
+
+        if (!selectedFrameId) {
+            alert("Pilih frame dulu!");
+            return;
+        }
+
+        loadPhotoGridById(selectedGridId);
+        goToPage('pagePhotoGrid');
+    }
+    function selectFrame(frameId) {
+
+            document.querySelectorAll('.frame-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+
+            const selectedCard = document.querySelector(`[data-frame-id="${frameId}"]`);
+
+            if (selectedCard) {
+                selectedCard.classList.add('selected');
+                selectedFrameId = frameId;
+            }
+
+            const lanjutBtn = document.querySelector('.lanjut-button');
+            if (lanjutBtn) lanjutBtn.disabled = false;
+        }
+
 
     function getUserName() {
-        const input = document.querySelector(`#page${currentPage} #username`);
+        const input = document.querySelector(`#${currentPage} #username`);
         return input.value;
     }
 
    async function confirmSelection() {
         const name = getUserName();
-        const captureElement = document.querySelector(`#page${currentPage} .capture-wrapper`);
+        const captureElement = document.querySelector(`#${currentPage} .capture-wrapper`);
         if (!name) {
             alert("Masukkan nama dulu sebelum konfirmasi!");
             return;
@@ -1677,6 +1890,7 @@ body {
                     type: selectedType,
                     layout_image: layoutImage,
                     warna: color,
+                    frame_id: selectedFrameId,
                 })
             });
 
@@ -1685,7 +1899,7 @@ body {
                 const result = JSON.parse(text); // coba parse JSON
                 if (response.ok) {
                     console.log("Data berhasil disimpan:", result);
-                    goToPage(4);
+                    goToPage('pageConfirm');
                 } else {
                     alert("Gagal menyimpan data: " + (result.message || text));
                 }
@@ -1719,14 +1933,11 @@ body {
         color = '';
         name = '';
         pageHistory = [];
-        goToPage(1);
+        goToPage('pageHome');
     }
     // Initialize back buttons
     document.addEventListener('DOMContentLoaded', function() {
         const backButtons = document.querySelectorAll('.back-button');
-        backButtons.forEach(btn => {
-            btn.style.display = 'none';
-        });
         loadPhotoGrids();
         loadKeychains();
     });

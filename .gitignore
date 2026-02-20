@@ -15,4 +15,10 @@ npm-debug.log
 yarn-error.log
 /.fleet
 /.idea
-/.vscode
+/.vscode=
+/.bash*
+/php-errors.log
+/public/error_log
+/public_html/
+/snapfun.onedream.id.zip
+/storage/framework/cache/*.php

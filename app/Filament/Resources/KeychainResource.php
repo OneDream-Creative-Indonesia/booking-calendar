@@ -17,7 +17,7 @@ class KeychainResource extends Resource
 {
     protected static ?string $model = Keychain::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-key';
 
     public static function form(Form $form): Form
     {
