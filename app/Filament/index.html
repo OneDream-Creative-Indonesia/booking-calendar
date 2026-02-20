@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+    rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tes</title>
+</head>
+
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html {
+    font-family: 'Poppins', sans-serif;
+  }
+
+  .judul {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 24px;
+  }
+
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .lingkaran,
+  .segitiga,
+  .persegiPanjang,
+  .jajarGenjang {
+    background-color: #fed049;
+    border-radius: 20px;
+    flex: 1 1 30px;
+    flex-wrap: wrap;
+    max-width: 300px;
+    height: 100%;
+    padding: 1rem 1.5rem;
+    margin: 1rem 1.7rem;
+  }
+
+  h3#hasilLingkaran,
+  h3#hasilSegitiga,
+  h3#hasilpp {
+    display: flex;
+    justify-content: center;
+  }
+</style>
+
+<body>
+  <h1 class="judul">Ini adalah fitur yang saya buat untuk mencari luas bangun ruang</h1>
+  <div class="row">
+    <div class="lingkaran">
+      <h3>Rumus luas lingkaran</h3>
+      <p id="p">π = 3.14</p>
+      <h3 id="hasilLingkaran"></h3>
+      <form class="circle">
+        <input type="number" id="jari-jari" placeholder="Jari-Jari (dalam cm)">
+        <input type="submit" value="submit" class="submit">
+      </form>
+      <h3 id="hasilLingkaran"></h3>
+      <p>Rumus Lingkaran = π × r² </p>
+    </div>
+    <div class="segitiga">
+      <h3>Rumus luas Segitiga</h3>
+      <p id="0.5"></p>
+      <h3 id="hasilSegitiga"></h3>
+      <h5>Masukan nilai Alas</h5>
+      <input type="number" id="a" placeholder="Alas (dalam cm)">
+      <h5>Masukan nilai tinggi</h5>
+      <input type="number" id="t" placeholder="Tinggi (dalam cm)">
+      <button id="submit">Submit</button>
+      <h3 id="hasilSegitiga"></h3>
+      <p>Rumus Segitiga = ½ × a × t<br>
+        *note : hasil sudah dibagi ½</p>
+    </div>
+    <div class="persegiPanjang">
+      <h3>Rumus luas Persegi Panjang</h3>
+      <p id="0.5"></p>
+      <h3 id="hasilpp"></h3>
+      <h5>Masukan nilai Panjang</h5>
+      <input type="number" id="P" placeholder="Panjang (dalam cm)">
+      <h5>Masukan nilai Lebar</h5>
+      <input type="number" id="L" placeholder="Lebar (dalam cm)">
+      <button id="kirim">Submit</button>
+      <h3 id="hasilpp"></h3>
+      <p>Rumus Segitiga = P × L</p>
+    </div>
+    <div class="jajarGenjang">
+      <h3>Rumus luas Jajar Genjang</h3>
+      <h3 id="hasiljg"></h3>
+      <h5>Masukan nilai alas</h5>
+      <input type="number" id="P" placeholder="Panjang (dalam cm)">
+      <h5>Masukan nilai Tinggi</h5>
+      <input type="number" id="L" placeholder="Lebar (dalam cm)">
+      <button id="kirim">Submit</button>
+      <h3 id="hasilpp"></h3>
+      <p>Rumus JajarGenjang= A × T</p>
+    </div>
+    <script>
+      //lingkaran
+      const form = document.querySelector('.circle')
+      const jariJari = document.getElementById('jari-jari')
+
+      form.addEventListener('click', (e) => {
+        e.preventDefault();//supaya tidak mudah ke restart browsernya
+        let pi = document.getElementById('p'.value)
+        pi = '3.14'
+        let r = parseFloat(jariJari.value)
+        let hasilAkhir = pi * (r * r)
+        const hasil1 = document.getElementById('hasilLingkaran')
+        hasil1.innerHTML = 'Luas lingkaran tersebut dengan jari-jari(r)' + r + ' adalah ' + hasilAkhir
+        document.body.append(hasil1)
+      })
+      //segitiga
+      const submit = document.getElementById('submit')
+      const alas = document.getElementById('a')
+      const tinggi = document.getElementById('t')
+      submit.addEventListener('click', function () {
+        let a = parseFloat(alas.value)
+        let t = parseFloat(tinggi.value)
+        let setengah = '0.5'
+        let hasilSegitiga = setengah * (a * t)
+        const hasil2 = document.getElementById('hasilSegitiga')
+        hasil2.innerHTML = 'Luas Segitiga tersebut dengan alas ' + a + ' & tinggi ' + t + ' adalah ' + hasilSegitiga
+        document.body.append(hasil2)
+      })
+      //persegi panjang
+      const kirim = document.getElementById('kirim')
+      const panjang = document.getElementById('P')
+      const lebar = document.getElementById('L')
+      kirim.addEventListener('click', function () {
+        let p = parseFloat(panjang.value)
+        let l = parseFloat(lebar.value)
+        let hasilpp = p * l
+        const hasil3 = document.getElementById('hasilpp')
+        hasil3.innerHTML = 'Luas Persegi Panjang tersebut dengan Panjang ' + p + ' & Lebar ' + l + ' adalah ' + hasilpp
+        document.body.append(hasil3)
+      })
+
+    </script>
+</body>
+
+</html>
