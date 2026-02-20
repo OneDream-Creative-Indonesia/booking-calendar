@@ -1805,7 +1805,7 @@ body {
                     <img 
                         src="${frame.image_url}" 
                         alt="${frame.name}" 
-                        style="width:100%; height:180px; border-radius:10px;"
+                        style="width:100%; height:100%; object-fit:cover; border-radius:10px; display:block;border: 2px solid #222;"
                     />
                     <div style="text-align:center; margin-top:8px; font-weight:600;">
                         ${frame.name}
