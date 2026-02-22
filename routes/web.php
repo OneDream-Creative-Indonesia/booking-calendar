@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\Artisan;
 // =====================================================
 Route::redirect('/', '/booking', 301);
 Route::get('/booking', [BookingController::class, 'home']); // Custom frontend booking view
-Route::get('/qrcode', function() {
+Route::get('/grid', function() {
      return view('qrcode');
     });
 
@@ -77,3 +77,11 @@ Route::post('/logout', function () {
 Route::get('/api/frames', [FrameController::class, 'index']);
 //ticketing
 Route::get('/ticketing/export', [TickettingReport::class, 'exportCsv'])->name('ticketings_reports.export');
+
+//photobooth
+Route::get('/photobooth', \App\Livewire\TicketingForms::class)->name('ticketing-forms');
+
+//edit grid
+Route::get('/edit', function() {
+     return view('edit');
+    });
