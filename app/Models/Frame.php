@@ -22,4 +22,9 @@ class Frame extends Model implements HasMedia
     {
         return $this->hasMany(PhotoOrder::class);
     }
+    public function photoGrids()
+    {
+        return $this->belongsToMany(PhotoGrid::class, 'photo_grid_frame');
+    }
+
 }

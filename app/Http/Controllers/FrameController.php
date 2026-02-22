@@ -4,14 +4,26 @@ namespace App\Http\Controllers;
 
 use App\Models\Frame;
 use Illuminate\Http\Request;
+use App\Models\PhotoGrid;
 
 class FrameController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         try {
 
-            $frames = Frame::all();
+            $photoGridId = $request->photo_grid_id;
+
+            if ($photoGridId) {
+
+                $photoGrid = PhotoGrid::findOrFail($photoGridId);
+
+                $frames = $photoGrid->frames; // ambil dari pivot
+
+            } else {
+
+                $frames = Frame::all(); // fallback kalau ga kirim id
+            }
 
             $data = $frames->map(function ($frame) {
                 return [

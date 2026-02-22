@@ -1781,11 +1781,15 @@ body {
     }
     async function loadFrames() {
         try {
-
             const container = document.getElementById('frames-grid-container');
-            container.innerHTML = ''; // bersihkan dulu
+            container.innerHTML = '';
 
-            const response = await fetch('/api/frames');
+            // Kirim selectedGridId ke backend
+            const url = selectedGridId 
+                ? `/api/frames?photo_grid_id=${selectedGridId}` 
+                : '/api/frames';
+
+            const response = await fetch(url);
             const result = await response.json();
 
             if (!result.success) {
@@ -1796,7 +1800,6 @@ body {
             const frames = result.data;
 
             frames.forEach(frame => {
-
                 const frameCard = document.createElement('div');
                 frameCard.className = 'frame-card';
                 frameCard.setAttribute('data-frame-id', frame.id);
@@ -1805,7 +1808,7 @@ body {
                     <img 
                         src="${frame.image_url}" 
                         alt="${frame.name}" 
-                        style="width:100%; height:auto; object-fit:cover; border-radius:10px; display:block;border: 2px solid #222;"
+                        style="width:100%; height:auto; object-fit:cover; border-radius:10px; display:block; border: 2px solid #222;"
                     />
                     <div style="text-align:center; margin-top:8px; font-weight:600;">
                         ${frame.name}

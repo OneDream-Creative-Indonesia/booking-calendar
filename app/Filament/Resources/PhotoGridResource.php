@@ -31,6 +31,13 @@ class PhotoGridResource extends Resource
             Forms\Components\Textarea::make('description')
                 ->label('Description')
                 ->nullable(),
+            Forms\Components\Select::make('frames')
+                ->relationship('frames', 'name')
+                ->multiple()
+                ->preload()
+                ->searchable()
+                ->label('Pilih Frame'),
+
 
             ])->columns(1);
     }

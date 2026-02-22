@@ -12,4 +12,9 @@ class PhotoGrid extends Model
         'title',
         'description',
     ];
+    public function frames()
+    {
+        return $this->belongsToMany(Frame::class, 'photo_grid_frame');
+    }
+
 }
