@@ -37,15 +37,6 @@ class PhotoOrderResource extends Resource
                     ->preload()
                     ->nullable(),
 
-                Forms\Components\Select::make('warna')
-                    ->label('Warna')
-                    ->options([
-                        'white' => 'Putih',
-                        'black' => 'Hitam',
-                        'blue'  => 'Biru',
-                    ])
-                    ->required(),
-
                 Forms\Components\Placeholder::make('frame_preview')
                     ->label('Preview Frame')
                     ->content(function ($record) {
@@ -95,10 +86,6 @@ class PhotoOrderResource extends Resource
                     ->label('Frame')
                     ->badge()
                     ->color('primary'),
-
-                Tables\Columns\TextColumn::make('warna')
-                    ->label('Warna')
-                    ->sortable(),
 
                 Tables\Columns\TextColumn::make('status')
                     ->label('Status')

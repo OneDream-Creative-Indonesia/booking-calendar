@@ -9,46 +9,42 @@ class PhotoOrderController extends Controller
 {
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'type' => 'required|string|max:255',
-            'layout_image' => 'required|string',  // base64 image
-            'warna' => 'nullable|string',
-            'frame_id' => 'nullable|exists:frames,id',
+         $validator = Validator::make($request->all(), [
+        'name'         => 'required|string|max:255',
+        'type'         => 'required|string|max:255',
+        'layout_image' => 'required|string',
+        'frame_id'     => 'nullable|exists:frames,id',
         ]);
 
-        // Cek jika validasi gagal
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Validasi gagal',
-                'errors' => $validator->errors()
+                'errors'  => $validator->errors()
             ], 422);
         }
 
-        // Simpan ke database
+        // Simpan ke DB tanpa layout_image
         $photoOrder = PhotoOrder::create([
-            'name' => $request->name,
-            'type' => $request->type,
-            'layout_image' => $request->layout_image,
-            'warna' => $request->warna,
-            'frame_id' => $request->frame_id, 
-            // status otomatis 'pending'
+            'name'     => $request->name,
+            'type'     => $request->type,
+            'frame_id' => $request->frame_id,
         ]);
-        $image = $request->input('layout_image');
-        $image = str_replace('data:image/png;base64,', '', $image);
-        $image = str_replace(' ', '+', $image);
+
+        // Proses base64 → simpan via Spatie
+        $image        = str_replace('data:image/png;base64,', '', $request->layout_image);
+        $image        = str_replace(' ', '+', $image);
         $imageContent = base64_decode($image);
 
-        // simpan via spatie
         $photoOrder
             ->addMediaFromString($imageContent)
-            ->usingFileName(uniqid().'.png')
+            ->usingFileName(uniqid() . '.png')
             ->toMediaCollection('layout');
+
         return response()->json([
             'success' => true,
             'message' => 'Data berhasil disimpan',
-            'data' => $photoOrder
+            'data'    => $photoOrder
         ]);
     }
 }

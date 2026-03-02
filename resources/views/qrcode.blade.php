@@ -1584,366 +1584,279 @@ body {
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script>
-    let currentPage = 'pageHome';
-    let pageHistory = [];
-    let selectedType = null;
-    let name = '';
-    let color = 'putih';
-    let selectedGridId = null;
-    let selectedFrameId = null;
-        
-    function setTypeAndGo(type, targetId) {
-        selectedType = type;
-        goToPage(targetId);
+ let currentPage = 'pageHome';
+let pageHistory = [];
+let selectedType = null;
+let selectedGridId = null;
+let selectedFrameId = null;
+
+// ─── Navigasi ───────────────────────────────────────────────
+function setTypeAndGo(type, targetId) {
+    selectedType = type;
+    goToPage(targetId);
+}
+
+function goToPage(targetId) {
+    if (targetId === currentPage) return;
+
+    const currentPageEl = document.getElementById(currentPage);
+    const nextPageEl    = document.getElementById(targetId);
+
+    if (!currentPageEl || !nextPageEl) {
+        console.error('Page tidak ditemukan:', targetId);
+        return;
     }
 
-    function goToPage(targetId) {
+    document.querySelectorAll('.back-button').forEach(btn => {
+        btn.style.display = targetId === 'pageHome' ? 'none' : 'flex';
+    });
 
-        if (targetId === currentPage) return;
+    document.querySelectorAll('.page').forEach(p => {
+        p.classList.remove('active', 'slide-left', 'slide-right');
+    });
 
-        const currentPageEl = document.getElementById(currentPage);
-        const nextPageEl = document.getElementById(targetId);
+    if (targetId === 'pagePilihFrame') loadFrames();
 
-        if (!currentPageEl || !nextPageEl) {
-            console.error('Page tidak ditemukan:', targetId);
-            return;
-        }
-        document.querySelectorAll('.back-button').forEach(btn => {
-            if (targetId === 'pageHome') {
-                btn.style.display = 'none';
-            } else {
-                btn.style.display = 'flex';
-            }
-        });
-        document.querySelectorAll('.page').forEach(page => {
-            page.classList.remove('active', 'slide-left', 'slide-right');
-        });
-        if (targetId === 'pagePilihFrame') {
-            loadFrames();
-        }
+    nextPageEl.classList.add('active');
+    pageHistory.push(currentPage);
+    currentPage = targetId;
+}
 
-        nextPageEl.classList.add('active');
+function goBack() {
+    if (pageHistory.length === 0) return;
 
-        pageHistory.push(currentPage);
-        currentPage = targetId;
-    }
+    const prevPageId = pageHistory.pop();
 
+    document.querySelectorAll('.page').forEach(p => {
+        p.classList.remove('active', 'slide-left', 'slide-right');
+    });
 
-    function goBack() {
-        if (pageHistory.length === 0) return;
+    document.getElementById(prevPageId).classList.add('active');
+    currentPage = prevPageId;
+}
 
-        const prevPageId = pageHistory.pop();
-
-        document.querySelectorAll('.page').forEach(page => {
-            page.classList.remove('active', 'slide-left', 'slide-right');
-        });
-
-        document.getElementById(prevPageId).classList.add('active');
-        currentPage = prevPageId;
-    }
-
-    function selectColor(element) {
-        document.querySelectorAll('.color-option').forEach(option => {
-            option.classList.remove('selected');
-        });
-        element.classList.add('selected');
-        if (element.classList.contains('color-white')) color = 'putih';
-        if (element.classList.contains('color-black')) color = 'hitam';
-        if (element.classList.contains('color-blue')) color = 'biru';
-    }
-  async function loadKeychains() {
+// ─── Keychains ──────────────────────────────────────────────
+async function loadKeychains() {
     try {
-        const response = await fetch('/keychains');
+        const response  = await fetch('/keychains');
         const keychains = await response.json();
         const container = document.getElementById('keychains-container-page5');
         container.innerHTML = '';
 
         const svgs = {
             1: `<img src="/img/persegiPanjang.png" width="38" height="55" />`,
-            2: `<img src="/img/kotak.png" width="38" height="55" />`,
-            3: `<img src="/img/bulet.png" width="38" height="55" />`,
-            4: `<img src="/img/love.png" width="38" height="55" />`,
+            2: `<img src="/img/kotak.png"          width="38" height="55" />`,
+            3: `<img src="/img/bulet.png"           width="38" height="55" />`,
+            4: `<img src="/img/love.png"            width="38" height="55" />`,
         };
 
-        const pageMap = {
-            1: 'page17',
-            2: 'page15',
-            3: 'page14',
-            4: 'page16',
-        };
+        const pageMap = { 1: 'page17', 2: 'page15', 3: 'page14', 4: 'page16' };
 
         keychains.forEach((keychain, index) => {
+            const item = document.createElement('div');
+            item.className = `keychain-item keychain-${index + 1}`;
+            item.style.top = `${135 + index * 100}px`;
 
-            const keychainItem = document.createElement('div');
-            keychainItem.className = `keychain-item keychain-${index + 1}`;
-
-            keychainItem.innerHTML = `
+            item.innerHTML = `
                 <div class="keychain-item-bg"></div>
                 <div class="keychain-icon">${svgs[keychain.id] || ''}</div>
                 <div class="keychain-title">${keychain.title}</div>
                 <div class="keychain-arrow"></div>
             `;
 
-            keychainItem.style.top = `${135 + (index * 100)}px`;
-
-            keychainItem.onclick = function () {
-                selectedType = 'gantungan_kunci';
+            item.onclick = () => {
+                selectedType   = 'gantungan_kunci';
                 selectedGridId = keychain.id;
-
-                const targetPage = pageMap[keychain.id];
-                if (targetPage) {
-                    goToPage(targetPage);
-                }
+                const target   = pageMap[keychain.id];
+                if (target) goToPage(target);
             };
 
-            container.appendChild(keychainItem);
+            container.appendChild(item);
         });
 
-    } catch (error) {
-        console.error('Gagal load keychains:', error);
+    } catch (err) {
+        console.error('Gagal load keychains:', err);
     }
 }
 
-    function loadPhotoGridById(gridId) {
-
-        const container = document.getElementById('photoGridCapture');
-
-        // reset class
-        container.className = 'capture-wrapper';
-
-        // tambahkan class sesuai CSS kamu
-        container.classList.add(`photo-grid${gridId}`);
-
+// ─── Photo Grids ────────────────────────────────────────────
+async function loadPhotoGrids() {
+    try {
+        const response  = await fetch('/photo-grids');
+        const grids     = await response.json();
+        const container = document.getElementById('grid-container-page2');
         container.innerHTML = '';
 
-        let slotCount = 1;
+        const svgs = [
+            `<img src="/img/grid(1).png" width="50" height="45" />`,
+            `<img src="/img/grid(2).png" width="50" height="45" />`,
+            `<img src="/img/grid(3).png" width="50" height="45" />`,
+            `<img src="/img/grid(4).png" width="50" height="45" />`,
+            `<img src="/img/grid(6).png" width="50" height="45" />`,
+        ];
 
-        if (gridId == 2) slotCount = 2;
-        if (gridId == 3) slotCount = 3;
-        if (gridId == 4) slotCount = 4;
-        if (gridId == 6) slotCount = 6;
+        grids.forEach((grid, index) => {
+            const item = document.createElement('div');
+            item.className = `grid-item grid-${index + 1}`;
+            item.style.top = `${135 + index * 100}px`;
 
-        for (let i = 1; i <= slotCount; i++) {
+            item.innerHTML = `
+                <div class="grid-item-bg"></div>
+                <div class="grid-icon">${svgs[index] || ''}</div>
+                <div class="grid-title">${grid.title}</div>
+                <div class="grid-desc">${grid.description}</div>
+                <div class="grid-arrow"></div>
+            `;
 
-            const input = document.createElement('input');
-            input.type = 'text';
+            item.onclick = () => {
+                selectedType   = 'layout_photo';
+                selectedGridId = grid.id;
+                goToPage('pagePilihFrame');
+            };
 
-            // class slot tetap sesuai CSS lama kamu
-            input.className = `photo-grid-input photo-grid-${gridId}-slot-${i}`;
-
-            container.appendChild(input);
-        }
-    }
-
-    async function loadPhotoGrids() {
-        try {
-            const response = await fetch('/photo-grids');
-            const grids = await response.json();
-
-            const container = document.getElementById('grid-container-page2');
-            container.innerHTML = '';
-
-            const svgs = [
-                `<img src="/img/grid(1).png" width="50" height="45" />`,
-                `<img src="/img/grid(2).png" width="50" height="45" />`,
-                `<img src="/img/grid(3).png" width="50" height="45" />`,
-                `<img src="/img/grid(4).png" width="50" height="45" />`,
-                `<img src="/img/grid(6).png" width="50" height="45" />`,
-            ];
-
-            grids.forEach((grid, index) => {
-
-                const gridItem = document.createElement('div');
-                gridItem.className = `grid-item grid-${index + 1}`;
-
-               gridItem.onclick = function () {
-                    selectedType = 'layout_photo';
-                    selectedGridId = grid.id; // simpan grid
-                    goToPage('pagePilihFrame'); // masuk frame dulu
-                };
-
-                gridItem.innerHTML = `
-                    <div class="grid-item-bg"></div>
-                    <div class="grid-icon">${svgs[index] || ''}</div>
-                    <div class="grid-title">${grid.title}</div>
-                    <div class="grid-desc">${grid.description}</div>
-                    <div class="grid-arrow"></div>
-                `;
-
-                gridItem.style.top = `${135 + (index * 100)}px`;
-
-                container.appendChild(gridItem);
-            });
-
-        } catch (error) {
-            console.error('Gagal load grids:', error);
-        }
-    }
-    async function loadFrames() {
-        try {
-            const container = document.getElementById('frames-grid-container');
-            container.innerHTML = '';
-
-            // Kirim selectedGridId ke backend
-            const url = selectedGridId 
-                ? `/api/frames?photo_grid_id=${selectedGridId}` 
-                : '/api/frames';
-
-            const response = await fetch(url);
-            const result = await response.json();
-
-            if (!result.success) {
-                console.error('Gagal load frames');
-                return;
-            }
-
-            const frames = result.data;
-
-            frames.forEach(frame => {
-                const frameCard = document.createElement('div');
-                frameCard.className = 'frame-card';
-                frameCard.setAttribute('data-frame-id', frame.id);
-
-                frameCard.innerHTML = `
-                    <img 
-                        src="${frame.image_url}" 
-                        alt="${frame.name}" 
-                        style="width:100%; height:auto; object-fit:cover; border-radius:10px; display:block; border: 2px solid #222;"
-                    />
-                    <div style="text-align:center; margin-top:8px; font-weight:600;">
-                        ${frame.name}
-                    </div>
-                `;
-
-                frameCard.onclick = function () {
-                    selectFrame(frame.id);
-                };
-
-                container.appendChild(frameCard);
-            });
-
-        } catch (error) {
-            console.error('Error load frames:', error);
-        }
-    }
-
-    function proceedAfterFrameSelection() {
-
-        if (!selectedFrameId) {
-            alert("Pilih frame dulu!");
-            return;
-        }
-
-        loadPhotoGridById(selectedGridId);
-        goToPage('pagePhotoGrid');
-    }
-    function selectFrame(frameId) {
-
-            document.querySelectorAll('.frame-card').forEach(card => {
-                card.classList.remove('selected');
-            });
-
-            const selectedCard = document.querySelector(`[data-frame-id="${frameId}"]`);
-
-            if (selectedCard) {
-                selectedCard.classList.add('selected');
-                selectedFrameId = frameId;
-            }
-
-            const lanjutBtn = document.querySelector('.lanjut-button');
-            if (lanjutBtn) lanjutBtn.disabled = false;
-        }
-
-
-    function getUserName() {
-        const input = document.querySelector(`#${currentPage} #username`);
-        return input.value;
-    }
-
-   async function confirmSelection() {
-        const name = getUserName();
-        const captureElement = document.querySelector(`#${currentPage} .capture-wrapper`);
-        if (!name) {
-            alert("Masukkan nama dulu sebelum konfirmasi!");
-            return;
-        }
-        if (!selectedType) {
-            alert("Pilih tipe dulu sebelum konfirmasi!");
-            return;
-        }
-         if (selectedType === "stiker" || selectedType === "gantungan_kunci") {
-            color = null;
-        }
-        try {
-            const canvas = await html2canvas(captureElement, {
-                allowTaint: true,
-                useCORS: true
-            });
-
-            const layoutImage = canvas.toDataURL("image/png");
-
-            const response = await fetch('/photo-orders', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
-                },
-                body: JSON.stringify({
-                    name: name,
-                    type: selectedType,
-                    layout_image: layoutImage,
-                    warna: color,
-                    frame_id: selectedFrameId,
-                })
-            });
-
-            const text = await response.text(); // ambil dulu text
-            try {
-                const result = JSON.parse(text); // coba parse JSON
-                if (response.ok) {
-                    console.log("Data berhasil disimpan:", result);
-                    goToPage('pageConfirm');
-                } else {
-                    alert("Gagal menyimpan data: " + (result.message || text));
-                }
-            } catch (err) {
-                console.error('Response bukan JSON:', text);
-                alert('Terjadi error: Response bukan JSON. Cek console untuk detail.');
-            }
-
-        } catch (error) {
-            console.error("Error saat generate layout_image atau menyimpan:", error);
-            alert("Terjadi kesalahan saat menyimpan data.");
-        }
-    }
-    // reset form
-    function resetForm() {
-        // Reset semua input text
-        document.querySelectorAll('input[type="text"]').forEach(input => {
-            input.value = '';
+            container.appendChild(item);
         });
 
-        // Reset warna (balik ke default = black misalnya)
-        document.querySelectorAll('.color-option').forEach(option => {
-            option.classList.remove('selected');
-        });
-        document.querySelectorAll('.color-black').forEach(option => {
-            option.classList.add('selected');
+    } catch (err) {
+        console.error('Gagal load grids:', err);
+    }
+}
+
+function loadPhotoGridById(gridId) {
+    if (gridId == 5) gridId = 6;
+    const container = document.getElementById('photoGridCapture');
+    container.className = `capture-wrapper photo-grid${gridId}`;
+    container.innerHTML = '';
+
+    const slotCounts = { 2: 2, 3: 3, 4: 4, 6: 6 };
+    const count = slotCounts[gridId] ?? 1;
+
+    for (let i = 1; i <= count; i++) {
+        const input = document.createElement('input');
+        input.type      = 'text';
+        input.className = `photo-grid-input photo-grid-${gridId}-slot-${i}`;
+        container.appendChild(input);
+    }
+}
+
+// ─── Frames ─────────────────────────────────────────────────
+async function loadFrames() {
+    try {
+        const container = document.getElementById('frames-grid-container');
+        container.innerHTML = '';
+
+        const url      = selectedGridId ? `/api/frames?photo_grid_id=${selectedGridId}` : '/api/frames';
+        const response = await fetch(url);
+        const result   = await response.json();
+
+        if (!result.success) { console.error('Gagal load frames'); return; }
+
+        result.data.forEach(frame => {
+            const card = document.createElement('div');
+            card.className = 'frame-card';
+            card.setAttribute('data-frame-id', frame.id);
+
+            card.innerHTML = `
+                <img src="${frame.image_url}" alt="${frame.name}"
+                     style="width:100%;height:auto;object-fit:cover;border-radius:10px;display:block;border:2px solid #222;" />
+                <div style="text-align:center;margin-top:8px;font-weight:600;">${frame.name}</div>
+            `;
+
+            card.onclick = () => selectFrame(frame.id);
+            container.appendChild(card);
         });
 
-        // Reset variable global
-        selectedType = null;
-        color = '';
-        name = '';
-        pageHistory = [];
-        goToPage('pageHome');
+    } catch (err) {
+        console.error('Error load frames:', err);
     }
-    // Initialize back buttons
-    document.addEventListener('DOMContentLoaded', function() {
-        const backButtons = document.querySelectorAll('.back-button');
-        loadPhotoGrids();
-        loadKeychains();
-    });
+}
+
+function selectFrame(frameId) {
+    document.querySelectorAll('.frame-card').forEach(c => c.classList.remove('selected'));
+
+    const card = document.querySelector(`[data-frame-id="${frameId}"]`);
+    if (card) { card.classList.add('selected'); selectedFrameId = frameId; }
+
+    const btn = document.querySelector('.lanjut-button');
+    if (btn) btn.disabled = false;
+}
+
+function proceedAfterFrameSelection() {
+    if (!selectedFrameId) { alert('Pilih frame dulu!'); return; }
+    loadPhotoGridById(selectedGridId);
+    goToPage('pagePhotoGrid');
+}
+
+// ─── Konfirmasi ─────────────────────────────────────────────
+function getUserName() {
+    const input = document.querySelector(`#${currentPage} #username`);
+    return input ? input.value : '';
+}
+
+async function confirmSelection() {
+    const name = getUserName();
+
+    if (!name)         { alert('Masukkan nama dulu sebelum konfirmasi!'); return; }
+    if (!selectedType) { alert('Pilih tipe dulu sebelum konfirmasi!'); return; }
+
+    const captureElement = document.querySelector(`#${currentPage} .capture-wrapper`);
+
+    try {
+        const canvas      = await html2canvas(captureElement, { allowTaint: true, useCORS: true });
+        const layoutImage = canvas.toDataURL('image/png');
+
+        const response = await fetch('/photo-orders', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+            },
+            body: JSON.stringify({
+                name,
+                type: selectedType,
+                layout_image: layoutImage,
+                frame_id: selectedFrameId,
+            })
+        });
+
+        const text = await response.text();
+
+        try {
+            const result = JSON.parse(text);
+            if (response.ok) {
+                console.log('Data berhasil disimpan:', result);
+                goToPage('pageConfirm');
+            } else {
+                alert('Gagal menyimpan data: ' + (result.message || text));
+            }
+        } catch {
+            console.error('Response bukan JSON:', text);
+            alert('Terjadi error: Response bukan JSON. Cek console untuk detail.');
+        }
+
+    } catch (err) {
+        console.error('Error saat generate/simpan:', err);
+        alert('Terjadi kesalahan saat menyimpan data.');
+    }
+}
+
+// ─── Reset ──────────────────────────────────────────────────
+function resetForm() {
+    document.querySelectorAll('input[type="text"]').forEach(i => i.value = '');
+
+    selectedType    = null;
+    selectedGridId  = null;
+    selectedFrameId = null;
+    pageHistory     = [];
+
+    goToPage('pageHome');
+}
+
+// ─── Init ────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    loadPhotoGrids();
+    loadKeychains();
+});
 </script>
 </body>
 </html>
