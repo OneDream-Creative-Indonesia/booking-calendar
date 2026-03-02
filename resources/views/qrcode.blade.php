@@ -331,6 +331,13 @@ body {
     line-height: 99%;
     color: #FFFFFF;
 }
+#pagePhotoGrid .capture-wrapper {
+    position: relative !important;
+    top: 0 !important;
+    left: 0 !important;
+    transform: none !important;
+    margin: 0 auto;
+}
 #pagePhotoGrid .header-text {
      position: absolute;
     height: 20px;
@@ -1152,7 +1159,7 @@ body {
     font-family: 'Montserrat';
     font-weight: 700;
     font-size: 16px;
-    top: 680px;
+    top: 640px;
 }
 .confirm-button17 {
     position: absolute;
