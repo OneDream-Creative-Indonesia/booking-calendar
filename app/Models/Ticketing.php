@@ -10,6 +10,7 @@ class Ticketing extends Model
     use HasFactory;
     protected $fillable = [
         'nama',
+        'email',
         'jumlah',
         'telpon',
         'transaction_type'

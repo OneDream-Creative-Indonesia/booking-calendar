@@ -15,6 +15,7 @@
             [x-cloak] {
                 display: none !important;
             }
+            
         </style>
         @filamentStyles
         @vite('resources/css/app.css')
@@ -23,13 +24,10 @@
 
     <body class="antialiased">
 
-            <div class="fixed-bg" style="background-image: url(../../assets/img/shape/bg-4.png);"
-            <!-- Fixed BG -->
+            <div class="fixed-bg" style="background-image: url(../../assets/img/shape/bg-4.png); height: 250px;">
             <div class="container mx-auto">
-                <div class="py-20 lg:flex lg:justify-center lg:items-center">
-                    <div class="lg:w-8/12">
-                        <h1 class="mb-4 text-4xl font-bold text-white text-center ">Pop Up Self Photo by Snap Fun</h1>
-                    </div>
+                <div class="py-20 flex justify-center items-center">
+                    <h1 class="mb-4 font-bold text-white text-center" style="font-size: clamp(1.5rem, 5vw, 2.5rem); margin-top:80px;">Pop Up Self Photo by Snap Fun</h1>
                 </div>
             </div>
         </div>

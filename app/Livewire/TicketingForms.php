@@ -17,6 +17,7 @@ class TicketingForms extends Component implements HasForms
     use InteractsWithForms;
 
     public $nama;
+    public $email;
     public $jumlah;
     public $telpon;
     public $transaction_type;
@@ -30,6 +31,9 @@ class TicketingForms extends Component implements HasForms
     {
         return $form->schema([
             TextInput::make('nama')
+                ->required(),
+            TextInput::make('email')
+                ->email()
                 ->required(),
             TextInput::make('jumlah')
                 ->required()
@@ -56,6 +60,7 @@ class TicketingForms extends Component implements HasForms
     {
         $validate = $this->validate([
             'nama' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
             'jumlah' => 'required|integer|min:1',
             'telpon' => 'required|string|max:15',
             'transaction_type' => 'required|string|in:tunai,qris',
@@ -63,7 +68,22 @@ class TicketingForms extends Component implements HasForms
 
         Ticketing::create($validate);
 
-        Session::flash('message', 'terimakasih data kamu telah diterima, Foto Akan dikirim maks 1 minggu');
+        $pembayaran = $this->transaction_type === 'qris' ? 'QRIS' : 'Tunai';
+
+        $pesan = "Halo Snap Fun! 👋%0A%0A"
+            . "Saya ingin konfirmasi booking Pop Up Self Photo:%0A"
+            . "━━━━━━━━━━━━━━━━%0A"
+            . "Nama: {$this->nama}%0A"
+            . "Email: {$this->email}%0A"
+            . "Jumlah Orang: {$this->jumlah}%0A"
+            . "No. HP: {$this->telpon}%0A"
+            . "Pembayaran: {$pembayaran}%0A"
+            . "━━━━━━━━━━━━━━━━%0A"
+            . "Mohon konfirmasinya ya, terima kasih! 🙏";
+
+        $nomorWA = '6285117607254';
+
+        $this->dispatch('redirectToWA', url: "https://wa.me/{$nomorWA}?text={$pesan}");
 
         $this->resetForm();
     }
@@ -71,9 +91,11 @@ class TicketingForms extends Component implements HasForms
     public function resetForm()
     {
         $this->nama = '';
+        $this->email = '';
         $this->jumlah = '';
         $this->telpon = '';
         $this->transaction_type = '';
+        $this->form->fill();
     }
 
     public function render()

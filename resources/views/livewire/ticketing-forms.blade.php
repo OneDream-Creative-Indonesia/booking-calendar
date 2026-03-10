@@ -20,7 +20,7 @@
 
 
         <div class="w-full max-w-3xl p-8 bg-white rounded-lg shadow dark:bg-gray-800">
-             <h2 class="mb-4 font-bold text-center md:text-2xl sm:text-xl">
+             <h2 class="mb-4 font-bold text-center text-xl sm:text-2xl md:text-3xl">
                 Silahkan Masukan Data Kamu
             </h2>
 
@@ -56,4 +56,9 @@
             popup.style.display = "none";
         }
     }
+    document.addEventListener('livewire:initialized', () => {
+        Livewire.on('redirectToWA', (event) => {
+            window.open(event.url, '_blank');
+        });
+    });
 </script>

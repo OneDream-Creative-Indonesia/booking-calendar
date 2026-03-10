@@ -40,6 +40,9 @@ class TicketingResource extends Resource
             ->schema([
                 TextInput::make('nama')
                     ->required(),
+                TextInput::make('email')
+                    ->email()
+                    ->required(),
                 TextInput::make('jumlah')
                     ->required()
                     ->label("Jumlah Orang"),
@@ -66,7 +69,11 @@ class TicketingResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('nama')
-                    ->label('name')
+                    ->label('Name')
+                    ->sortable()
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('email')
+                    ->label('Email')
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('jumlah')
