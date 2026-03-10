@@ -70,7 +70,7 @@ class TicketingForms extends Component implements HasForms
 
         $pembayaran = $this->transaction_type === 'qris' ? 'QRIS' : 'Tunai';
 
-        $pesan = "Halo Snap Fun! 👋%0A%0A"
+        $pesan = "Halo Snap Fun!"
             . "Saya ingin konfirmasi booking Pop Up Self Photo:%0A"
             . "━━━━━━━━━━━━━━━━%0A"
             . "Nama: {$this->nama}%0A"
@@ -79,7 +79,7 @@ class TicketingForms extends Component implements HasForms
             . "No. HP: {$this->telpon}%0A"
             . "Pembayaran: {$pembayaran}%0A"
             . "━━━━━━━━━━━━━━━━%0A"
-            . "Mohon konfirmasinya ya, terima kasih! 🙏";
+            . "Mohon konfirmasinya ya, terima kasih!";
 
         $nomorWA = '6285117607254';
 
