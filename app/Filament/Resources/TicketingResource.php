@@ -46,6 +46,10 @@ class TicketingResource extends Resource
                 TextInput::make('jumlah')
                     ->required()
                     ->label("Jumlah Orang"),
+                TextInput::make('cetak')
+                    ->required()
+                    ->numeric()
+                    ->label('Jumlah Cetak'),
                 TextInput::make('telpon')
                     ->label('Nomor Telfon')
                     ->numeric()
@@ -80,6 +84,10 @@ class TicketingResource extends Resource
                     ->label('Jumlah Orang')
                     ->sortable()
                     ->searchable(),
+                Tables\Columns\TextColumn::make('cetak')
+                    ->sortable()
+                    ->searchable()
+                    ->label('Jumlah Cetak'),
                 Tables\Columns\TextColumn::make('telpon')
                     ->label('Nomor Handpone')
                     ->sortable()

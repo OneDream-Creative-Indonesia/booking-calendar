@@ -12,14 +12,16 @@ class TickettingReport extends Controller
     {
         $csv = Writer::createFromFileObject(new \SplTempFileObject());
 
-        $csv->insertOne(['Nama', 'Jumlah Orang', 'No Handphone', 'Jenis Pembayaran']);
+        $csv->insertOne(['Nama', 'email' ,'Jumlah Orang', 'Jumlah Cetak' ,'No Handphone', 'Jenis Pembayaran']);
 
         $reports = Ticketing::all();
         foreach ($reports as $report) {
 
             $csv->insertOne([
                 $report->nama,
+                $report->email,
                 $report->jumlah,
+                $report->cetak,
                 $report->telpon,
                 $report->transaction_type,
             ]);

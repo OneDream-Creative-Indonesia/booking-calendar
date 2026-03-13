@@ -12,6 +12,7 @@ class Ticketing extends Model
         'nama',
         'email',
         'jumlah',
+        'cetak',
         'telpon',
         'transaction_type'
     ];

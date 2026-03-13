@@ -19,6 +19,7 @@ class TicketingForms extends Component implements HasForms
     public $nama;
     public $email;
     public $jumlah;
+    public $cetak;
     public $telpon;
     public $transaction_type;
 
@@ -38,6 +39,10 @@ class TicketingForms extends Component implements HasForms
             TextInput::make('jumlah')
                 ->required()
                 ->label('Jumlah Orang'),
+            TextInput::make('cetak')
+                ->required()
+                ->numeric()
+                ->label('Jumlah Cetak'),
             TextInput::make('telpon')
                 ->label('Nomor Handphone')
                 ->numeric()
@@ -62,6 +67,7 @@ class TicketingForms extends Component implements HasForms
             'nama' => 'required|string|max:255',
             'email' => 'required|email|max:255',
             'jumlah' => 'required|integer|min:1',
+            'cetak' => 'required|integer|min:1',
             'telpon' => 'required|string|max:15',
             'transaction_type' => 'required|string|in:tunai,qris',
         ]);
@@ -76,6 +82,7 @@ class TicketingForms extends Component implements HasForms
             . "Nama: {$this->nama}%0A"
             . "Email: {$this->email}%0A"
             . "Jumlah Orang: {$this->jumlah}%0A"
+            . "Jumlah Cetak: {$this->cetak}%0A"
             . "No. HP: {$this->telpon}%0A"
             . "Pembayaran: {$pembayaran}%0A"
             . "━━━━━━━━━━━━━━━━%0A"
@@ -93,6 +100,7 @@ class TicketingForms extends Component implements HasForms
         $this->nama = '';
         $this->email = '';
         $this->jumlah = '';
+        $this->cetak = '';
         $this->telpon = '';
         $this->transaction_type = '';
         $this->form->fill();
