@@ -76,17 +76,21 @@ class TicketingForms extends Component implements HasForms
 
         $pembayaran = $this->transaction_type === 'qris' ? 'QRIS' : 'Tunai';
 
-       $pesan = "Halo Snap Fun!
-        Saya ingin konfirmasi booking Pop Up Self Photo:
-        ━━━━━━━━━━━━━━━━
-        Nama: {$this->nama}
-        Email: {$this->email}
-        Jumlah Orang: {$this->jumlah}
-        Jumlah Cetak: {$this->cetak}
-        No. HP: {$this->telpon}
-        Pembayaran: {$pembayaran}
-        ━━━━━━━━━━━━━━━━
-        Mohon konfirmasinya ya, terima kasih!";
+       $pesan = "*Halo Snap Fun!*
+
+Saya ingin konfirmasi booking *Pop Up Self Photo*
+
+━━━━━━━━━━━━━━━━
+
+*Nama:* {$this->nama}
+*Email:* {$this->email}
+*Jumlah Orang:* {$this->jumlah}
+*Jumlah Cetak:* {$this->cetak}
+*No. HP:* {$this->telpon}
+*Pembayaran:* {$pembayaran}
+
+━━━━━━━━━━━━━━━━
+Mohon konfirmasinya ya, terima kasih 🙏";
 
         $encodedPesan = urlencode($pesan);
 
