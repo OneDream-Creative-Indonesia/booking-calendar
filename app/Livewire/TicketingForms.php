@@ -76,21 +76,27 @@ class TicketingForms extends Component implements HasForms
 
         $pembayaran = $this->transaction_type === 'qris' ? 'QRIS' : 'Tunai';
 
-        $pesan = "Halo Snap Fun!"
-            . "Saya ingin konfirmasi booking Pop Up Self Photo:%0A"
-            . "━━━━━━━━━━━━━━━━%0A"
-            . "Nama: {$this->nama}%0A"
-            . "Email: {$this->email}%0A"
-            . "Jumlah Orang: {$this->jumlah}%0A"
-            . "Jumlah Cetak: {$this->cetak}%0A"
-            . "No. HP: {$this->telpon}%0A"
-            . "Pembayaran: {$pembayaran}%0A"
-            . "━━━━━━━━━━━━━━━━%0A"
-            . "Mohon konfirmasinya ya, terima kasih!";
+       $pesan = "Halo Snap Fun!
+                Saya ingin konfirmasi booking Pop Up Self Photo:
+                ━━━━━━━━━━━━━━━━
+                Nama: {$this->nama}
+                Email: {$this->email}
+                Jumlah Orang: {$this->jumlah}
+                Jumlah Cetak: {$this->cetak}
+                No. HP: {$this->telpon}
+                Pembayaran: {$pembayaran}
+                ━━━━━━━━━━━━━━━━
+                Mohon konfirmasinya ya, terima kasih!";
+
+        $encodedPesan = urlencode($pesan);
 
         $nomorWA = '6285117607254';
 
-        $this->dispatch('redirectToWA', url: "https://wa.me/{$nomorWA}?text={$pesan}");
+        $this->dispatch(
+            'redirectToWA',
+            url: "https://api.whatsapp.com/send?phone={$nomorWA}&text={$encodedPesan}"
+        );
+
 
         $this->resetForm();
     }

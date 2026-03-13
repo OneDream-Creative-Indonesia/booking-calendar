@@ -58,7 +58,7 @@
     }
     document.addEventListener('livewire:initialized', () => {
         Livewire.on('redirectToWA', (event) => {
-            window.open(event.url, '_blank');
+            window.location.href = event.url;
         });
     });
 </script>
