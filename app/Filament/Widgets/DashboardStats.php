@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Filament\Widgets;
 
 use App\Models\Project;
@@ -8,6 +9,8 @@ use Illuminate\Support\Facades\Storage;
 
 class DashboardStats extends BaseWidget
 {
+    protected static bool $isDiscovered = false;
+    
     protected function getStats(): array
     {
         $projects = Project::all();
