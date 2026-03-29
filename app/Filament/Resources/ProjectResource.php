@@ -19,8 +19,9 @@ class ProjectResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-folder-open';
     protected static ?string $modelLabel = 'Proyek';
     protected static ?string $pluralModelLabel = 'Riwayat Proyek';
-    protected static ?string $navigationLabel = 'Proyek Saya';
-
+    protected static ?string $navigationLabel = 'Photo Link';
+    protected static ?string $navigationGroup = 'Studio';
+    protected static ?int $navigationSort = 5;
     public static function form(Form $form): Form
     {
         return $form
@@ -47,8 +48,14 @@ class ProjectResource extends Resource
                                 'PAS PHOTO' => 'Pas Photo'
                              ])
                             ->required(),
-                        Forms\Components\DateTimePicker::make('expired_at')
-                            ->label('Batas Waktu (Expired)'),
+                      Forms\Components\Select::make('expired_at')
+                            ->label('Batas Waktu (Expired)')
+                            ->options([
+                                '7' => '1 Minggu',
+                                '14' => '2 Minggu',
+                            ])
+                            ->required()
+                        ->dehydrateStateUsing(fn ($state) => $state ? now()->addDays((int) $state) : null),
                     ])->columns(2)->hidden(fn (string $operation): bool => $operation === 'edit'),
 
                 // Bagian Upload Foto menggunakan Bawaan Filament

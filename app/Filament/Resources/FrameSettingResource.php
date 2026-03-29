@@ -22,8 +22,8 @@ class FrameSettingResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-viewfinder-circle';
     protected static ?string $navigationLabel = 'Frame Settings';
-    protected static ?string $navigationGroup = 'Section Settings';
-    protected static ?int $navigationSort = 5;   
+    protected static ?string $navigationGroup = 'Section';
+    protected static ?int $navigationSort = 1;   
     public static function form(Form $form): Form
     {
         return $form
@@ -59,7 +59,16 @@ class FrameSettingResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')->label('Nama Frame')->sortable()->searchable(),
-                Tables\Columns\TextColumn::make('type.name')->label('Tipe Frame')->sortable()->searchable(),
+                Tables\Columns\TextColumn::make('type.name')
+                    ->label('Folder / Kategori')
+                    ->sortable()
+                    ->searchable()
+                    ->badge() 
+                    ->color('info'),
+                Tables\Columns\TextColumn::make('type.type') 
+                    ->label('Ukuran Kertas')
+                    ->sortable()
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('orientation')->label('Orientasi'),
                 SpatieMediaLibraryImageColumn::make('framesSettings')->label('Foto Frame')->collection('framesSettings'),
             ])

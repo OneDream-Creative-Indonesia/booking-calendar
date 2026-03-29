@@ -14,9 +14,10 @@ return new class extends Migration
         Schema::create('frame_settings', function (Blueprint $table) {
             $table->id();
             $table->string('name');             
-            $table->foreignId('type_id')->constrained('frame_types')->onDelete('cascade');          
             $table->string('orientation')->default('portrait'); 
             $table->json('masks')->nullable();
+            $table->string('folder_name')->after('name');
+            $table->string('paper_size')->after('folder_name');
             $table->timestamps();
         });
     }

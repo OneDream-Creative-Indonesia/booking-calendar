@@ -16,9 +16,10 @@ class PhotoOrderResource extends Resource
     protected static ?string $model = PhotoOrder::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-shopping-bag';
-    protected static ?string $navigationGroup = 'Section Settings';
+    protected static ?string $navigationGroup = 'Studio';
     protected static ?int $navigationSort = 4;
-
+    protected static ?string $pluralModelLabel = '⁠Photo Number';
+    protected static ?string $navigationLabel = '⁠Photo Number';
     public static function form(Form $form): Form
     {
         return $form

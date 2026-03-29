@@ -41,7 +41,7 @@ class AdminPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
-                Pages\Dashboard::class,
+                \App\Filament\Pages\Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
@@ -62,17 +62,23 @@ class AdminPanelProvider extends PanelProvider
                 \Hasnayeen\Themes\Http\Middleware\SetTheme::class
             ])
             ->navigationItems([
-                NavigationItem::make('Halaman Antrian') 
+                NavigationItem::make('⁠Waiting List') 
                     ->url('https://snapfunstudio.id/antrian', shouldOpenInNewTab: true) 
                     ->icon('heroicon-o-queue-list') 
                     ->group('Photobooth')
-                    ->sort(10),
-                    NavigationItem::make('Snap Edit')
+                    ->sort(2),
+                    NavigationItem::make('Photo Edit')
                     ->url('https://snapfunstudio.id/edit', shouldOpenInNewTab: true)
                     ->icon('heroicon-o-paint-brush') 
-                    ->group('Photobooth')
-                    ->sort(11),
+                    ->group('Studio')
+                    ->sort(3),
 
+            ])
+            ->navigationGroups([
+                'Studio', 
+                'Photobooth',        
+                'Operational',       
+                'Settings',        
             ])
             ->authMiddleware([
                 Authenticate::class,

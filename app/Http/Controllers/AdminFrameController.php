@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\FrameType;
 use App\Models\FrameSetting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class AdminFrameController extends Controller
 {
@@ -19,20 +20,21 @@ class AdminFrameController extends Controller
                 'name' => $type->name,
                 'frames' => $type->frames->map(function ($frame) use ($type) {
                     
-                    // Cek apakah bentuknya String atau sudah Array (tergantung model)
                     $masksData = [];
                     if (!empty($frame->masks)) {
                         $masksData = is_string($frame->masks) ? json_decode($frame->masks, true) : $frame->masks;
                     }
 
+                    // Ambil ukuran kertas dari tabel FrameType (Folder)
+                    $paperSize = strtolower($type->type ?? '4r');
+
                     return [
                         'id' => $frame->id,
                         'name' => $frame->name,
-                        'paperSize' => $type->type,
+                        'paperSize' => $type->type, 
                         'orientation' => $frame->orientation,
-                        // Secara otomatis dihitung oleh backend karena tidak ada di DB
-                        'width' => strtolower($type->type) == '2x6' ? 600 : (strtolower($type->type) == 'a4' ? 2480 : (strtolower($type->type) == 'a3' ? 3508 : 1200)),
-                        'height' => strtolower($type->type) == 'a4' ? 3508 : (strtolower($type->type) == 'a3' ? 4961 : 1800),
+                        'width' => $paperSize == '2x6' ? 600 : ($paperSize == 'a4' ? 2480 : ($paperSize == 'a3' ? 3508 : 1200)),
+                        'height' => $paperSize == 'a4' ? 3508 : ($paperSize == 'a3' ? 4961 : 1800),
                         'imageUrl' => $frame->getFirstMediaUrl('framesSettings'),
                         'masks' => $masksData
                     ];
@@ -50,7 +52,7 @@ class AdminFrameController extends Controller
         
         FrameType::create([
             'name' => $request->name,
-            'type' => '4R', // Default tipe, bisa diubah jika perlu
+            'type' => '4R', // Beri nilai default 4R saat folder baru dibuat
         ]);
 
         return response()->json(['success' => true]);
@@ -59,7 +61,9 @@ class AdminFrameController extends Controller
     // Menghapus Folder dan isinya
     public function deleteFolder($id)
     {
-        $folder = FrameType::find($id);
+        $folderId = str_replace('folder_', '', $id);
+        $folder = FrameType::find($folderId);
+        
         if ($folder) {
             foreach ($folder->frames as $frame) {
                 $frame->clearMediaCollection('framesSettings');
@@ -74,23 +78,27 @@ class AdminFrameController extends Controller
     public function saveFrame(Request $request)
     {
         $typeId = str_replace('folder_', '', $request->folder_id);
-        $isNewFrame = str_contains($request->frame_id, 'folder_');
-
-        if ($isNewFrame) {
+        
+        if (Str::contains($request->frame_id, 'folder_') || Str::contains($request->frame_id, 'new_')) {
             $frame = new FrameSetting();
         } else {
             $frame = FrameSetting::findOrFail($request->frame_id);
         }
 
-        // HANYA MASUKKAN FIELD YANG ADA DI DATABASE SAJA
+        // 1. SIMPAN DATA KE FRAME SETTING
         $frame->type_id = $typeId;
         $frame->name = $request->name;
         $frame->orientation = strtolower($request->orientation);
         $frame->masks = $request->masks; // Simpan array koordinat
-        
-        // TIDAK ADA LAGI PENYIMPANAN $frame->width dan $frame->height!
         $frame->save();
 
+        if ($request->has('paper_size')) {
+            \App\Models\FrameType::where('id', $typeId)->update([
+                'type' => $request->paper_size // Simpan ukuran kertas (misal: A3, 4R) ke sini
+            ]);
+        }
+
+        // 3. SIMPAN GAMBAR FOTO
         if ($request->image_base64 && str_starts_with($request->image_base64, 'data:image')) {
             $frame->clearMediaCollection('framesSettings');
             $frame->addMediaFromBase64($request->image_base64)

@@ -25,7 +25,7 @@
 
         protected static ?string $navigationIcon = 'heroicon-o-camera';
         protected static ?string $navigationLabel = 'List Booking';
-        protected static ?string $navigationGroup = 'Photobooth';
+        protected static ?string $navigationGroup = 'Studio';
         protected static ?int $navigationSort = 1;
         public static function form(Form $form): Form
         {

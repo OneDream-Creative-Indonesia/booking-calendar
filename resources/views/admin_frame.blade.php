@@ -919,7 +919,7 @@
             const fId = document.getElementById('frame-id').value;
             const fName = document.getElementById('frame-name').value || 'Untitled Frame';
             const fOrient = document.getElementById('frame-orientation').value;
-
+            const fPaper = document.getElementById('frame-paper').value;
             const masksData = maskRects.map(rect => {
                 return {
                     x: Math.round(rect.left),
@@ -935,6 +935,7 @@
                 frame_id: fId, 
                 name: fName,
                 orientation: fOrient,
+                paper_size: fPaper,
                 masks: masksData,
                 image_base64: bgBase64 
             };

@@ -17,8 +17,8 @@ class FrameResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-identification';
     protected static ?string $navigationLabel = 'Frames Preview';
-    protected static ?string $navigationGroup = 'Section Settings';
-    protected static ?int $navigationSort = 5;
+    protected static ?string $navigationGroup = 'Section';
+    protected static ?int $navigationSort = 2;
     public static function form(Form $form): Form
     {
         return $form

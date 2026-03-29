@@ -18,8 +18,8 @@ class PhotoGridResource extends Resource
     protected static ?string $model = PhotoGrid::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-table-cells';
-    protected static ?string $navigationGroup = 'Section Settings';
-    protected static ?int $navigationSort = 1;   
+    protected static ?string $navigationGroup = 'Section';
+    protected static ?int $navigationSort = 3;   
     public static function form(Form $form): Form
     {
         return $form
