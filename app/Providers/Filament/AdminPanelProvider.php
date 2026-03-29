@@ -20,6 +20,7 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Filament\Enums\ThemeMode;
 use Filament\View\PanelsRenderHook;
+use Filament\Navigation\NavigationItem;
 class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
@@ -59,6 +60,13 @@ class AdminPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
                 \Hasnayeen\Themes\Http\Middleware\SetTheme::class
+            ])
+            ->navigationItems([
+                NavigationItem::make('Halaman Antrian') // Nama menu di sidebar
+                    ->url('https://snapfunstudio.id/antrian', shouldOpenInNewTab: true) // URL tujuan, set true agar buka di tab baru
+                    ->icon('heroicon-o-queue-list') // Ikon antrian
+                    ->group('Photobooth') // Akan masuk ke bawah kategori Photobooth (opsional)
+                    ->sort(10), // Urutan menu
             ])
             ->authMiddleware([
                 Authenticate::class,
