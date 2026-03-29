@@ -104,7 +104,18 @@ class ProjectResource extends Resource
                     ->color('danger')
                     ->button()
                     ->outlined()
-                    ->extraAttributes(['style' => 'display: none !important;']),
+                    ->extraAttributes(['style' => 'display: none !important;'])
+                    // TAMBAHKAN PERINTAH AFTER INI:
+                    ->after(function (Project $record) {
+                        // Hapus semua file foto fisik dari server saat proyek dihapus
+                        if (is_array($record->photos)) {
+                            foreach ($record->photos as $photo) {
+                                if (\Illuminate\Support\Facades\Storage::disk('public')->exists($photo)) {
+                                    \Illuminate\Support\Facades\Storage::disk('public')->delete($photo);
+                                }
+                            }
+                        }
+                    }),
             ])
             // KOSONGKAN Bulk Actions agar "Checkbox" di kiri hilang (Sesuai desain Figma)
             ->bulkActions([])
