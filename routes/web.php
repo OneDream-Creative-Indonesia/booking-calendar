@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Project;
 use App\Http\Controllers\{
     BookingController,
     VoucherController,
@@ -15,9 +16,12 @@ use App\Http\Controllers\{
     PhotoOrderController,
     FrameController,
     TickettingReport,
+    FrameSettingController,
+    AdminFrameController,
 };
 use Illuminate\Support\Facades\Artisan;
-
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 // =====================================================
 // 🧍 ROUTES: PUBLIC BOOKING PAGE
 // =====================================================
@@ -85,3 +89,54 @@ Route::get('/photobooth', \App\Livewire\TicketingForms::class)->name('ticketing-
 Route::get('/edit', function() {
      return view('edit');
     });
+
+//sound grid
+Route::get('/antrian', function() {
+     return view('antrian');
+    });
+// =====================================================
+// 🔊 ROUTES: API SISTEM ANTREAN
+// =====================================================
+Route::get('/api/antrian/get_queue', function() {
+    try {
+        // Ambil semua data dari tabel ticketings menggunakan DB Facade bawaan Laravel
+        $queue = DB::table('ticketings')->orderBy('id', 'asc')->get();
+        return response()->json(['success' => true, 'data' => $queue, 'history' => []]);
+    } catch (\Exception $e) {
+        return response()->json(['success' => false, 'message' => $e->getMessage()]);
+    }
+});
+
+Route::post('/api/antrian/update_status', function(Request $request) {
+    $id = $request->input('id');
+    if ($id) {
+        try {
+            // HAPUS DATA: Hilangkan data dari database setelah berhasil dipanggil
+            DB::table('ticketings')->where('id', $id)->delete();
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+    return response()->json(['success' => false, 'message' => 'ID tidak ditemukan']);
+});
+// Rute untuk menampilkan data JSON frame ke Editor
+Route::get('/api/get-frames', [FrameSettingController::class, 'index']);
+Route::get('/admin/frame-manager', function() {
+    return view('admin_frame');
+})->middleware('auth'); 
+
+Route::get('/api/admin/get-frames', [\App\Http\Controllers\AdminFrameController::class, 'getFrames']);
+Route::post('/api/admin/create-folder', [\App\Http\Controllers\AdminFrameController::class, 'createFolder']);
+Route::delete('/api/admin/delete-folder/{id}', [\App\Http\Controllers\AdminFrameController::class, 'deleteFolder']);
+Route::post('/api/admin/save-frame', [\App\Http\Controllers\AdminFrameController::class, 'saveFrame']);
+Route::get('/', function (\Illuminate\Http\Request $request) {
+    if ($request->has('album')) {
+        $project = \App\Models\Project::where('project_code', $request->query('album'))->firstOrFail();
+        return view('project-gallery', [
+            'project' => $project
+        ]);
+    }
+    
+    return view('welcome');
+})->middleware('auth'); 

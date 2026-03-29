@@ -26,9 +26,9 @@ class BlockedDaysResource extends Resource
     protected static ?string $model = BlockedDate::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-x-mark';
-    protected static ?string $navigationLabel = 'Studio Tidak Tersedia';
-    protected static ?string $pluralModelLabel = 'Studio Tidak Tersedia';
-    protected static ?string $navigationGroup = 'Settings';
+    protected static ?string $navigationLabel = 'Studios Unavailable';
+    protected static ?string $pluralModelLabel = 'Studios Unavailable';
+    protected static ?string $navigationGroup = 'Operational';
     protected static ?int $navigationSort = 3;
     public static function form(Form $form): Form
     {

@@ -18,8 +18,8 @@ class OperationalSettingsResource extends Resource
     protected static ?string $model = OperationalHour::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-clock';
-    protected static ?string $navigationLabel = 'Jam Operasional';
-    protected static ?string $navigationGroup = 'Settings';
+    protected static ?string $navigationLabel = 'Operating Hours';
+    protected static ?string $navigationGroup = 'Operational';
     protected static ?int $navigationSort = 1;
     public static function form(Form $form): Form
     {

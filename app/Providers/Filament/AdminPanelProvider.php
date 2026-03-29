@@ -29,12 +29,13 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
-            ->favicon(asset('img/logo/favicon.png'))
-            ->brandLogo(asset('img/logo/logo.svg'))
-            ->darkModeBrandLogo(fn () => view('filament.logo'))
+            ->favicon(asset('img/logo/Logo Snapfun-01.svg'))
+            ->brandLogo(asset('img/logo/Logo Snapfun-01.svg'))
+            ->darkModeBrandLogo(asset('img/logo/Logo Snapfun-02.png'))
             ->colors([
                 'primary' => '#01013D',
             ])
+            ->brandLogoHeight('7rem')
             ->defaultThemeMode(ThemeMode::Dark)
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')

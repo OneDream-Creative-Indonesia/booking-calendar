@@ -20,9 +20,9 @@ class PackageResource extends Resource
 {
     protected static ?string $model = Package::class;
     protected static ?string $navigationIcon = 'heroicon-o-inbox-stack';
-    protected static ?string $navigationGroup = 'Settings';
     protected static ?string $navigationLabel = 'Paket Settings';
-    protected static ?int $navigationSort = 2;
+    protected static ?string $navigationGroup = 'Operational';
+    protected static ?int $navigationSort = 4;
     public static function form(Form $form): Form
     {
         return $form->schema([

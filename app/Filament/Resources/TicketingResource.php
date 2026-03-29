@@ -23,7 +23,8 @@ class TicketingResource extends Resource
     protected static ?string $model = Ticketing::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-ticket';
-    protected static ?int $navigationSort = 4;
+    protected static ?string $navigationGroup = 'Photobooth';
+    protected static ?int $navigationSort = 3;
     public static function getNavigationLabel(): string
     {
         return __('Ticketing');
