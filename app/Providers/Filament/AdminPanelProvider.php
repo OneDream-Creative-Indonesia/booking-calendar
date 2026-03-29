@@ -62,11 +62,17 @@ class AdminPanelProvider extends PanelProvider
                 \Hasnayeen\Themes\Http\Middleware\SetTheme::class
             ])
             ->navigationItems([
-                NavigationItem::make('Halaman Antrian') // Nama menu di sidebar
-                    ->url('https://snapfunstudio.id/antrian', shouldOpenInNewTab: true) // URL tujuan, set true agar buka di tab baru
-                    ->icon('heroicon-o-queue-list') // Ikon antrian
-                    ->group('Photobooth') // Akan masuk ke bawah kategori Photobooth (opsional)
-                    ->sort(10), // Urutan menu
+                NavigationItem::make('Halaman Antrian') 
+                    ->url('https://snapfunstudio.id/antrian', shouldOpenInNewTab: true) 
+                    ->icon('heroicon-o-queue-list') 
+                    ->group('Photobooth')
+                    ->sort(10),
+                    NavigationItem::make('Snap Edit')
+                    ->url('https://snapfunstudio.id/edit', shouldOpenInNewTab: true)
+                    ->icon('heroicon-o-paint-brush') 
+                    ->group('Photobooth')
+                    ->sort(11),
+
             ])
             ->authMiddleware([
                 Authenticate::class,
