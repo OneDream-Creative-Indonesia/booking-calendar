@@ -77,7 +77,8 @@ class AdminPanelProvider extends PanelProvider
             ->navigationGroups([
                 'Studio', 
                 'Photobooth',        
-                'Operational',       
+                'Operational',
+                'Section',       
                 'Settings',        
             ])
             ->authMiddleware([
