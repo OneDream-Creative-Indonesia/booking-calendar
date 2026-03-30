@@ -18,6 +18,7 @@ use App\Http\Controllers\{
     TickettingReport,
     FrameSettingController,
     AdminFrameController,
+    PhotoLinkController,
 };
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Http\Request;
@@ -58,45 +59,30 @@ Route::get('/blocked-dates', [OperationalHourController::class, 'blockedTimes'])
 Route::get('/auth/{provider}/redirect', [SocialiteController::class, 'redirect'])->name('socialite.redirect');
 Route::get('/auth/{provider}/callback', [SocialiteController::class, 'callback'])->name('socialite.callback');
 
-// ------------------------------
-// ROUTE UNTUK ADMIN / GOOGLE CALENDAR SYNC
-// ------------------------------
+
 Route::get('/admin/google/connect', [GoogleCalendarController::class, 'redirectToGoogle'])->name('google.connect');
 Route::get('/google/callback', [GoogleCalendarController::class, 'handleGoogleCallback'])->name('google.callback');
 
 
-// =====================================================
-// Export Booking Csv
-// =====================================================
 Route::get('/export-bookings', [BookingExportController::class, 'exportCsv'])->name('export.bookings');
-// =====================================================
-// 🚪 ROUTES: LOGOUT
-// =====================================================
 Route::post('/logout', function () {
     Auth::logout();
     return redirect('/');
 })->name('logout');
 
-//Frame
 Route::get('/api/frames', [FrameController::class, 'index']);
-//ticketing
 Route::get('/ticketing/export', [TickettingReport::class, 'exportCsv'])->name('ticketings_reports.export');
 
-//photobooth
 Route::get('/photobooth', \App\Livewire\TicketingForms::class)->name('ticketing-forms');
 
-//edit grid
 Route::get('/edit', function() {
      return view('edit');
     });
 
-//sound grid
 Route::get('/antrian', function() {
      return view('antrian');
     });
-// =====================================================
-// 🔊 ROUTES: API SISTEM ANTREAN
-// =====================================================
+
 Route::get('/api/antrian/get_queue', function() {
     try {
         // Ambil semua data dari tabel ticketings menggunakan DB Facade bawaan Laravel
@@ -120,7 +106,6 @@ Route::post('/api/antrian/update_status', function(Request $request) {
     }
     return response()->json(['success' => false, 'message' => 'ID tidak ditemukan']);
 });
-// Rute untuk menampilkan data JSON frame ke Editor
 Route::get('/api/get-frames', [FrameSettingController::class, 'index']);
 Route::get('/admin/frame-manager', function() {
     return view('admin_frame');
@@ -130,13 +115,16 @@ Route::get('/api/admin/get-frames', [\App\Http\Controllers\AdminFrameController:
 Route::post('/api/admin/create-folder', [\App\Http\Controllers\AdminFrameController::class, 'createFolder']);
 Route::delete('/api/admin/delete-folder/{id}', [\App\Http\Controllers\AdminFrameController::class, 'deleteFolder']);
 Route::post('/api/admin/save-frame', [\App\Http\Controllers\AdminFrameController::class, 'saveFrame']);
-Route::get('/', function (\Illuminate\Http\Request $request) {
-    if ($request->has('album')) {
-        $project = \App\Models\Project::where('project_code', $request->query('album'))->firstOrFail();
-        return view('project-gallery', [
-            'project' => $project
-        ]);
-    }
+Route::prefix('photo-link')->name('photo-link.')->group(function () {
+    Route::get('/', [PhotoLinkController::class, 'index'])->name('index');
+    Route::get('/album/{id}', [PhotoLinkController::class, 'customerView'])->name('customer');
     
-    return view('welcome');
-})->middleware('auth'); 
+    // Auth & Actions
+    Route::post('/login', [PhotoLinkController::class, 'login'])->name('login');
+    Route::get('/logout', [PhotoLinkController::class, 'logout'])->name('logout');
+    
+    // API & Downloads
+    Route::post('/api/action', [PhotoLinkController::class, 'apiAction'])->name('api.action');
+    Route::get('/download/file/{file}', [PhotoLinkController::class, 'downloadFile'])->name('download.file');
+    Route::get('/download/zip/{album_id}', [PhotoLinkController::class, 'downloadZip'])->name('download.zip');
+});

@@ -303,7 +303,7 @@
             .packages-grid { grid-template-columns: 1fr; }
             .character-art-desktop { display: none; }
             .character-art-mobile svg { position: absolute; }
-            .character-art-mobile { display: block;left: 50px;flex-shrink: 0;position: relative; top: 80px;}
+            .character-art-mobile { display: block;;flex-shrink: 0;position: relative;}
             .background-grid-container {z-index: 2;}
             .schedule-layout { gap: 1.5rem;}
         }
@@ -364,7 +364,7 @@
                             <img src="{{ asset('img/Pinpin-05.png') }}" alt="" style="height:300px;">
                              </div>
                         <div class="character-art-mobile">
-                            <img src="{{ asset('img/Pinpin-05.png') }}" alt="" style="height:200px;" class="gambar">
+                            <img src="{{ asset('img/Pinpin-05.png') }}" alt="" style="height:200px;">
                         </div>
                         <ul id="package-detail-list"></ul>
                     </div>

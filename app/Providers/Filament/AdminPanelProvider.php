@@ -67,9 +67,14 @@ class AdminPanelProvider extends PanelProvider
                     ->icon('heroicon-o-queue-list') 
                     ->group('Photobooth')
                     ->sort(2),
-                    NavigationItem::make('Photo Edit')
+                NavigationItem::make('Photo Edit')
                     ->url('https://snapfunstudio.id/edit', shouldOpenInNewTab: true)
                     ->icon('heroicon-o-paint-brush') 
+                    ->group('Studio')
+                    ->sort(3),
+                NavigationItem::make('Photo Link')
+                    ->url('http://127.0.0.1:8000/photo-link', shouldOpenInNewTab: true)
+                    ->icon('heroicon-o-camera') 
                     ->group('Studio')
                     ->sort(3),
 
