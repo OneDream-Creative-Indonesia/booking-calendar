@@ -78,7 +78,6 @@ class AdminPanelProvider extends PanelProvider
                 'Studio', 
                 'Photobooth',        
                 'Operational',
-                'Section',       
                 'Settings',        
             ])
             ->authMiddleware([
