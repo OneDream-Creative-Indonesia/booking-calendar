@@ -73,7 +73,7 @@ class AdminPanelProvider extends PanelProvider
                     ->group('Studio')
                     ->sort(3),
                 NavigationItem::make('Photo Link')
-                    ->url('http://127.0.0.1:8000/photo-link', shouldOpenInNewTab: true)
+                    ->url('https://snapfunstudio.id/photo-link', shouldOpenInNewTab: true)
                     ->icon('heroicon-o-camera') 
                     ->group('Studio')
                     ->sort(3),
