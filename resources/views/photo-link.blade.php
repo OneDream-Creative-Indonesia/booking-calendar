@@ -50,10 +50,16 @@
     <!-- 1. DASHBOARD ADMIN -->
     <div class="flex-1 bg-[#f3f4f6] dot-grid flex flex-col h-screen overflow-hidden relative">
         
-        <!-- Header Utama (Menggantikan Sidebar) -->
+        <!-- Header Utama -->
         <header class="bg-white border-b border-gray-200 px-4 md:px-8 py-4 flex justify-between items-center z-20 shadow-sm shrink-0 w-full">
             <div class="flex items-center gap-3">
-                <img src="{{ asset('img//logo/Logo Snapfun-01.svg') }}" alt="" style="height:60px;">
+                <div class="w-10 h-10 bg-[#355faa] rounded-xl flex items-center justify-center text-white shadow-md shadow-blue-900/20">
+                    <i data-lucide="layout-dashboard"></i>
+                </div>
+                <div>
+                    <h2 class="font-bold text-lg md:text-xl leading-none text-gray-900">Snap Link</h2>
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Admin Panel</p>
+                </div>
             </div>
             
             <!-- Tombol Kembali ke Dashboard Utama -->
@@ -245,10 +251,7 @@
                 <p class="text-[10px] font-bold text-[#355faa] uppercase tracking-widest mb-0.5">{{ $paket }}</p>
                 <h1 class="text-gray-900 font-bold text-lg truncate max-w-[200px] leading-tight">{{ $current_album['name'] }}</h1>
             </div>
-            <a href="{{ url('/admin') }}" class="flex items-center gap-2 px-3 md:px-4 py-2 bg-white border border-gray-200 text-gray-600 rounded-xl hover:bg-gray-50 hover:text-gray-900 font-bold text-xs transition-all shadow-sm btn-touch">
-                <i data-lucide="arrow-left" size="16"></i> 
-                <span class="hidden sm:inline">Kembali ke Dashboard</span>
-            </a>
+            <!-- Tombol Kembali dihapus dari sini sesuai permintaan Anda -->
         </header>
 
         <main class="flex-1 overflow-y-auto pt-20 pb-32 px-4 md:px-8 mt-4 custom-scrollbar bg-[#f9fafb]">
@@ -267,13 +270,10 @@
                 <div class="photo-item relative aspect-[4/5] bg-white rounded-xl overflow-hidden group shadow-sm border border-gray-100">
                     <img src="{{ $photo['url'] }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy">
                     
-                    @php 
-                        $ext = pathinfo($photo['file'], PATHINFO_EXTENSION);
-                        $custom_dl_name = "Snap Fun_" . $paket . "_" . $current_album['name'] . "_" . ($idx + 1) . "." . $ext;
-                    @endphp
+                    <!-- Perbaikan Link Unduh agar Menggunakan NAMA ASLI dan Memaksa Download di Android -->
                     <div class="normal-overlay absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
-                        <a href="{{ route('photo-link.download.file', ['file' => $photo['file']]) }}?dl_name={{ urlencode($custom_dl_name) }}" class="w-full bg-white text-[#355faa] py-2 rounded-lg text-[10px] font-bold text-center uppercase tracking-widest hover:bg-gray-50 shadow-lg btn-touch">
-                            Unduh
+                        <a href="{{ route('photo-link.download.file', ['file' => $photo['file']]) }}?dl_name={{ urlencode($photo['name']) }}" download="{{ $photo['name'] }}" class="w-full bg-white text-[#355faa] py-2 rounded-lg text-[10px] font-bold text-center uppercase tracking-widest hover:bg-gray-50 shadow-lg btn-touch flex items-center justify-center gap-1.5">
+                            <i data-lucide="download" size="14"></i> Unduh
                         </a>
                     </div>
 
@@ -315,7 +315,7 @@
         <div id="downloadModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-6">
             <div class="bg-white p-8 rounded-[2rem] w-full max-w-sm shadow-2xl animate-in zoom-in duration-300 text-center relative">
                 <div class="animate-spin rounded-full h-16 w-16 border-4 border-gray-200 border-t-[#355faa] mx-auto mb-6 mt-4"></div>
-                <h3 class="font-bold text-xl text-gray-900 mb-2">Tunggu Sebentar...</h3>
+                <h3 class="font-bold text-xl text-gray-900 mb-2">Mempersiapkan File...</h3>
                 <p class="text-sm text-gray-500 font-medium leading-relaxed">Sabar ya pinpin lagi siapin file kamu buat di download</p>
             </div>
         </div>
@@ -590,7 +590,6 @@
 
         @if ($mode === 'customer_view')
         const albumData = @json(['id' => $current_album['id'], 'paket' => $paket, 'name' => $current_album['name']]);
-        const photos = @json($current_album['photos']);
         
         const timerEl = document.getElementById('timer');
         if(timerEl) {
@@ -606,32 +605,16 @@
             setInterval(updateTimer, 1000);
         }
 
-        async function downloadAll() {
-            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        // --- UPDATE PENTING UNTUK BUG DOWNLOAD ANDROID MENGGUNAKAN ZIP ---
+        function downloadAll() {
             const modal = document.getElementById('downloadModal');
             modal.classList.remove('hidden');
 
-            if (isIOS) {
-                setTimeout(() => {
-                    window.location.href = `{{ url('/photo-link/download/zip') }}/${albumData.id}`;
-                    setTimeout(() => { modal.classList.add('hidden'); }, 3000);
-                }, 1000); 
-            } else {
-                for(let i=0; i<photos.length; i++) {
-                    const a = document.createElement('a');
-                    const ext = photos[i].file.split('.').pop();
-                    const customName = `Snap Fun_${albumData.paket}_${albumData.name}_${i+1}.${ext}`;
-                    
-                    a.href = `{{ url('/photo-link/download/file') }}/${encodeURIComponent(photos[i].file)}?dl_name=${encodeURIComponent(customName)}`;
-                    a.download = customName;
-                    document.body.appendChild(a); 
-                    a.click(); 
-                    document.body.removeChild(a);
-                    
-                    await new Promise(r => setTimeout(r, 600)); 
-                }
-                modal.classList.add('hidden');
-            }
+            // Kita selalu menggunakan ZIP untuk "Simpan Semua" agar sangat aman dari pemblokiran popup/download beruntun browser Chrome (Mobile maupun Desktop).
+            setTimeout(() => {
+                window.location.href = `{{ url('/photo-link/download/zip') }}/${albumData.id}`;
+                setTimeout(() => { modal.classList.add('hidden'); }, 3500);
+            }, 1000); 
         }
 
         let gifMode = false;

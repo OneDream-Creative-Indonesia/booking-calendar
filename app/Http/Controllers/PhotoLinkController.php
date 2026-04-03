@@ -94,8 +94,7 @@ class PhotoLinkController extends Controller
     {
         // 100% Cek menggunakan Session Login Bawaan Laravel
         if (!Auth::check()) {
-            // Jika belum login, tendang ke halaman awal atau login laravel
-            return redirect('/'); 
+            return redirect('/booking'); 
         }
 
         $db_all = $this->getDb();
@@ -143,7 +142,11 @@ class PhotoLinkController extends Controller
         $custom_name = $request->query('dl_name', basename($file));
 
         if (File::exists($target_file)) {
-            return response()->download($target_file, $custom_name);
+            // Memaksa browser (khususnya Android) untuk mengunduh, bukan membuka file di tab baru
+            return response()->download($target_file, $custom_name, [
+                'Content-Type' => 'application/octet-stream',
+                'Content-Disposition' => 'attachment; filename="' . $custom_name . '"',
+            ]);
         }
         abort(404, 'File tidak ditemukan.');
     }
@@ -166,9 +169,8 @@ class PhotoLinkController extends Controller
                 foreach ($album['photos'] as $idx => $photo) {
                     $target_file = $this->storage_dir . '/' . $photo['file'];
                     if (File::exists($target_file)) {
-                        $ext = pathinfo($photo['file'], PATHINFO_EXTENSION);
-                        $custom_name = "Snap Fun_" . $paket . "_" . $album['name'] . "_" . ($idx + 1) . "." . $ext;
-                        $zip->addFile($target_file, $custom_name);
+                        // MENGGUNAKAN NAMA ASLI DI DALAM ZIP
+                        $zip->addFile($target_file, $photo['name']);
                     }
                 }
                 $zip->close();
@@ -184,7 +186,6 @@ class PhotoLinkController extends Controller
     // --- API POST METHODS (AJAX) ---
     public function apiAction(Request $request)
     {
-        // Izinkan akses API HANYA JIKA sudah login lewat Laravel Auth
         if (!Auth::check()) {
             return response()->json(['success' => false, 'message' => 'Unauthorized. Harap login.'], 401);
         }
@@ -212,15 +213,21 @@ class PhotoLinkController extends Controller
             $album_id = $request->input('album_id');
             if (isset($db[$album_id]) && $request->hasFile('photo')) {
                 $file = $request->file('photo');
-                $ext = $file->getClientOriginalExtension();
-                $fname = $album_id . '_' . time() . '_' . mt_rand(1000, 9999) . '.' . $ext;
                 
+                // Mengambil nama asli file
+                $originalName = $file->getClientOriginalName();
+                
+                // Menambahkan random ID ke nama sistem agar tidak tertimpa jika ada nama file sama, 
+                // tapi nama aslinya tetap kita simpan di database.
+                $safeName = preg_replace('/[^A-Za-z0-9.\-_]/', '_', $originalName);
+                $fname = $album_id . '_' . time() . '_' . mt_rand(100, 999) . '_' . $safeName;
+                
+                // Move tidak mengompres file sama sekali (raw data transfer)
                 $file->move($this->storage_dir, $fname);
 
                 $db[$album_id]['photos'][] = [
-                    'name' => $file->getClientOriginalName(),
+                    'name' => $originalName, // NAMA ASLI DISIMPAN DI SINI
                     'file' => $fname,
-                    // Di Laravel URL gambar diambil dari /uploads/...
                     'url' => asset('uploads/' . $fname) 
                 ];
                 $this->saveDb($db);
@@ -253,7 +260,7 @@ class PhotoLinkController extends Controller
 
         if ($action === 'delete_photo') {
             $id = $request->input('id');
-            $file_name = $request->input('file_name'); // Kita ubah dari URL ke file_name untuk keakuratan
+            $file_name = $request->input('file_name'); 
             if (isset($db[$id])) {
                 foreach ($db[$id]['photos'] as $idx => $p) {
                     if ($p['file'] === $file_name) {
