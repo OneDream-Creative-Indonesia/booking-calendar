@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Project;
 use App\Http\Controllers\{
     BookingController,
     VoucherController,

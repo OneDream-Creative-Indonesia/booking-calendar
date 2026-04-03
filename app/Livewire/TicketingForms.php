@@ -8,14 +8,16 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
-use Filament\Notifications\Notification;
-use Illuminate\Support\Facades\Session;
 use Livewire\Component;
 
 class TicketingForms extends Component implements HasForms
 {
     use InteractsWithForms;
 
+    // Menandai apakah form sudah disubmit atau belum
+    public $isSuccess = false;
+
+    // Properti Form
     public $nama;
     public $email;
     public $jumlah;
@@ -72,11 +74,18 @@ class TicketingForms extends Component implements HasForms
             'transaction_type' => 'required|string|in:tunai,qris',
         ]);
 
+        // Simpan ke Database
         Ticketing::create($validate);
 
+        // Ubah tampilan ke halaman sukses
+        $this->isSuccess = true;
+    }
+
+    public function confirmToWA()
+    {
         $pembayaran = $this->transaction_type === 'qris' ? 'QRIS' : 'Tunai';
 
-       $pesan = "*Halo Snap Fun!*
+        $pesan = "*Halo Snap Fun!*
 
 Saya ingin konfirmasi booking *Pop Up Self Photo*
 
@@ -93,27 +102,12 @@ Saya ingin konfirmasi booking *Pop Up Self Photo*
 Mohon konfirmasinya ya, terima kasih 🙏";
 
         $encodedPesan = urlencode($pesan);
-
         $nomorWA = '6285117607254';
 
         $this->dispatch(
             'redirectToWA',
             url: "https://api.whatsapp.com/send?phone={$nomorWA}&text={$encodedPesan}"
         );
-
-
-        $this->resetForm();
-    }
-
-    public function resetForm()
-    {
-        $this->nama = '';
-        $this->email = '';
-        $this->jumlah = '';
-        $this->cetak = '';
-        $this->telpon = '';
-        $this->transaction_type = '';
-        $this->form->fill();
     }
 
     public function render()
