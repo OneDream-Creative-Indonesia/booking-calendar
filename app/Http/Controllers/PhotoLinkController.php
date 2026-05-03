@@ -3,277 +3,192 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Auth;
-use ZipArchive;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http; // Tambahkan ini untuk akses G-Drive API
 
 class PhotoLinkController extends Controller
 {
-    private $db_file;
-    private $storage_dir;
-
-    public function __construct()
-    {
-        // Simpan database.json secara aman di folder storage/app
-        $this->db_file = storage_path('app/database.json');
-        // Folder upload di public/uploads agar bisa diakses langsung via web
-        $this->storage_dir = public_path('uploads');
-
-        if (!File::exists($this->storage_dir)) {
-            File::makeDirectory($this->storage_dir, 0777, true);
-        }
-        if (!File::exists($this->db_file)) {
-            File::put($this->db_file, json_encode([]));
-        }
-
-        // Jalankan auto cleanup setiap kali controller dipanggil
-        $this->autoCleanup();
-    }
-
-    private function getDb()
-    {
-        $data = json_decode(File::get($this->db_file), true);
-        return is_array($data) ? $data : [];
-    }
-
-    private function saveDb($data)
-    {
-        File::put($this->db_file, json_encode($data, JSON_PRETTY_PRINT));
-    }
-
-    private function autoCleanup()
-    {
-        $db = $this->getDb();
-        $changed = false;
-        $now = time();
-
-        foreach ($db as $id => $album) {
-            if ($now >= $album['expires_at']) {
-                foreach ($album['photos'] as $p) {
-                    $filePath = $this->storage_dir . '/' . $p['file'];
-                    if (File::exists($filePath)) {
-                        File::delete($filePath);
-                    }
-                }
-                // Bersihkan file zip temporary jika ada
-                $zip_pattern = $this->storage_dir . '/temp_' . $id . '_*.zip';
-                foreach (glob($zip_pattern) as $zf) {
-                    @unlink($zf);
-                }
-                unset($db[$id]);
-                $changed = true;
-            }
-        }
-
-        if ($changed) {
-            $this->saveDb($db);
-        }
-    }
-
-    // Hitung ukuran folder (Helper)
-    private function folderSize($dir)
-    {
-        $size = 0;
-        foreach (glob(rtrim($dir, '/') . '/*', GLOB_NOSORT) as $each) {
-            $size += is_file($each) ? filesize($each) : $this->folderSize($each);
-        }
-        return $size;
-    }
-
-    private function formatBytes($bytes)
-    {
-        if ($bytes == 0) return '0 B';
-        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
-        $pow = floor(log($bytes) / log(1024));
-        return round($bytes / pow(1024, $pow), 2) . ' ' . $units[$pow];
-    }
-
-    // --- VIEW METHODS ---
-
+    // 1. TAMPILAN ADMIN DASHBOARD
     public function index()
     {
-        // 100% Cek menggunakan Session Login Bawaan Laravel
-        if (!Auth::check()) {
-            return redirect('/booking'); 
-        }
-
-        $db_all = $this->getDb();
-        $total_files = 0;
-        $active_links = 0;
-        foreach ($db_all as $a) {
-            $total_files += count($a['photos']);
-            if (time() < $a['expires_at']) $active_links++;
-        }
-        $total_storage = $this->formatBytes($this->folderSize($this->storage_dir));
-
+        // Ambil semua data project dari database
+        $db_all = DB::table('snap_links')->orderBy('created_at', 'desc')->get();
+        
         return view('photo-link', [
             'mode' => 'admin_dashboard',
             'db_all' => $db_all,
-            'active_links' => $active_links,
-            'total_files' => $total_files,
-            'total_storage' => $total_storage
+            'active_links' => DB::table('snap_links')->where('expires_at', '>', now())->count(),
         ]);
     }
 
+    // 2. TAMPILAN GALERI PELANGGAN
     public function customerView($id)
     {
-        $db = $this->getDb();
-        $id = strtoupper($id);
+        // Cari data album berdasarkan ID
+        $album = DB::table('snap_links')->where('album_id', strtoupper($id))->first();
 
-        if (isset($db[$id])) {
-            if (time() < $db[$id]['expires_at']) {
-                return view('photo-link', [
-                    'mode' => 'customer_view',
-                    'current_album' => $db[$id]
-                ]);
-            } else {
-                return view('photo-link', ['mode' => 'customer_expired']);
-            }
+        // Jika album tidak ada, tampilkan halaman error
+        if (!$album) {
+            return view('photo-link', ['mode' => 'error']);
         }
 
-        return view('photo-link', ['mode' => 'customer_not_found']);
+        return view('photo-link', [
+            'mode' => 'customer_view',
+            'current_album' => [
+                'id' => $album->album_id,
+                'name' => $album->name,
+                'paket' => $album->paket,
+                'folder_id' => $album->folder_id,
+                'expires_at' => strtotime($album->expires_at)
+            ]
+        ]);
     }
 
-    // --- ACTION METHODS ---
-
-    public function downloadFile(Request $request, $file)
-    {
-        $target_file = $this->storage_dir . '/' . basename($file);
-        $custom_name = $request->query('dl_name', basename($file));
-
-        if (File::exists($target_file)) {
-            // Memaksa browser (khususnya Android) untuk mengunduh, bukan membuka file di tab baru
-            return response()->download($target_file, $custom_name, [
-                'Content-Type' => 'application/octet-stream',
-                'Content-Disposition' => 'attachment; filename="' . $custom_name . '"',
-            ]);
-        }
-        abort(404, 'File tidak ditemukan.');
-    }
-
-    public function downloadZip($album_id)
-    {
-        $album_id = strtoupper($album_id);
-        $db = $this->getDb();
-
-        if (isset($db[$album_id]) && extension_loaded('zip')) {
-            $album = $db[$album_id];
-            $paket = $album['paket'] ?? 'SelfPhoto';
-            $clean_name = preg_replace('/[^a-zA-Z0-9]/', '_', $album['name']);
-            $zip_name = "SnapFun_" . $paket . "_" . $clean_name . ".zip";
-            
-            $zip_file = $this->storage_dir . '/temp_' . $album_id . '_' . time() . '.zip';
-            $zip = new ZipArchive();
-            
-            if ($zip->open($zip_file, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
-                foreach ($album['photos'] as $idx => $photo) {
-                    $target_file = $this->storage_dir . '/' . $photo['file'];
-                    if (File::exists($target_file)) {
-                        // MENGGUNAKAN NAMA ASLI DI DALAM ZIP
-                        $zip->addFile($target_file, $photo['name']);
-                    }
-                }
-                $zip->close();
-
-                if (File::exists($zip_file)) {
-                    return response()->download($zip_file, $zip_name)->deleteFileAfterSend(true);
-                }
-            }
-        }
-        abort(500, 'Gagal membuat file ZIP.');
-    }
-
-    // --- API POST METHODS (AJAX) ---
+    // 3. FUNGSI UNTUK API BACKEND (AJAX DARI ADMIN)
     public function apiAction(Request $request)
     {
-        if (!Auth::check()) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized. Harap login.'], 401);
-        }
-
-        $db = $this->getDb();
         $action = $request->input('action');
+        $apiKey = env('GDRIVE_API_KEY'); // Pastikan udah diset di .env
 
-        if ($action === 'init_album') {
-            $album_id = strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 6));
-            $hours = (int)($request->input('hours', 168));
+        // -----------------------------------------------------------
+        // Aksi 1: Buat Link Biasa (Single)
+        // -----------------------------------------------------------
+        if ($action === 'create_album') {
+            preg_match('/(?:folders\/|id=)([\w-]+)/', $request->drive_link, $matches);
+            $folder_id = $matches[1] ?? null;
+
+            if (!$folder_id) {
+                return response()->json(['success' => false, 'message' => 'Link G-Drive tidak valid']);
+            }
+
+            DB::table('snap_links')->insert([
+                'album_id' => strtoupper(substr(md5(uniqid()), 0, 6)),
+                'name' => $request->name,
+                'paket' => $request->paket,
+                'drive_link' => $request->drive_link,
+                'folder_id' => $folder_id,
+                'group_name' => $request->group_name,
+                'expires_at' => now()->addHours((int)$request->hours),
+                'created_at' => now(),
+            ]);
+
+            return response()->json(['success' => true]);
+        }
+
+        // -----------------------------------------------------------
+        // Aksi 2: BATCH Create (Tarik Otomatis)
+        // -----------------------------------------------------------
+        if ($action === 'create_album_batch') {
+            preg_match('/(?:folders\/|id=)([\w-]+)/', $request->drive_link, $matches);
+            $main_folder_id = $matches[1] ?? null;
+
+            if (!$main_folder_id) {
+                return response()->json(['success' => false, 'message' => 'Link G-Drive (Folder Utama) tidak valid.']);
+            }
+
+            $group_name = trim($request->group_name);
             
-            $db[$album_id] = [
-                'id' => $album_id,
-                'name' => $request->input('name', 'Proyek Tanpa Judul'),
-                'paket' => $request->input('paket', 'Self Photo'),
-                'expires_at' => time() + ($hours * 3600),
-                'created_at' => time(),
-                'photos' => []
-            ];
-            $this->saveDb($db);
-            return response()->json(['success' => true, 'album_id' => $album_id]);
-        }
+            // Jika nama folder dashboard dikosongkan, tarik nama dari folder utama G-Drive
+            if (empty($group_name)) {
+                $parentResponse = Http::get("https://www.googleapis.com/drive/v3/files/{$main_folder_id}", [
+                    'key' => $apiKey,
+                    'fields' => 'name'
+                ]);
+                
+                if ($parentResponse->successful()) {
+                    $group_name = $parentResponse->json('name');
+                } else {
+                    $group_name = 'Proyek Batch';
+                }
+            }
 
-        if ($action === 'upload_single') {
-            $album_id = $request->input('album_id');
-            if (isset($db[$album_id]) && $request->hasFile('photo')) {
-                $file = $request->file('photo');
-                
-                // Mengambil nama asli file
-                $originalName = $file->getClientOriginalName();
-                
-                // Menambahkan random ID ke nama sistem agar tidak tertimpa jika ada nama file sama, 
-                // tapi nama aslinya tetap kita simpan di database.
-                $safeName = preg_replace('/[^A-Za-z0-9.\-_]/', '_', $originalName);
-                $fname = $album_id . '_' . time() . '_' . mt_rand(100, 999) . '_' . $safeName;
-                
-                // Move tidak mengompres file sama sekali (raw data transfer)
-                $file->move($this->storage_dir, $fname);
+            // Request ke Google Drive API untuk cari sub-folder
+            $response = Http::get("https://www.googleapis.com/drive/v3/files", [
+                'q' => "'" . $main_folder_id . "' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false",
+                'key' => $apiKey,
+                'fields' => 'files(id,name)',
+                'pageSize' => 1000
+            ]);
 
-                $db[$album_id]['photos'][] = [
-                    'name' => $originalName, // NAMA ASLI DISIMPAN DI SINI
-                    'file' => $fname,
-                    'url' => asset('uploads/' . $fname) 
+            if ($response->failed()) {
+                return response()->json(['success' => false, 'message' => 'Gagal akses API. Pastikan Folder Utama sudah di-set ke "Siapa saja yang memiliki link".']);
+            }
+
+            $files = $response->json('files');
+            
+            if (empty($files)) {
+                return response()->json(['success' => false, 'message' => 'Tidak ada sub-folder klien ditemukan di dalam link tersebut.']);
+            }
+
+            $insertData = [];
+            foreach ($files as $folder) {
+                $insertData[] = [
+                    'album_id' => strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 6)),
+                    'name' => $folder['name'], // Nama ambil dari folder
+                    'paket' => $request->paket,
+                    'drive_link' => 'https://drive.google.com/drive/folders/' . $folder['id'],
+                    'folder_id' => $folder['id'],
+                    'group_name' => $group_name,
+                    'expires_at' => now()->addHours((int)$request->hours),
+                    'created_at' => now()
                 ];
-                $this->saveDb($db);
-                return response()->json(['success' => true]);
             }
-            return response()->json(['success' => false, 'message' => 'Gagal menyimpan file']);
+
+            // Insert massal ke database
+            DB::table('snap_links')->insert($insertData);
+
+            return response()->json(['success' => true, 'count' => count($insertData)]);
         }
 
+        // -----------------------------------------------------------
+        // Aksi 3: Get Data untuk Modal Edit
+        // -----------------------------------------------------------
         if ($action === 'get_album') {
-            $id = $request->input('id');
-            if (isset($db[$id])) {
-                return response()->json(['success' => true, 'album' => $db[$id]]);
+            $album = DB::table('snap_links')->where('album_id', $request->id)->first();
+            if ($album) {
+                return response()->json(['success' => true, 'album' => $album]);
             }
             return response()->json(['success' => false]);
         }
 
+        // -----------------------------------------------------------
+        // Aksi 4: Update Data Edit
+        // -----------------------------------------------------------
+        if ($action === 'update_album') {
+            preg_match('/(?:folders\/|id=)([\w-]+)/', $request->drive_link, $matches);
+            $folder_id = $matches[1] ?? null;
+
+            if (!$folder_id) {
+                return response()->json(['success' => false, 'message' => 'Link Invalid']);
+            }
+
+            DB::table('snap_links')->where('album_id', $request->id)->update([
+                'name' => $request->name,
+                'paket' => $request->paket,
+                'drive_link' => $request->drive_link,
+                'folder_id' => $folder_id,
+                'group_name' => $request->group_name,
+            ]);
+
+            return response()->json(['success' => true]);
+        }
+
+        // -----------------------------------------------------------
+        // Aksi 5: Hapus Single Link
+        // -----------------------------------------------------------
         if ($action === 'delete_album') {
-            $id = $request->input('id');
-            if (isset($db[$id])) {
-                foreach ($db[$id]['photos'] as $p) {
-                    $filePath = $this->storage_dir . '/' . $p['file'];
-                    if (File::exists($filePath)) File::delete($filePath);
-                }
-                unset($db[$id]);
-                $this->saveDb($db);
-                return response()->json(['success' => true]);
-            }
-            return response()->json(['success' => false]);
+            DB::table('snap_links')->where('album_id', $request->id)->delete();
+            return response()->json(['success' => true]);
         }
 
-        if ($action === 'delete_photo') {
-            $id = $request->input('id');
-            $file_name = $request->input('file_name'); 
-            if (isset($db[$id])) {
-                foreach ($db[$id]['photos'] as $idx => $p) {
-                    if ($p['file'] === $file_name) {
-                        $filePath = $this->storage_dir . '/' . $p['file'];
-                        if (File::exists($filePath)) File::delete($filePath);
-                        unset($db[$id]['photos'][$idx]);
-                    }
-                }
-                $db[$id]['photos'] = array_values($db[$id]['photos']);
-                $this->saveDb($db);
-                return response()->json(['success' => true]);
-            }
-            return response()->json(['success' => false]);
+        // -----------------------------------------------------------
+        // Aksi 6: Hapus Folder Sekaligus
+        // -----------------------------------------------------------
+        if ($action === 'delete_group') {
+            DB::table('snap_links')->where('group_name', $request->group_name)->delete();
+            return response()->json(['success' => true]);
         }
+
+        return response()->json(['success' => false, 'message' => 'Aksi tidak ditemukan']);
     }
 }

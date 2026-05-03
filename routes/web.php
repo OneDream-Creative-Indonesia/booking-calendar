@@ -18,6 +18,7 @@ use App\Http\Controllers\{
     FrameSettingController,
     AdminFrameController,
     PhotoLinkController,
+
 };
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Http\Request;
@@ -114,6 +115,7 @@ Route::get('/api/admin/get-frames', [\App\Http\Controllers\AdminFrameController:
 Route::post('/api/admin/create-folder', [\App\Http\Controllers\AdminFrameController::class, 'createFolder']);
 Route::delete('/api/admin/delete-folder/{id}', [\App\Http\Controllers\AdminFrameController::class, 'deleteFolder']);
 Route::post('/api/admin/save-frame', [\App\Http\Controllers\AdminFrameController::class, 'saveFrame']);
+
 Route::prefix('photo-link')->name('photo-link.')->group(function () {
     Route::get('/', [PhotoLinkController::class, 'index'])->name('index');
     Route::get('/album/{id}', [PhotoLinkController::class, 'customerView'])->name('customer');
