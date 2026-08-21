@@ -5,152 +5,168 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Wajib di Laravel untuk request POST via AJAX/Fetch -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Sistem Pemanggil Pelanggan</title>
+    <title>Display Antrean Photobooth</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-</head>
-<body class="bg-slate-50 text-slate-800 font-sans min-h-screen">
-
-    <!-- Header -->
-    <header class="bg-blue-600 text-white p-4 shadow-md">
-        <div class="max-w-6xl mx-auto flex items-center gap-3">
-            <i data-lucide="volume-2" class="w-7 h-7"></i>
-            <h1 class="text-2xl font-bold tracking-wide">Sistem Pemanggil Pelanggan</h1>
-        </div>
-    </header>
-
-    <main class="max-w-6xl mx-auto p-4 md:p-6 mt-4">
+    <style>
+        body { margin: 0; overflow: hidden; background-color: black; }
         
-        <div id="tts-warning" class="hidden mb-6 p-4 bg-red-100 text-red-700 rounded-lg flex items-center gap-3 border border-red-200">
-            <i data-lucide="info" class="w-6 h-6 flex-shrink-0"></i>
-            <p><strong>Peringatan:</strong> Browser Anda tidak mendukung fitur Text-to-Speech. Suara tidak akan berfungsi.</p>
-        </div>
+        /* CLASS UNTUK MEMUTAR LAYAR WEB 90 DERAJAT (Searah Jarum Jam) */
+        .rotate-cw {
+            width: 100vh !important;
+            height: 100vw !important;
+            transform: rotate(90deg) translateY(-100%);
+            transform-origin: top left;
+        }
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        /* CLASS UNTUK MEMUTAR LAYAR WEB -90 DERAJAT (Berlawanan Jarum Jam / Bawaan Baru) */
+        .rotate-ccw {
+            width: 100vh !important;
+            height: 100vw !important;
+            transform: rotate(-90deg) translateX(-100%);
+            transform-origin: top left;
+        }
+    </style>
+</head>
+<body class="w-screen h-screen relative">
+
+    <!-- WRAPPER UTAMA: Ini yang akan diputar oleh CSS -->
+    <!-- DEFAULT: rotate-ccw (Kebalikan/180 derajat dari posisi sebelumnya) -->
+    <div id="main-wrapper" class="absolute top-0 left-0 flex flex-col bg-white rotate-ccw transition-transform duration-500">
+        
+        <!-- Tombol Rahasia Pemutar Layar (Pojok Kiri Atas) -->
+        <button onclick="toggleRotation(event)" class="absolute top-2 left-2 z-50 text-gray-300 hover:text-blue-500 bg-white/50 p-2 rounded-full cursor-pointer focus:outline-none shadow-sm backdrop-blur-sm">
+            <i data-lucide="rotate-cw" class="w-6 h-6"></i>
+        </button>
+
+        <!-- BAGIAN ATAS: INFORMASI ANTREAN (Bisa ditap untuk panggil selanjutnya) -->
+        <div onclick="callNext()" class="bg-white w-full flex items-center justify-between px-6 md:px-10 py-4 sm:py-6 lg:py-8 cursor-pointer select-none active:bg-gray-50 transition-colors relative z-10 shadow-[0_10px_40px_rgba(0,0,0,0.15)] flex-shrink-0 gap-2">
             
-            <!-- Kolom Kiri -->
-            <div class="lg:col-span-4 flex flex-col gap-6">
-                <!-- Panel Integrasi Database -->
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center gap-2 text-blue-600">
-                            <i data-lucide="database" class="w-5 h-5"></i>
-                            <h2 class="text-lg font-semibold">Koneksi Database</h2>
-                        </div>
-                        <div id="status-badge" class="flex items-center gap-1.5 px-2.5 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium border border-green-200 transition-colors duration-300">
-                            <i data-lucide="wifi" class="w-3 h-3 animate-pulse" id="wifi-icon"></i>
-                            <span id="status-text">Terhubung</span>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-slate-50 p-3 rounded-lg border border-slate-100 flex items-center justify-between">
-                        <span class="text-xs text-slate-500 flex items-center gap-1">
-                            <i data-lucide="activity" class="w-3.5 h-3.5"></i> Sync terakhir:
-                        </span>
-                        <span id="last-fetch-time" class="text-xs font-mono font-medium text-slate-700">-</span>
-                    </div>
-
-                    <!-- Area Pesan Error Database -->
-                    <div id="db-error-msg" class="hidden mt-3 text-xs text-red-600 bg-red-50 p-2.5 rounded-lg border border-red-200 break-words font-mono">
-                        <!-- Pesan error SQL akan tampil di sini -->
+            <!-- Kolom Kiri: Yang lagi foto & Selanjutnya -->
+            <div class="flex flex-col justify-center gap-2 sm:gap-3 flex-1 min-w-0">
+                <p class="text-gray-500 text-lg sm:text-xl md:text-2xl font-medium tracking-wide">Yang lagi foto...</p>
+                
+                <!-- Nomor Saat Ini -->
+                <div>
+                    <div class="bg-[#245DCD] text-white font-black text-4xl sm:text-6xl md:text-7xl rounded-xl sm:rounded-2xl px-6 sm:px-8 py-3 md:py-4 inline-block shadow-lg tracking-wider">
+                        <span id="current-queue">SF---</span>
                     </div>
                 </div>
-
-                <!-- Panel Daftar Antrean (Menunggu) -->
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex-grow flex flex-col h-[400px]">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center gap-2 text-blue-600">
-                            <i data-lucide="users" class="w-5 h-5"></i>
-                            <h2 class="text-lg font-semibold">Menunggu (<span id="queue-count">0</span>)</h2>
-                        </div>
-                    </div>
-                    
-                    <div id="queue-list" class="overflow-y-auto flex-grow pr-2 space-y-2">
-                        <!-- List antrean akan dimuat oleh JS -->
-                    </div>
+                
+                <!-- Antrean Selanjutnya -->
+                <div class="flex flex-wrap items-center gap-2 sm:gap-3 md:gap-4 text-base sm:text-lg md:text-2xl mt-1 md:mt-2">
+                    <span class="text-gray-700 font-medium whitespace-nowrap">Selanjutnya</span>
+                    <span class="bg-[#F6A820] text-black font-black px-3 sm:px-4 py-1.5 rounded-lg shadow-md whitespace-nowrap" id="next-queue">SF---</span>
                 </div>
             </div>
 
-            <!-- Kolom Kanan -->
-            <div class="lg:col-span-8 flex flex-col gap-6">
-                <!-- Layar Utama -->
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-8 flex flex-col items-center justify-center min-h-[350px] text-center relative overflow-hidden">
-                    
-                    <div id="speaking-indicator" class="hidden absolute top-6 right-6 flex items-center gap-2 text-green-600 animate-pulse">
-                        <i data-lucide="mic" class="w-6 h-6"></i>
-                        <span class="font-semibold text-sm tracking-widest uppercase">Sedang Memanggil</span>
-                    </div>
-
-                    <h3 class="text-slate-500 text-xl font-medium mb-4 uppercase tracking-widest">
-                        Panggilan Saat Ini
-                    </h3>
-                    
-                    <div class="mb-8">
-                        <h2 id="current-name" class="text-4xl text-slate-300 font-bold max-w-full px-4 break-words">
-                            Belum ada panggilan
-                        </h2>
-                    </div>
-
-                    <button id="btn-recall" class="hidden flex items-center gap-2 text-slate-500 hover:text-blue-600 transition-colors bg-slate-100 hover:bg-blue-50 py-2 px-6 rounded-full font-medium">
-                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
-                        Ulangi Panggilan
-                    </button>
-                </div>
-
-                <!-- Tombol Aksi Utama -->
-                <button id="btn-call-next" disabled class="relative overflow-hidden w-full py-5 rounded-xl flex items-center justify-center gap-4 text-2xl font-bold text-white transition-all transform active:scale-[0.98] shadow-lg bg-slate-300 cursor-not-allowed shadow-none">
-                    <i data-lucide="play" class="w-8 h-8 fill-current"></i>
-                    Panggil Selanjutnya
-                    <span id="enter-hint" class="hidden absolute bottom-2 right-4 text-xs font-normal opacity-70 flex items-center gap-1 bg-black/20 px-2 py-1 rounded-md">
-                        Tekan <kbd class="font-mono bg-white/20 px-1 rounded">Enter</kbd>
-                    </span>
-                </button>
-
-                <!-- Panel Riwayat (Sudah Dipanggil) -->
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 mt-2">
-                    <div class="flex items-center gap-2 text-slate-600 mb-4 border-b border-slate-100 pb-2">
-                        <i data-lucide="check-circle" class="w-5 h-5 text-green-500"></i>
-                        <h2 class="text-lg font-semibold">Sudah Dipanggil (Sesi Ini)</h2>
-                    </div>
-                    <div id="history-list" class="flex flex-wrap gap-2 max-h-32 overflow-y-auto pr-2">
-                        <!-- Riwayat akan dimuat oleh JS -->
-                    </div>
-                </div>
+            <!-- Kolom Kanan: Sisa Antrean -->
+            <div class="bg-[#CC3444] text-white rounded-2xl sm:rounded-3xl flex flex-col items-center justify-center shadow-xl py-6 sm:py-8 px-3 flex-shrink-0 w-auto min-w-[140px] sm:min-w-[180px] aspect-auto">
+                <span class="text-6xl sm:text-7xl md:text-8xl font-black leading-none tracking-tighter" id="queue-count">0</span>
+                <span class="text-sm sm:text-base md:text-lg font-medium tracking-wide mt-1 md:mt-2 text-center whitespace-nowrap">antrian lagi</span>
             </div>
-
         </div>
-    </main>
 
-    <!-- JavaScript untuk interaksi UI & Panggilan -->
+        <!-- BAGIAN BAWAH: TEMPAT VIDEO IKLAN (FLEX-1 MENGISI PENUH SISA LAYAR) -->
+        <div class="flex-1 bg-black relative w-full flex items-center justify-center pointer-events-none overflow-hidden">
+            
+            <!-- Indikator Loading Video Awal -->
+            <div id="video-loader" class="absolute inset-0 flex flex-col items-center justify-center text-white/50 z-0">
+                <i data-lucide="loader-2" class="w-10 h-10 animate-spin mb-2"></i>
+                <span class="text-sm font-medium tracking-widest uppercase">Memuat Video...</span>
+            </div>
+
+            <!-- Video Player -->
+            <!-- Kita hapus 'src' di HTML, karena akan di-load lewat JavaScript agar masuk RAM -->
+            <video 
+                id="promo-video"
+                autoplay 
+                loop 
+                muted 
+                playsinline
+                class="w-full h-full object-contain relative z-10 opacity-0 transition-opacity duration-1000"
+            ></video>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
     <script>
-        // Inisialisasi ikon
         lucide.createIcons();
 
         // State Aplikasi
         let queue = [];
-        let historyList = [];
-        let currentPerson = null;
-        let isSpeaking = false;
         let voices = [];
-        let pollingInterval;
+        let currentUtterance = null; 
 
         // Elemen DOM
-        const queueListEl = document.getElementById('queue-list');
+        const currentQueueEl = document.getElementById('current-queue');
+        const nextQueueEl = document.getElementById('next-queue');
         const queueCountEl = document.getElementById('queue-count');
-        const historyListEl = document.getElementById('history-list');
-        const currentNameEl = document.getElementById('current-name');
-        const btnCallNext = document.getElementById('btn-call-next');
-        const btnRecall = document.getElementById('btn-recall');
-        const speakingIndicator = document.getElementById('speaking-indicator');
-        const enterHint = document.getElementById('enter-hint');
-        const lastFetchTimeEl = document.getElementById('last-fetch-time');
+        const mainWrapper = document.getElementById('main-wrapper');
+        const videoEl = document.getElementById('promo-video');
+        const videoLoader = document.getElementById('video-loader');
+
+        // TRIK ANTI JARINGAN LEMAH: Load video ke RAM (Blob)
+        async function loadVideoToMemory() {
+            try {
+                // PERBAIKAN: Gunakan asset() Laravel atau setidaknya relatif dari root '/'
+                // Pastikan file mp4 berada di folder: public/img/sfanimasi.mp4
+                const videoPath = '{{ asset('img/sfanimasi.mp4') }}'; 
+                
+                const response = await fetch(videoPath);
+                if (!response.ok) throw new Error("Video tidak ditemukan");
+                
+                // Ubah video menjadi file data di memori sementara (RAM)
+                const blob = await response.blob();
+                
+                // Buat local URL yang tidak butuh internet sama sekali
+                const localVideoUrl = URL.createObjectURL(blob);
+                
+                // Pasang ke player
+                videoEl.src = localVideoUrl;
+                
+                videoEl.oncanplay = () => {
+                    videoLoader.style.display = 'none';
+                    videoEl.style.opacity = '1';
+                };
+            } catch (error) {
+                console.error("Gagal caching video, fallback ke src biasa:", error);
+                // Fallback jika fetch gagal (misal kena blokir CORS)
+                // PERBAIKAN fallback path
+                videoEl.src = '{{ asset('img/sfanimasi.mp4') }}';
+                videoLoader.style.display = 'none';
+                videoEl.style.opacity = '1';
+            }
+        }
         
-        // Setup Suara
-        if (!('speechSynthesis' in window)) {
-            document.getElementById('tts-warning').classList.remove('hidden');
-        } else {
+        // Panggil saat halaman dimuat
+        loadVideoToMemory();
+
+        // Fungsi Memutar Layar Secara Dinamis
+        function toggleRotation(event) {
+            event.stopPropagation(); // Mencegah klik terhitung sebagai klik antrean
+            if (mainWrapper.classList.contains('rotate-ccw')) {
+                mainWrapper.classList.remove('rotate-ccw');
+                mainWrapper.classList.add('rotate-cw'); // Putar ke 90 derajat
+            } else {
+                mainWrapper.classList.remove('rotate-cw');
+                mainWrapper.classList.add('rotate-ccw'); // Balik ke default (-90 derajat)
+            }
+        }
+
+        // Pancing TTS Engine saat klik pertama di body (Syarat browser)
+        document.body.addEventListener('click', () => {
+            if ('speechSynthesis' in window && !window.speechSynthesis.pending) {
+                const test = new SpeechSynthesisUtterance("");
+                test.volume = 0;
+                window.speechSynthesis.speak(test);
+            }
+        }, { once: true });
+
+        // Setup Suara TTS
+        if ('speechSynthesis' in window) {
             const loadVoices = () => { voices = window.speechSynthesis.getVoices(); };
             loadVoices();
             if (window.speechSynthesis.onvoiceschanged !== undefined) {
@@ -158,207 +174,110 @@
             }
         }
 
-        // Helper untuk memanggil nama orang dengan fleksibel (menghindari error nama kolom)
-        function getPersonName(person) {
-            if (!person) return '';
-            return person.nama || person.name || person.Name || 'Pelanggan';
+        function getQueueNumber(person) {
+            if (!person) return '-';
+            return person.queue_number || 'TBA'; 
         }
-
-        // Fungsi Render UI Antrean (Menunggu)
-        function renderQueue() {
-            queueCountEl.textContent = queue.length;
+        
+        function renderDisplay() {
+            const remaining = Math.max(0, queue.length - 1);
+            queueCountEl.textContent = remaining;
             
             if (queue.length === 0) {
-                queueListEl.innerHTML = `
-                    <div class="h-full flex flex-col items-center justify-center text-slate-400 gap-2">
-                        <i data-lucide="users" class="w-10 h-10 opacity-50"></i>
-                        <p class="text-sm">Antrean kosong</p>
-                    </div>`;
-                lucide.createIcons();
+                currentQueueEl.textContent = 'SF---';
+                nextQueueEl.textContent = 'SF---';
             } else {
-                queueListEl.innerHTML = queue.map((person, index) => `
-                    <div class="p-3 bg-slate-50 border border-slate-100 rounded-lg flex items-center gap-3">
-                        <div class="bg-blue-100 text-blue-700 font-bold rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0 text-sm">
-                            ${index + 1}
-                        </div>
-                        <span class="font-medium text-slate-700 truncate">${getPersonName(person)}</span>
-                    </div>
-                `).join('');
-            }
-
-            updateCallButton();
-        }
-
-        // Fungsi Render UI Riwayat (Sudah Dipanggil)
-        function renderHistory() {
-            if (historyList.length === 0) {
-                historyListEl.innerHTML = `<span class="text-sm text-slate-400 italic">Belum ada data yang dipanggil di sesi ini</span>`;
-            } else {
-                historyListEl.innerHTML = historyList.map(person => `
-                    <div class="px-3 py-1.5 bg-slate-100 border border-slate-200 rounded-full text-sm font-medium text-slate-600 flex items-center gap-1.5 mb-1 mr-1 inline-flex">
-                        <i data-lucide="check" class="w-3.5 h-3.5 text-green-500"></i>
-                        ${getPersonName(person)}
-                    </div>
-                `).join('');
-                lucide.createIcons();
+                currentQueueEl.textContent = getQueueNumber(queue[0]);
+                if (queue.length > 1) {
+                    nextQueueEl.textContent = getQueueNumber(queue[1]);
+                } else {
+                    nextQueueEl.textContent = 'Kosong';
+                }
             }
         }
 
-        // Update tampilan tombol panggil
-        function updateCallButton() {
-            if (queue.length === 0 || isSpeaking) {
-                btnCallNext.disabled = true;
-                btnCallNext.className = "relative overflow-hidden w-full py-5 rounded-xl flex items-center justify-center gap-4 text-2xl font-bold text-white transition-all transform shadow-lg bg-slate-300 cursor-not-allowed shadow-none";
-                enterHint.classList.add('hidden');
-            } else {
-                btnCallNext.disabled = false;
-                btnCallNext.className = "relative overflow-hidden w-full py-5 rounded-xl flex items-center justify-center gap-4 text-2xl font-bold text-white transition-all transform active:scale-[0.98] shadow-lg bg-green-500 hover:bg-green-600 hover:shadow-green-500/30";
-                enterHint.classList.remove('hidden');
-            }
-        }
-
-        // Mengatur tampilan error pada badge status
-        function setStatusBadge(isSuccess, message = "") {
-            const badge = document.getElementById('status-badge');
-            const text = document.getElementById('status-text');
-            const icon = document.getElementById('wifi-icon');
-            const errorContainer = document.getElementById('db-error-msg');
-
-            if (isSuccess) {
-                badge.className = "flex items-center gap-1.5 px-2.5 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium border border-green-200 transition-colors duration-300";
-                text.textContent = "Terhubung";
-                icon.classList.add('animate-pulse');
-                errorContainer.classList.add('hidden'); // Sembunyikan pesan error
-            } else {
-                badge.className = "flex items-center gap-1.5 px-2.5 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium border border-red-200 transition-colors duration-300";
-                text.textContent = "Error Query";
-                icon.classList.remove('animate-pulse');
-                
-                // Tampilkan pesan error aktual di layar agar mudah didebug
-                errorContainer.classList.remove('hidden');
-                errorContainer.textContent = message;
-                console.error("Database Error:", message);
-            }
-        }
-
-        // Menarik data dari API LARAVEL
         async function fetchDatabase() {
             try {
-                // Menembak ke route API Laravel yang baru kita buat
                 const response = await fetch('/api/antrian/get_queue');
+                if (!response.ok) return; 
+                
                 const result = await response.json();
                 
                 if (result.success) {
-                    setStatusBadge(true);
+                    const oldTop = queue.length > 0 ? queue[0] : null;
+                    const newQueue = result.data;
                     
-                    queue = result.data; 
+                    // Deteksi sinkronisasi jika device lain menekan next
+                    if (oldTop && newQueue.length > 0) {
+                        const newTop = newQueue[0];
+                        if (oldTop.id !== newTop.id) {
+                            queue = newQueue;
+                            renderDisplay();
+                            speakName(getQueueNumber(newTop));
+                            return; 
+                        }
+                    } else if (oldTop && newQueue.length === 0) {
+                        queue = newQueue;
+                        renderDisplay();
+                        return;
+                    }
                     
-                    renderQueue();
-                    renderHistory(); 
-                    
-                    const now = new Date();
-                    lastFetchTimeEl.textContent = now.getHours().toString().padStart(2, '0') + ':' + 
-                                                  now.getMinutes().toString().padStart(2, '0') + ':' + 
-                                                  now.getSeconds().toString().padStart(2, '0');
-                } else {
-                    setStatusBadge(false, result.message);
+                    queue = newQueue; 
+                    renderDisplay();
                 }
-            } catch (error) {
-                setStatusBadge(false, "Gagal koneksi API/Jaringan");
-            }
+            } catch (error) {}
         }
 
-        // Menghapus data dari database setelah dipanggil
         async function markAsCalled(id) {
             try {
-                // Menembak ke route API POST Laravel dan menyertakan CSRF TOKEN
-                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+                const csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : '';
                 
                 await fetch('/api/antrian/update_status', {
                     method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken 
-                    },
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
                     body: JSON.stringify({ id: id })
                 });
-            } catch (error) {
-                console.error('Error deleting data:', error);
-            }
+            } catch (error) {}
         }
 
-        // Fungsi berbicara (TTS)
-        function speakName(name) {
+        function speakName(queueNum) {
             if (!('speechSynthesis' in window)) return;
+            
             window.speechSynthesis.cancel();
             
-            isSpeaking = true;
-            speakingIndicator.classList.remove('hidden');
-            btnRecall.disabled = true;
-            updateCallButton();
+            // Eja nomor (SF001 -> S F 0 0 1)
+            let spelledNumber = queueNum.split('').join(' ');
+            const textToSpeak = `Nomor antrean, ${spelledNumber}. Silakan masuk ke area foto.`;
             
-            const utterance = new SpeechSynthesisUtterance(`${name}, Ayo Foto!`);
-            utterance.lang = 'id-ID';
+            currentUtterance = new SpeechSynthesisUtterance(textToSpeak);
+            currentUtterance.lang = 'id-ID';
             
             const idVoice = voices.find(v => v.lang === 'id-ID' || v.lang === 'id_ID');
-            if (idVoice) utterance.voice = idVoice;
+            if (idVoice) currentUtterance.voice = idVoice;
 
-            utterance.rate = 1.05; 
-            utterance.pitch = 1.0; 
-            utterance.volume = 1;
+            currentUtterance.rate = 1.0; 
+            currentUtterance.pitch = 1.0; 
+            currentUtterance.volume = 1;
 
-            utterance.onend = () => {
-                isSpeaking = false;
-                speakingIndicator.classList.add('hidden');
-                btnRecall.disabled = false;
-                updateCallButton();
-            };
-            
-            utterance.onerror = () => {
-                isSpeaking = false;
-                speakingIndicator.classList.add('hidden');
-                btnRecall.disabled = false;
-                updateCallButton();
-            };
-
-            window.speechSynthesis.speak(utterance);
+            window.speechSynthesis.speak(currentUtterance);
         }
 
-        // Memanggil orang berikutnya
-        function callNext() {
-            if (queue.length === 0 || isSpeaking) return;
+        window.callNext = function() {
+            // Cegah error jika tidak ada antrean atau sisa antrean = 0 (hanya tersisa yang lagi foto)
+            if (queue.length <= 1) return; 
 
-            const nextPerson = queue[0];
-            currentPerson = nextPerson;
-            const personName = getPersonName(nextPerson);
+            const currentFinished = queue.shift(); 
+            const nextPerson = queue[0]; 
             
-            // Tampilkan di layar utama
-            currentNameEl.textContent = personName;
-            currentNameEl.className = "text-6xl md:text-8xl font-black text-blue-700 tracking-tight leading-tight break-words max-w-full px-4";
-            btnRecall.classList.remove('hidden');
+            renderDisplay();
             
-            // Masukkan ke history visual secara realtime
-            if (!historyList.some(p => p.id === nextPerson.id)) {
-                historyList.unshift(nextPerson);
-            }
-            renderHistory();
-
-            // Hapus dari antrean lokal dan update DB (Ubah Status -> DELETE)
-            queue.shift();
-            renderQueue();
-            markAsCalled(nextPerson.id);
+            const personNumber = getQueueNumber(nextPerson);
             
-            speakName(personName);
+            markAsCalled(currentFinished.id);
+            speakName(personNumber);
         }
 
-        // Event Listeners
-        btnCallNext.addEventListener('click', callNext);
-        
-        btnRecall.addEventListener('click', () => {
-            if (currentPerson && !isSpeaking) speakName(getPersonName(currentPerson));
-        });
-
-        // Global Enter Key
         window.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
@@ -366,9 +285,8 @@
             }
         });
 
-        // Mulai Polling 
-        fetchDatabase(); // Panggilan pertama
-        pollingInterval = setInterval(fetchDatabase, 3000); // Polling setiap 3 detik
+        fetchDatabase(); 
+        setInterval(fetchDatabase, 3000);
 
     </script>
 </body>

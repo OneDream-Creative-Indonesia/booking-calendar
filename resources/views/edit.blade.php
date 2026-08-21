@@ -205,7 +205,7 @@
     </div>
 
     <!-- MAIN APP (Initially Hidden) -->
-    <div id="app-container" class="hidden h-full flex-col">
+    <div id="app-container" class="hidden h-full flex-col w-full">
         
         <!-- TOP HEADER -->
         <header class="h-14 bg-white border-b border-gray-200 flex items-center justify-between px-6 z-30 relative shadow-sm shrink-0">
@@ -241,7 +241,7 @@
         <div class="flex-1 flex overflow-hidden">
             
             <!-- LEFT SIDEBAR: GRID & ASSETS -->
-            <aside class="w-64 bg-white border-r border-gray-200 flex flex-col z-20 left-sidebar">
+            <aside class="w-64 bg-white border-r border-gray-200 flex flex-col z-20 left-sidebar shrink-0">
                 
                 <!-- Section 1: Grid Preview -->
                 <div class="h-1/2 border-b border-gray-200 flex flex-col">
@@ -281,7 +281,7 @@
 
             <!-- CENTER: CANVAS WORKSPACE -->
             <!-- Flex center untuk memastikan scale container selalu presisi di tengah layar -->
-            <main class="flex-1 relative workspace-bg overflow-auto p-8 flex items-center justify-center" id="workspace-container">
+            <main class="flex-1 relative workspace-bg overflow-auto p-8 flex items-center justify-center w-full" id="workspace-container">
                 
                 <!-- DOM Stabilizer agar scrollbar mengukur dengan pas walau di-scale CSS -->
                 <div id="scale-container">
@@ -290,14 +290,23 @@
                     </div>
                 </div>
 
-                <!-- FLOATING ZOOM SLIDER -->
-                <div id="active-zoom-ui" class="fixed bottom-24 left-[calc(50%+10rem)] -translate-x-1/2 bg-white/90 backdrop-blur-md border border-gray-200 px-6 py-3 rounded-2xl shadow-xl flex flex-col items-center gap-2 z-40 hidden w-64">
+                <!-- FLOATING ZOOM & EDIT UI -->
+                <div id="active-zoom-ui" class="fixed bottom-24 left-[calc(50%+10rem)] -translate-x-1/2 bg-white/90 backdrop-blur-md border border-gray-200 px-6 py-3 rounded-2xl shadow-xl flex flex-col items-center gap-2 z-40 hidden w-72">
                     <div class="flex justify-between w-full text-xs font-bold text-gray-600">
                         <span><i class="fa-solid fa-minus text-[10px]"></i> Zoom Out</span>
                         <span>Zoom In <i class="fa-solid fa-plus text-[10px]"></i></span>
                     </div>
                     <input type="range" id="floating-zoom-slider" min="0.1" max="3" step="0.05" value="1" oninput="updateGridImageZoom(this.value)" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
-                    <span class="text-[10px] text-gray-400">Geser untuk zoom foto dalam grid</span>
+                    
+                    <!-- NEW: Rotate & Apply All Buttons -->
+                    <div class="flex gap-2 w-full mt-2">
+                        <button onclick="rotateActiveGridImage()" class="flex-1 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-[11px] font-bold rounded-lg transition-colors flex justify-center items-center gap-1 shadow-sm">
+                            <i class="fa-solid fa-rotate-right"></i> Rotate
+                        </button>
+                        <button onclick="applySettingsToAllGridImages(this)" class="flex-1 py-1.5 bg-[#eff6ff] text-[#355faa] hover:bg-[#dbeafe] border border-blue-100 text-[11px] font-bold rounded-lg transition-colors flex justify-center items-center gap-1 shadow-sm">
+                            <i class="fa-solid fa-check-double"></i> Apply All
+                        </button>
+                    </div>
                 </div>
 
                 <!-- CROP CONFIRMATION OVERLAY -->
@@ -316,7 +325,7 @@
             </main>
 
             <!-- RIGHT SIDEBAR: PROPERTIES -->
-            <aside class="w-72 bg-white border-l border-gray-200 flex flex-col z-20 right-sidebar">
+            <aside class="w-72 bg-white border-l border-gray-200 flex flex-col z-20 right-sidebar shrink-0">
                 <div class="p-4 border-b border-gray-100">
                     <h2 class="text-xs font-bold text-gray-400 uppercase tracking-widest">Properties</h2>
                 </div>
@@ -869,6 +878,129 @@
                 const newScale = obj.baseScale * parseFloat(value);
                 obj.scale(newScale);
                 canvas.requestRenderAll();
+            }
+        }
+
+        // ==========================================
+        // FITUR BARU: ROTATE & APPLY ALL SETTINGS
+        // ==========================================
+        function rotateActiveGridImage() {
+            const obj = canvas.getActiveObject();
+            if (obj && obj.isGridImage) {
+                // Putar 90 derajat setiap kali diklik
+                let currentAngle = obj.angle || 0;
+                obj.rotate((currentAngle + 90) % 360);
+                canvas.requestRenderAll();
+            }
+        }
+
+       function applySettingsToAllGridImages(btnElement) {
+            const activeObj = canvas.getActiveObject();
+            if (!activeObj || !activeObj.isGridImage) return;
+
+            // 1. Ambil URL/sumber foto, zoom, angle, dan flip dari foto aktif
+            const imgUrl = activeObj.getSrc();
+            const targetZoom = activeObj.scaleX / activeObj.baseScale;
+            const targetAngle = activeObj.angle || 0;
+            const targetFlipX = activeObj.flipX || false;
+            const targetFlipY = activeObj.flipY || false;
+            
+            // Hitung jarak geser (Pan) relatif dari tengah mask
+            let offsetX = 0;
+            let offsetY = 0;
+            if (activeObj.clipPath) {
+                offsetX = activeObj.left - activeObj.clipPath.left;
+                offsetY = activeObj.top - activeObj.clipPath.top;
+            }
+
+            const objects = canvas.getObjects();
+            const placeholders = objects.filter(o => o.isPlaceholder);
+            
+            // 2. Hapus semua foto grid yang lama (kecuali foto yang sedang diklik)
+            // Ini memastikan kotak yang sudah terisi sebelumnya akan direplace.
+            const oldGridImages = objects.filter(o => o.isGridImage && o !== activeObj);
+            oldGridImages.forEach(img => canvas.remove(img));
+
+            let appliedCount = 0;
+
+            // 3. Looping ke SEMUA kotak placeholder
+            placeholders.forEach(slot => {
+                // Cek apakah ini slot milik foto yang sedang kita klik sekarang?
+                const isCurrentSlot = activeObj.clipPath && 
+                                      Math.abs(slot.left - activeObj.clipPath.left) < 1 && 
+                                      Math.abs(slot.top - activeObj.clipPath.top) < 1;
+
+                // Jika bukan slot yang sedang aktif, isi dengan foto yang sama!
+                if (!isCurrentSlot) {
+                    slot.visible = false; // Sembunyikan icon (+)
+
+                    const slotW = slot.width * slot.scaleX;
+                    const slotH = slot.height * slot.scaleY;
+                    const slotX = slot.left;
+                    const slotY = slot.top;
+
+                    // Buat mask (clipPath) baru di posisi kotak ini
+                    const clipRect = new fabric.Rect({
+                        left: slotX, top: slotY,
+                        width: slotW, height: slotH,
+                        originX: 'center', originY: 'center',
+                        absolutePositioned: true
+                    });
+
+                    // Clone & masukkan gambar
+                    fabric.Image.fromURL(imgUrl, function(img) {
+                        const scaleX = slotW / img.width;
+                        const scaleY = slotH / img.height;
+                        const baseScale = Math.max(scaleX, scaleY);
+
+                        img.set({
+                            left: slotX + offsetX, // Terapkan jarak gesernya
+                            top: slotY + offsetY,
+                            originX: 'center', originY: 'center',
+                            scaleX: baseScale * targetZoom, 
+                            scaleY: baseScale * targetZoom,
+                            baseScale: baseScale,
+                            angle: targetAngle,
+                            flipX: targetFlipX,
+                            flipY: targetFlipY,
+                            clipPath: clipRect,
+                            cornerColor: '#355faa', borderColor: '#355faa',
+                            cornerStyle: 'circle', transparentCorners: false, cornerSize: 40,
+                            isFrame: false,
+                            isGridImage: true,
+                            hasControls: true,
+                            lockRotation: true,
+                            lockScalingX: true, lockScalingY: true
+                        });
+
+                        canvas.add(img);
+                        
+                        // Rapikan layer agar foto selalu ada di bawah Frame penutup utama
+                        const topFrame = canvas.getObjects().find(o => o.isFrame);
+                        if (topFrame) img.moveTo(canvas.getObjects().indexOf(topFrame));
+                        else img.sendToBack(); 
+
+                        canvas.requestRenderAll();
+                    });
+                    
+                    appliedCount++;
+                }
+            });
+
+            // 4. Animasi sukses pada tombol UI
+            if(btnElement) {
+                const originalText = btnElement.innerHTML;
+                btnElement.innerHTML = `<i class="fa-solid fa-check-double"></i> Applied to All!`;
+                btnElement.classList.replace('text-[#355faa]', 'text-green-600');
+                btnElement.classList.replace('bg-[#eff6ff]', 'bg-green-50');
+                btnElement.classList.replace('border-blue-100', 'border-green-200');
+                
+                setTimeout(() => { 
+                    btnElement.innerHTML = originalText; 
+                    btnElement.classList.replace('text-green-600', 'text-[#355faa]');
+                    btnElement.classList.replace('bg-green-50', 'bg-[#eff6ff]');
+                    btnElement.classList.replace('border-green-200', 'border-blue-100');
+                }, 1200);
             }
         }
 

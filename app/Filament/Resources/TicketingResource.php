@@ -14,6 +14,7 @@ use Filament\Tables;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -46,6 +47,7 @@ class TicketingResource extends Resource
                     ->required(),
                 TextInput::make('jumlah')
                     ->required()
+                    ->numeric()
                     ->label("Jumlah Orang"),
                 TextInput::make('cetak')
                     ->required()
@@ -74,29 +76,47 @@ class TicketingResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('nama')
-                    ->label('Name')
-                    ->sortable()
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('email')
-                    ->label('Email')
+                    ->label('Nama')
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('jumlah')
-                    ->label('Jumlah Orang')
+                    ->label('Orang')
+                    ->summarize(Sum::make()->label('')) // Menambahkan label kosong di sini
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('cetak')
                     ->sortable()
+                    ->summarize(Sum::make()->label('')) // Menambahkan label kosong di sini
                     ->searchable()
-                    ->label('Jumlah Cetak'),
+                    ->label('Cetak'),
                 Tables\Columns\TextColumn::make('telpon')
-                    ->label('Nomor Handpone')
+                    ->label('No. Hp')
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('transaction_type')
-                    ->label('Jenis Pembayaran')
+                    ->label('Pembayaran')
                     ->sortable()
                     ->searchable(),
+                Tables\Columns\TextColumn::make('queue_number')
+                    ->label('Antrian')
+                    ->sortable()
+                    ->searchable(),
+               Tables\Columns\TextColumn::make('status')
+                    ->label('Status')
+                    ->sortable()
+                    ->searchable(),
+                     // Tambahkan 3 kolom fitur centang ini:
+                Tables\Columns\CheckboxColumn::make('is_foto')
+                    ->label('Foto')
+                    ->sortable(),
+                    
+                Tables\Columns\CheckboxColumn::make('is_export')
+                    ->label('Export')
+                    ->sortable(),
+                    
+                Tables\Columns\CheckboxColumn::make('is_print')
+                    ->label('Print')
+                    ->sortable(),
             ])
             ->filters([
                 // SelectFilter::make('no_photo')
@@ -115,7 +135,6 @@ class TicketingResource extends Resource
                 // }),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])

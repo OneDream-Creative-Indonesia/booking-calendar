@@ -14,6 +14,11 @@ class Ticketing extends Model
         'jumlah',
         'cetak',
         'telpon',
-        'transaction_type'
+        'transaction_type',
+        'queue_number', 
+        'status',
+        'is_foto',   // <--- PASTIKAN INI ADA
+        'is_export', // <--- PASTIKAN INI ADA
+        'is_print'   // <--- PASTIKAN INI ADA
     ];
 }

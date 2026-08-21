@@ -24,10 +24,10 @@
 
     <body class="antialiased">
 
-            <div class="fixed-bg" style="background-image: url(../../assets/img/shape/bg-4.png); height: 250px;background-size: cover;">
+            <div class="fixed-bg" style="background-image: url(../../assets/img/shape/bg-4.png); height: 70px;background-size: cover;">
             <div class="container mx-auto">
                 <div class="py-20 flex justify-center items-center">
-                    <h1 class="mb-4 font-bold text-white text-center" style="font-size: clamp(1.5rem, 5vw, 2.5rem); margin-top:80px;">Pop Up Self Photo by Snap Fun</h1>
+                    <h1 class="mb-4 font-bold text-white text-center" style="font-size: clamp(1.5rem, 5vw, 2.5rem); margin-top:20px;">Pop Up Self Photo by Snap Fun</h1>
                 </div>
             </div>
         </div>
@@ -46,20 +46,20 @@
                     <div class="w-full px-4 mb-4 md:w-1/4 md:mb-0">
                         <h4 class="mb-4 text-lg font-semibold">Studio Kami</h4>
                         <ul>
-                            <li class="flex items-center mb-2">
+                            <li class="flex items-center mb-2 gap-3">
                                 <img src="../../assets/img/Icon/placeholder.png" class="h-8 mr-2" alt="Location">
                                 <span>Ruko Sukses 2, Sumur Pecung - Kota Serang Banten </span>
                             </li>
                         </ul>
                     </div>
-                    <div class="w-full px-4 mb-4 md:w-1/4 md:mb-0">
+                    <div class="w-full px-4 mb-4 md:w-1/4 md:mb-0 gap-3">
                         <h4 class="mb-4 text-lg font-semibold">Kontak Kami</h4>
                         <ul>
-                            <li class="flex items-center mb-2">
+                            <li class="flex items-center mb-2 gap-3">
                                 <img src="../../assets/img/Icon/mail.png" class="h-8 mr-2" alt="Email">
                                 <a href="mailto:hello@onedream.id" class="hover:text-gray-300">snapfunstudio@gmail.com</a>
                             </li>
-                            <li class="flex items-center mb-2">
+                            <li class="flex items-center mb-2 gap-3">
                                 <img src="../../assets/img/Icon/call.png" class="h-8 mr-2" alt="Phone">
                                 <a href="https://wa.me/6281213369843" class="hover:text-gray-300">+628 12 1336 9843</a>
                             </li>
@@ -67,7 +67,7 @@
                     </div>
                     <div class="w-full px-4 mb-4 md:w-1/4 md:mb-0">
                         <h4 class="mb-4 text-lg font-semibold">Ikuti Kami</h4>
-                        <ul class="flex space-x-2">
+                        <ul class="flex space-x-2 gap-3">
                             <li>
                                 <a href="https://www.instagram.com/snapfunstudio/" target="_blank" class="hover:text-gray-300">
                                     <img src="../../assets/img/Icon/instagram.png" class="h-8" alt="Instagram">

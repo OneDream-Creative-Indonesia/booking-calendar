@@ -1,4 +1,4 @@
-<div class="flex flex-col items-center justify-center min-h-screen p-4 text-gray-900 dark:bg-gray-900 dark:text-white">
+<div class="flex flex-col items-center p-4 text-gray-900 dark:bg-gray-900 dark:text-white">
     
     @if (!$isSuccess)
         <div class="w-full max-w-3xl p-8 bg-white rounded-lg shadow dark:bg-gray-800">
@@ -10,20 +10,17 @@
                 {{ $this->form }}
 
                 @if ($transaction_type === 'qris')
-                    <div class="flex justify-center">
-                       <img src="../../assets/img/IMG_6642.png" alt="QRIS Image" class="w-1/2 h-auto">
-                    </div>
                 @endif
 
-                <div class="flex flex-wrap items-center justify-start gap-4">
-                    <x-filament::button type="Submit" style="background-color: #1759CA;">
-                        {{ __('Submit') }}
+                <div class="w-full mt-4">
+                    <x-filament::button type="Submit" size="lg" class="w-full justify-center text-lg" style="background-color: #004fbf;">
+                        {{ __('Kirim') }}
                     </x-filament::button>
                 </div>
             </form>
         </div>
 
-  @else
+    @elseif (!$isWaiting)
         <section id="page-sukses" class="page active" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; width: 100%; padding: 2rem 1rem;">
             
             <div class="success-container" style="display: flex; flex-direction: column; align-items: center; max-width: 500px; width: 100%;">
@@ -35,8 +32,50 @@
                 <h1 style="font-weight: 800; font-size: clamp(1.8rem, 5vw, 2.2rem); margin-top: 0.5rem; line-height: 1.2;">
                     Pastikan data kamu sudah benar!
                 </h1>
+
+                <!-- FITUR LIVE ANTREAN CUSTOMER -->
+                <!-- wire:poll.3s akan merefresh blok DIV ini saja setiap 3 detik secara otomatis -->
+                <div wire:poll.3s class="w-full mt-6 mb-2">
+                    @if($this->queueStatus)
+                        
+                        @if($this->queueStatus['isCalled'])
+                            <!-- JIKA SUDAH DIPANGGIL -->
+                            <div style="background-color: #28a745; border-radius: 15px; padding: 1.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 1rem; color: white;">
+                                <h2 style="font-weight: 800; font-size: 1.8rem; margin: 0; line-height: 1;">GILIRAN KAMU!</h2>
+                                <p style="font-size: 1rem; margin-top: 0.5rem; margin-bottom: 0;">Ayo bergegas menuju area Photobooth sekarang.</p>
+                            </div>
+                        @else
+                            <!-- JIKA MASIH MENUNGGU -->
+                            <!-- Card Antrean -->
+                            <div style="background-color: #d13d56; border-radius: 15px; padding: 1.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; color: white; text-align: left;">
+                                <div>
+                                    <p style="margin: 0; font-size: 1.1rem; line-height: 1.3;">Sabar yaw.</p>
+                                    <p style="margin: 0; font-size: 1.1rem; line-height: 1.3;">Kamu akan foto</p>
+                                    <p style="margin: 0; font-size: 1.1rem; line-height: 1.3;">setelah :</p>
+                                </div>
+                                <div style="text-align: center;">
+                                    <span style="font-size: 4rem; font-weight: 800; line-height: 1; display: block;">{{ $this->queueStatus['peopleAhead'] }}</span>
+                                    <span style="font-size: 0.9rem; font-weight: 500;">antrian lagi.</span>
+                                </div>
+                            </div>
+
+                            <!-- Card Estimasi Waktu (5 menit per antrean) -->
+                            <div style="background-color: #d13d56; border-radius: 15px; padding: 1.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; color: white; text-align: left;">
+                                <div>
+                                    <p style="margin: 0; font-size: 1.1rem; line-height: 1.3;">Atau sekitar</p>
+                                </div>
+                                <div style="text-align: center;">
+                                    <span style="font-size: 4rem; font-weight: 800; line-height: 1; display: block;">{{ $this->queueStatus['peopleAhead'] * 5 }}</span>
+                                    <span style="font-size: 0.9rem; font-weight: 500;">menit lagi.</span>
+                                </div>
+                            </div>
+                        @endif
+
+                    @endif
+                </div>
+                <!-- END FITUR LIVE ANTREAN -->
                 
-                <p style="line-height: 1.6; color: #666; font-size: 0.95rem; margin-bottom: 2rem;margin-top: 2rem; padding: 0 10px;">
+                <p style="line-height: 1.6; color: #666; font-size: 0.95rem; margin-bottom: 2rem; margin-top: 1.5rem; padding: 0 10px;">
                     Data yang kamu kirim, Pinpin jamin keamanannya, Pinpin butuh data kamu buat kirim soft file fotonya yaw! Ouh iya soft file paling lama 
                     Pinpin kirim besok, dan<strong> bisa diakses hanya dalam waktu 14 hari</strong>, jadi jangan lupa langsung di download yaaaa!!!
                 </p>
@@ -47,14 +86,114 @@
                 </button>
             </div>
         </section>
+    @else
+        <!-- HALAMAN MENUNGGU (SETELAH KLIK KONFIRMASI) -->
+        <section id="page-menunggu" class="page active" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; width: 100%; padding: 2rem 1rem;">
+            
+            <div class="success-container" style="display: flex; flex-direction: column; align-items: center; max-width: 500px; width: 100%;">
+                
+                <div class="success-icon" style="display: flex; justify-content: center; width: 100%; margin-bottom: 1.5rem;">
+                    <img src="{{ asset('img/Pinpin-01.png') }}" alt="Mascot Snap Fun" style="height: 170px; width: auto; object-fit: contain;">
+                </div>
+                
+                <h1 style="font-weight: 800; font-size: clamp(1.8rem, 5vw, 2.2rem); margin-top: 0.5rem; line-height: 1.2; color: #333;">
+                    Maaciw, udah mau nunggu..
+                </h1>
+
+                <!-- TAMPILAN NOMOR ANTREAN CUSTOMER -->
+                <div style="background-color: #f3f4f6; border: 2px dashed #ccc; border-radius: 12px; padding: 1rem 2rem; margin-top: 1.5rem; display: inline-block;">
+                    <p style="margin: 0; font-size: 0.9rem; color: #666; font-weight: 600; text-transform: uppercase;">Nomor Antrean Kamu</p>
+                    <h2 style="margin: 0; font-size: 2.5rem; font-weight: 900; color: #1759CA; letter-spacing: 2px;">{{ $this->queue_number }}</h2>
+                </div>
+
+                <p style="margin-top: 1.5rem; margin-bottom: 1rem; font-size: 1.1rem; color: #555;">
+                    Sabar yaw. Kamu akan foto setelah :
+                </p>
+
+                <!-- FITUR LIVE ANTREAN CUSTOMER -->
+                <div wire:poll.3s class="w-full mb-2">
+                    @if($this->queueStatus)
+                        
+                        @if($this->queueStatus['isCalled'])
+                            <!-- JIKA SUDAH DIPANGGIL -->
+                            <div style="background-color: #28a745; border-radius: 15px; padding: 1.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 1rem; color: white;">
+                                <h2 style="font-weight: 800; font-size: 1.8rem; margin: 0; line-height: 1;">GILIRAN KAMU!</h2>
+                                <p style="font-size: 1rem; margin-top: 0.5rem; margin-bottom: 0;">Ayo bergegas menuju area Photobooth sekarang.</p>
+                            </div>
+                        @else
+                            <!-- JIKA MASIH MENUNGGU (UI GABUNGAN) -->
+                            <div style="background-color: #cb314d; border-radius: 15px; padding: 1.5rem 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 1rem; display: flex; color: white; width: 100%; max-width: 350px;">
+                                <!-- Antrean Section -->
+                                <div style="flex: 1; border-right: 2px solid rgba(255,255,255,0.5); display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                                    <span style="font-size: 4rem; font-weight: 800; line-height: 1; margin-bottom: -5px;">{{ $this->queueStatus['peopleAhead'] }}</span>
+                                    <span style="font-size: 1.1rem; font-weight: 500;">antrian lagi</span>
+                                </div>
+                                <!-- Menit Section -->
+                                <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                                    <span style="font-size: 4rem; font-weight: 800; line-height: 1; margin-bottom: -5px;">{{ $this->queueStatus['peopleAhead'] * 5 }}</span>
+                                    <span style="font-size: 1.1rem; font-weight: 500;">menit lagi</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Pemicu Notifikasi (Hidden Element) -->
+                            <span class="hidden queue-tracker" data-ahead="{{ $this->queueStatus['peopleAhead'] }}"></span>
+                        @endif
+                    @endif
+                </div>
+                <!-- END FITUR LIVE ANTREAN -->
+                
+                <p style="line-height: 1.6; color: #666; font-size: 1rem; margin-bottom: 2rem; margin-top: 1.5rem; padding: 0 20px;">
+                    Jangan lupa buat pantau terus, biar sesi foto kamu ga terlewat.
+                </p>
+
+            </div>
+        </section>
     @endif
 </div>
 
 <script>
     document.addEventListener('livewire:initialized', () => {
+        // Meminta izin notifikasi saat komponen pertama kali dimuat
+        if ("Notification" in window) {
+            if (Notification.permission !== "granted" && Notification.permission !== "denied") {
+                Notification.requestPermission();
+            }
+        }
+
+        // Variabel untuk mencegah notifikasi muncul berulang kali
+        let notificationSent = false;
+
         Livewire.on('redirectToWA', (event) => {
-            // Membuka WhatsApp di tab baru sesuai alur template kamu
+            // Membuka WhatsApp di tab baru
             window.open(event.url, '_blank');
         });
+
+        // Memantau perubahan DOM untuk mengecek sisa antrean
+        const observer = new MutationObserver((mutations) => {
+            const tracker = document.querySelector('.queue-tracker');
+            if (tracker) {
+                const ahead = parseInt(tracker.getAttribute('data-ahead'));
+                
+                // Memicu notifikasi jika sisa antrean 1 dan belum pernah dikirim
+                if (ahead === 1 && !notificationSent) {
+                    if ("Notification" in window && Notification.permission === "granted") {
+                        new Notification("Giliran Kamu Sebentar Lagi!", {
+                            body: "Hanya sisa 1 antrean lagi. Harap bersiap menuju photobooth.",
+                            icon: "{{ asset('img/Pinpin-01.png') }}"
+                        });
+                        notificationSent = true;
+                    }
+                } else if (ahead > 1) {
+                    // Reset flag jika antrean entah bagaimana bertambah (edge case)
+                    notificationSent = false;
+                }
+            }
+        });
+
+        // Mulai memantau elemen utama Livewire
+        const livewireComponent = document.querySelector('[wire\\:id]');
+        if (livewireComponent) {
+            observer.observe(livewireComponent, { childList: true, subtree: true });
+        }
     });
 </script>

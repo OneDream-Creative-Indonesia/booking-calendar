@@ -85,9 +85,47 @@ Route::get('/antrian', function() {
 
 Route::get('/api/antrian/get_queue', function() {
     try {
-        // Ambil semua data dari tabel ticketings menggunakan DB Facade bawaan Laravel
-        $queue = DB::table('ticketings')->orderBy('id', 'asc')->get();
-        return response()->json(['success' => true, 'data' => $queue, 'history' => []]);
+        // [OTOMATIS] Cek & Buat kolom 'status' jika belum ada di tabel ticketings
+        if (!Schema::hasColumn('ticketings', 'status')) {
+            Schema::table('ticketings', function ($table) {
+                $table->string('status', 20)->nullable()->default('menunggu');
+            });
+        }
+
+        // [OTOMATIS] Buat kolom checklist Foto, Export, Print jika belum ada
+        if (!Schema::hasColumn('ticketings', 'is_foto')) {
+            Schema::table('ticketings', function ($table) {
+                $table->boolean('is_foto')->default(false);
+                $table->boolean('is_export')->default(false);
+                $table->boolean('is_print')->default(false);
+            });
+        }
+
+        // [OTOMATIS] Buat kolom queue_number jika belum ada (Opsional untuk jaga-jaga)
+        if (!Schema::hasColumn('ticketings', 'queue_number')) {
+            Schema::table('ticketings', function ($table) {
+                $table->string('queue_number', 20)->nullable();
+            });
+        }
+
+        // Ambil data yang statusnya masih 'menunggu' (atau kosong)
+        $queue = DB::table('ticketings')
+            ->where(function ($query) {
+                $query->where('status', 'menunggu')
+                      ->orWhereNull('status')
+                      ->orWhere('status', '');
+            })
+            ->orderBy('id', 'asc')
+            ->get();
+
+        // Ambil data riwayat yang 'sudah dipanggil' (Maksimal 30 agar ringan)
+        $history = DB::table('ticketings')
+            ->where('status', 'dipanggil')
+            ->orderBy('updated_at', 'desc')
+            ->take(30)
+            ->get();
+
+        return response()->json(['success' => true, 'data' => $queue, 'history' => $history]);
     } catch (\Exception $e) {
         return response()->json(['success' => false, 'message' => $e->getMessage()]);
     }
@@ -97,8 +135,10 @@ Route::post('/api/antrian/update_status', function(Request $request) {
     $id = $request->input('id');
     if ($id) {
         try {
-            // HAPUS DATA: Hilangkan data dari database setelah berhasil dipanggil
-            DB::table('ticketings')->where('id', $id)->delete();
+            DB::table('ticketings')->where('id', $id)->update([
+                'status' => 'dipanggil',
+                'updated_at' => now()
+            ]);
             return response()->json(['success' => true]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
@@ -129,3 +169,4 @@ Route::prefix('photo-link')->name('photo-link.')->group(function () {
     Route::get('/download/file/{file}', [PhotoLinkController::class, 'downloadFile'])->name('download.file');
     Route::get('/download/zip/{album_id}', [PhotoLinkController::class, 'downloadZip'])->name('download.zip');
 });
+
