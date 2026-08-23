@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Ticketing extends Model
 {
     use HasFactory;
@@ -21,4 +21,8 @@ class Ticketing extends Model
         'is_export', // <--- PASTIKAN INI ADA
         'is_print'   // <--- PASTIKAN INI ADA
     ];
+    public function event(): BelongsTo
+    {
+        return $this->belongsTo(Event::class);
+    }
 }

@@ -38,5 +38,12 @@ return [
         //     'https://www.googleapis.com/auth/calendar',
         // ],
     ],
-
+    'google_drive' => [
+        'client_id' => env('GOOGLE_DRIVE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_DRIVE_CLIENT_SECRET'),
+        'redirect' => env('GOOGLE_DRIVE_REDIRECT_URI'),
+    ],
+    'snaplink' => [
+        'url' => env('SNAPLINK_URL', 'http://localhost:3000'),
+    ],
 ];

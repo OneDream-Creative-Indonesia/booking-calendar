@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\TicketingResource\Pages;
-use App\Filament\Resources\TicketingResource\RelationManagers;
 use App\Models\Ticketing;
 use Filament\Forms;
 use Filament\Forms\Components\Select;
@@ -11,14 +10,13 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Filters\Filter;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\Summarizers\Sum;
+use Filament\Tables\Grouping\Group;
+use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 use Illuminate\Contracts\Support\Htmlable;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-
+use App\Models\Event;
 class TicketingResource extends Resource
 {
     protected static ?string $model = Ticketing::class;
@@ -26,6 +24,7 @@ class TicketingResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-ticket';
     protected static ?string $navigationGroup = 'Photobooth';
     protected static ?int $navigationSort = 1;
+
     public static function getNavigationLabel(): string
     {
         return __('Register');
@@ -40,6 +39,14 @@ class TicketingResource extends Resource
     {
         return $form
             ->schema([
+                // TAMBAHKAN BLOK INI DI PALING ATAS
+                Select::make('event_id')
+                    ->label('Pilih Event')
+                    ->options(Event::pluck('nama_event', 'id'))
+                    ->searchable()
+                    ->placeholder('Antrean Tanpa Event'),
+                
+                // KODE LAMA KAMU TETAP DI BAWAHNYA
                 TextInput::make('nama')
                     ->required(),
                 TextInput::make('email')
@@ -63,9 +70,6 @@ class TicketingResource extends Resource
                         'tunai' => "Tunai",
                         'qris' => 'Qris'
                     ])
-                    // ->live()
-                    // ->reactive()
-                    // ->afterStateUpdated(fn ($state) => $this->transaction_type = $state)
                     ->label('Jenis Pembayaran')
                     ->required(),
             ]);
@@ -81,12 +85,12 @@ class TicketingResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('jumlah')
                     ->label('Orang')
-                    ->summarize(Sum::make()->label('')) // Menambahkan label kosong di sini
+                    ->summarize(Sum::make()->label(''))
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('cetak')
                     ->sortable()
-                    ->summarize(Sum::make()->label('')) // Menambahkan label kosong di sini
+                    ->summarize(Sum::make()->label(''))
                     ->searchable()
                     ->label('Cetak'),
                 Tables\Columns\TextColumn::make('telpon')
@@ -101,38 +105,41 @@ class TicketingResource extends Resource
                     ->label('Antrian')
                     ->sortable()
                     ->searchable(),
-               Tables\Columns\TextColumn::make('status')
+                Tables\Columns\TextColumn::make('status')
                     ->label('Status')
                     ->sortable()
                     ->searchable(),
-                     // Tambahkan 3 kolom fitur centang ini:
                 Tables\Columns\CheckboxColumn::make('is_foto')
                     ->label('Foto')
                     ->sortable(),
-                    
                 Tables\Columns\CheckboxColumn::make('is_export')
                     ->label('Export')
                     ->sortable(),
-                    
                 Tables\Columns\CheckboxColumn::make('is_print')
                     ->label('Print')
                     ->sortable(),
             ])
+            // Grouping Berdasarkan Event & Tanggal (Sesuai Desainmu)
+            ->groups([
+    Group::make('event_id')
+        ->label('Event')
+        ->getKeyFromRecordUsing(function (Model $record) {
+            return $record->event_id !== null
+                ? (string) $record->event_id
+                : 'no-event';
+        })
+        ->getTitleFromRecordUsing(function (Model $record) {
+            if (!$record->event) {
+                return 'Antrean Tanpa Event';
+            }
+            $tanggal = Carbon::parse($record->event->tanggal_event)->translatedFormat('d F Y');
+            return $record->event->nama_event . ' - ' . $tanggal;
+        })
+        ->collapsible(),
+])
+            ->defaultGroup('event_id')
             ->filters([
-                // SelectFilter::make('no_photo')
-                // ->label('Filter Nomor Photo')
-                // ->options([
-                //     'with_photo' => 'Nomor Photo Terisi',
-                //     'without_photo' => 'Nomor Photo Belum Terisi',
-                // ])
-                // ->query(function (Builder $query, array $data) {
-                //     if ($data['value'] === 'with_photo') {
-                //         return $query->whereNotNull('no_photo')->where('no_photo', '!=', '');
-                //     }
-                //     if ($data['value'] === 'without_photo') {
-                //         return $query->whereNull('no_photo')->orWhere('no_photo', '');
-                //     }
-                // }),
+                //
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -159,6 +166,7 @@ class TicketingResource extends Resource
             'edit' => Pages\EditTicketing::route('/{record}/edit'),
         ];
     }
+
     public static function getPluralLabel(): string
     {
         return 'Ticketing';

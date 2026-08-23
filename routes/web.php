@@ -18,14 +18,22 @@ use App\Http\Controllers\{
     FrameSettingController,
     AdminFrameController,
     PhotoLinkController,
-
+    GoogleDriveAuthController,
 };
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+
+Route::prefix('gdrive')->group(function () {
+    Route::get('/connect', [GoogleDriveAuthController::class, 'connect'])->name('gdrive.connect');
+    Route::get('/callback', [GoogleDriveAuthController::class, 'callback'])->name('gdrive.callback');
+    Route::get('/select-folder', [GoogleDriveAuthController::class, 'selectFolder'])->name('gdrive.select-folder');
+    Route::post('/select-folder', [GoogleDriveAuthController::class, 'saveFolder'])->name('gdrive.save-folder');
+});
 // =====================================================
 // 🧍 ROUTES: PUBLIC BOOKING PAGE
 // =====================================================
+
 Route::redirect('/', '/booking', 301);
 Route::get('/booking', [BookingController::class, 'home']); // Custom frontend booking view
 Route::get('/grid', function() {

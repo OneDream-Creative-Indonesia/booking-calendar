@@ -105,6 +105,24 @@
                     <p style="margin: 0; font-size: 0.9rem; color: #666; font-weight: 600; text-transform: uppercase;">Nomor Antrean Kamu</p>
                     <h2 style="margin: 0; font-size: 2.5rem; font-weight: 900; color: #1759CA; letter-spacing: 2px;">{{ $this->queue_number }}</h2>
                 </div>
+                <!-- TAMBAHAN QR CODE LINK GOOGLE DRIVE -->
+                @if($this->drive_link)
+                <div style="margin-top: 1.8rem; display: flex; flex-direction: column; align-items: center;">
+                    <p style="margin: 0; font-size: 0.95rem; color: #333; font-weight: 700; margin-bottom: 0.8rem;">
+                        Scan QR ini untuk akses folder fotomu nanti:
+                    </p>
+                    
+                    <div style="background: white; padding: 12px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #eaeaea;">
+                        <!-- Generate QR Code dinamis dari Link GDrive -->
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data={{ urlencode($this->drive_link) }}&margin=0" alt="QR Code Galeri" style="width: 140px; height: 140px; border-radius: 8px;">
+                    </div>
+                    
+                    <a href="{{ $this->drive_link }}" target="_blank" style="margin-top: 0.8rem; font-size: 0.85rem; color: #1759CA; font-weight: 700; text-decoration: underline;">
+                        Atau klik link ini
+                    </a>
+                </div>
+                @endif
+                <!-- END TAMBAHAN QR CODE -->
 
                 <p style="margin-top: 1.5rem; margin-bottom: 1rem; font-size: 1.1rem; color: #555;">
                     Sabar yaw. Kamu akan foto setelah :
