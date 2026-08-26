@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Filament\Notifications\Notification;
 use App\Services\GoogleDriveService;
+use Illuminate\Support\Str; // Tambahan wajib untuk generate ID random
 
 class ListTicketings extends Page
 {
@@ -162,20 +163,37 @@ class ListTicketings extends Page
 
                             // 2. Simpan ke tabel albums Nuxt
                             DB::table('albums')->insert([
+                                'id' => strtoupper(Str::random(6)), // Generate ID untuk Nuxt
                                 'name' => $data['nama_event'], 
                                 'paket' => 'Self Photo',
                                 'folder_id' => $folderId,
                                 'drive_link' => 'https://drive.google.com/drive/folders/' . $folderId,
                                 'group_name' => $folderName,
                                 'expires_at' => now()->addDays(14)->timestamp,
-                                'created_at' => now(),
-                                // 'updated_at' => now(),
+                                'created_at' => now()->timestamp, // Format timestamp murni
                             ]);
 
                             Notification::make()->title('Event & Folder Berhasil Dibuat!')->success()->send();
+                        } else {
+                            // TANGKAP ERROR GOOGLE DRIVE API
+                            $errorDetail = $response->json();
+                            $pesanError = $errorDetail['error']['message'] ?? 'API Google Error';
+                            
+                            Notification::make()
+                                ->title('Gagal di Google API')
+                                ->body($pesanError)
+                                ->danger()
+                                ->duration(10000)
+                                ->send();
                         }
                     } catch (\Exception $e) {
-                        Notification::make()->title('Error membuat folder')->danger()->send();
+                        // TANGKAP ERROR DATABASE / SISTEM
+                        Notification::make()
+                            ->title('System Error')
+                            ->body($e->getMessage()) // Menampilkan error aslinya
+                            ->danger()
+                            ->duration(10000)
+                            ->send();
                     }
                 }),
         ];
