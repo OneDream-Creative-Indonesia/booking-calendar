@@ -169,7 +169,7 @@ class ListTicketings extends Page
                                 'group_name' => $folderName,
                                 'expires_at' => now()->addDays(14)->timestamp,
                                 'created_at' => now(),
-                                'updated_at' => now(),
+                                // 'updated_at' => now(),
                             ]);
 
                             Notification::make()->title('Event & Folder Berhasil Dibuat!')->success()->send();
