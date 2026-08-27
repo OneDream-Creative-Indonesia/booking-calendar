@@ -926,16 +926,20 @@
             container.innerHTML = '';
             container.className = 'packages-grid';
 
-            data.forEach(pkg => {
-                const div = document.createElement('div');
-                div.classList.add('package-card');
+            data.forEach((pkg, index) => {
+        const div = document.createElement('div');
+        div.classList.add('package-card');
 
-                if (pkg.id == 1) div.classList.add('card-blue');
-                if (pkg.id == 2) div.classList.add('card-pink');
-                if (pkg.id == 3) div.classList.add('card-yellow');
+        // HAPUS KODE LAMA INI:
+        // if (pkg.id == 1) div.classList.add('card-blue');
+        // if (pkg.id == 2) div.classList.add('card-pink');
+        // if (pkg.id == 3) div.classList.add('card-yellow');
 
-                div.onclick = () => selectPackage(pkg.title, pkg.id, pkg.price, pkg.description, pkg.downpayment, pkg.extras_people);
+        // GANTI DENGAN KODE DINAMIS INI:
+        const colorClasses = ['card-blue', 'card-pink', 'card-yellow'];
+        div.classList.add(colorClasses[index % 3]); // Warna akan berulang otomatis
 
+        div.onclick = () => selectPackage(pkg.title, pkg.id, pkg.price, pkg.description, pkg.downpayment, pkg.extras_people);
                 const icons = [
                     `<!-- Icon jam --> <svg width="20" height="18" viewBox="0 0 20 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 <ellipse cx="9.67691" cy="8.99019" rx="9.60969" ry="8.99019" fill="white"/>
