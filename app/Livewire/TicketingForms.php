@@ -111,9 +111,6 @@ class TicketingForms extends Component implements HasForms
         $newNumber = 'SF001';
         $insertedId = null;
 
-        $newNumber = 'SF001';
-        $insertedId = null;
-
         DB::transaction(function () use (&$newNumber, &$insertedId, $validate) {
             $query = DB::table('ticketings');
             
