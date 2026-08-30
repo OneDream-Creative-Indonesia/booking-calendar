@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Filament\Notifications\Notification;
 use App\Services\GoogleDriveService;
-use Illuminate\Support\Str; // Tambahan wajib untuk generate ID random
+use Illuminate\Support\Str; 
 
 class ListTicketings extends Page
 {
@@ -60,6 +60,27 @@ class ListTicketings extends Page
         }
     }
 
+    // ==========================================
+    // FUNGSI PANGGIL ANTREAN DARI ADMIN
+    // ==========================================
+    public function panggilAntrean($ticketId)
+    {
+        $ticket = Ticketing::find($ticketId);
+        
+        if ($ticket) {
+            // Ubah status agar terbaca "dipanggil" oleh layar display TV & API
+            $ticket->status = 'dipanggil'; 
+            $ticket->save();
+
+            $nomorAntrean = $ticket->queue_number ?? '#' . $ticket->id;
+
+            Notification::make()
+                ->title("Antrean {$nomorAntrean} berhasil dipanggil!")
+                ->success()
+                ->send();
+        }
+    }
+
     public function deleteSelected()
     {
         Ticketing::whereIn('id', $this->selectedTickets)->delete();
@@ -100,7 +121,7 @@ class ListTicketings extends Page
         // 2. Hapus Event-nya dari Database
         $event->delete();
 
-        // Tampilkan Notifikasi Baru
+        // Tampilkan Notifikasi
         Notification::make()
             ->title('Event dan Tiket berhasil dihapus (Folder GDrive aman)!')
             ->success()
@@ -130,6 +151,7 @@ class ListTicketings extends Page
                 ])
                 ->action(function (array $data) {
                     $folderName = $data['nama_event'] . ' - ' . $data['tanggal_event'];
+                    $eventSlug = Str::slug($data['nama_event']); // Generate slug otomatis
                     
                     try {
                         $drive = app(GoogleDriveService::class);
@@ -153,9 +175,10 @@ class ListTicketings extends Page
                         if ($response->successful()) {
                             $folderId = $response->json()['id'];
 
-                            // 1. Simpan ke tabel events
+                            // 1. Simpan ke tabel events (Termasuk Slug)
                             Event::create([
                                 'nama_event' => $data['nama_event'],
+                                'slug' => $eventSlug,
                                 'tanggal_event' => $data['tanggal_event'],
                                 'is_active' => $data['is_active'],
                                 'gdrive_folder_id' => $folderId,
@@ -190,7 +213,7 @@ class ListTicketings extends Page
                         // TANGKAP ERROR DATABASE / SISTEM
                         Notification::make()
                             ->title('System Error')
-                            ->body($e->getMessage()) // Menampilkan error aslinya
+                            ->body($e->getMessage())
                             ->danger()
                             ->duration(10000)
                             ->send();

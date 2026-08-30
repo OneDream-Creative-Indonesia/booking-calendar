@@ -86,11 +86,53 @@ Route::get('/photobooth', \App\Livewire\TicketingForms::class)->name('ticketing-
 Route::get('/edit', function() {
      return view('edit');
     });
+    
+Route::get('/api/antrian/get_queue/{slug?}', function($slug = null) {
+    try {
+        // Cari event berdasarkan slug
+        $event = null;
+        if ($slug) {
+            $event = DB::table('events')->where('slug', $slug)->first();
+        } else {
+            // Kalau nggak ada slug, ambil event yang aktif
+            $event = DB::table('events')->where('is_active', 1)->first();
+        }
 
-Route::get('/antrian', function() {
-     return view('antrian');
-    });
+        $eventId = $event ? $event->id : null;
 
+        // Ambil antrean khusus untuk event tersebut
+        $queueQuery = DB::table('ticketings')
+            ->where(function ($query) {
+                $query->where('status', 'menunggu')
+                      ->orWhereNull('status')
+                      ->orWhere('status', '');
+            });
+
+        if ($eventId) {
+            $queueQuery->where('event_id', $eventId);
+        }
+        
+        $queue = $queueQuery->orderBy('id', 'asc')->get();
+
+        // Ambil history khusus untuk event tersebut
+        $historyQuery = DB::table('ticketings')
+            ->where('status', 'dipanggil');
+
+        if ($eventId) {
+            $historyQuery->where('event_id', $eventId);
+        }
+
+        $history = $historyQuery->orderBy('updated_at', 'desc')->take(30)->get();
+
+        return response()->json(['success' => true, 'data' => $queue, 'history' => $history]);
+    } catch (\Exception $e) {
+        return response()->json(['success' => false, 'message' => $e->getMessage()]);
+    }
+});
+Route::get('/antrian/{slug?}', function($slug = null) {
+    // Pastikan nama file di folder resources/views adalah antrian.blade.php
+    return view('antrian');
+});
 Route::get('/api/antrian/get_queue', function() {
     try {
         // [OTOMATIS] Cek & Buat kolom 'status' jika belum ada di tabel ticketings

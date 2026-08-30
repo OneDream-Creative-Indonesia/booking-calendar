@@ -32,6 +32,9 @@
 </head>
 <body class="w-screen h-screen relative">
 
+    <!-- Efek Bel sebelum suara panggilan Text-to-Speech -->
+    <audio id="audio-bell" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+
     <!-- WRAPPER UTAMA: Ini yang akan diputar oleh CSS -->
     <!-- DEFAULT: rotate-ccw (Kebalikan/180 derajat dari posisi sebelumnya) -->
     <div id="main-wrapper" class="absolute top-0 left-0 flex flex-col bg-white rotate-ccw transition-transform duration-500">
@@ -79,7 +82,6 @@
             </div>
 
             <!-- Video Player -->
-            <!-- Kita hapus 'src' di HTML, karena akan di-load lewat JavaScript agar masuk RAM -->
             <video 
                 id="promo-video"
                 autoplay 
@@ -111,20 +113,14 @@
         // TRIK ANTI JARINGAN LEMAH: Load video ke RAM (Blob)
         async function loadVideoToMemory() {
             try {
-                // PERBAIKAN: Gunakan asset() Laravel atau setidaknya relatif dari root '/'
-                // Pastikan file mp4 berada di folder: public/img/sfanimasi.mp4
-                const videoPath = '{{ asset('img/sfanimasi.mp4') }}'; 
+                const videoPath = '{{ asset("img/sfanimasi.mp4") }}'; 
                 
                 const response = await fetch(videoPath);
                 if (!response.ok) throw new Error("Video tidak ditemukan");
                 
-                // Ubah video menjadi file data di memori sementara (RAM)
                 const blob = await response.blob();
-                
-                // Buat local URL yang tidak butuh internet sama sekali
                 const localVideoUrl = URL.createObjectURL(blob);
                 
-                // Pasang ke player
                 videoEl.src = localVideoUrl;
                 
                 videoEl.oncanplay = () => {
@@ -133,30 +129,27 @@
                 };
             } catch (error) {
                 console.error("Gagal caching video, fallback ke src biasa:", error);
-                // Fallback jika fetch gagal (misal kena blokir CORS)
-                // PERBAIKAN fallback path
-                videoEl.src = '{{ asset('img/sfanimasi.mp4') }}';
+                videoEl.src = '{{ asset("img/sfanimasi.mp4") }}';
                 videoLoader.style.display = 'none';
                 videoEl.style.opacity = '1';
             }
         }
         
-        // Panggil saat halaman dimuat
         loadVideoToMemory();
 
         // Fungsi Memutar Layar Secara Dinamis
         function toggleRotation(event) {
-            event.stopPropagation(); // Mencegah klik terhitung sebagai klik antrean
+            event.stopPropagation(); 
             if (mainWrapper.classList.contains('rotate-ccw')) {
                 mainWrapper.classList.remove('rotate-ccw');
-                mainWrapper.classList.add('rotate-cw'); // Putar ke 90 derajat
+                mainWrapper.classList.add('rotate-cw'); 
             } else {
                 mainWrapper.classList.remove('rotate-cw');
-                mainWrapper.classList.add('rotate-ccw'); // Balik ke default (-90 derajat)
+                mainWrapper.classList.add('rotate-ccw'); 
             }
         }
 
-        // Pancing TTS Engine saat klik pertama di body (Syarat browser)
+        // Pancing TTS Engine
         document.body.addEventListener('click', () => {
             if ('speechSynthesis' in window && !window.speechSynthesis.pending) {
                 const test = new SpeechSynthesisUtterance("");
@@ -198,7 +191,17 @@
 
         async function fetchDatabase() {
             try {
-                const response = await fetch('/api/antrian/get_queue');
+                // AMBIL SLUG DARI URL
+                const segments = window.location.pathname.split('/').filter(Boolean);
+                const slug = segments[segments.length - 1];
+                
+                // BUAT ENDPOINT DINAMIS BERDASARKAN SLUG
+                let endpoint = '/api/antrian/get_queue';
+                if (slug && slug !== 'antrian') {
+                    endpoint = `/api/antrian/get_queue/${slug}`;
+                }
+
+                const response = await fetch(endpoint);
                 if (!response.ok) return; 
                 
                 const result = await response.json();
@@ -207,7 +210,6 @@
                     const oldTop = queue.length > 0 ? queue[0] : null;
                     const newQueue = result.data;
                     
-                    // Deteksi sinkronisasi jika device lain menekan next
                     if (oldTop && newQueue.length > 0) {
                         const newTop = newQueue[0];
                         if (oldTop.id !== newTop.id) {
@@ -225,7 +227,9 @@
                     queue = newQueue; 
                     renderDisplay();
                 }
-            } catch (error) {}
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
         }
 
         async function markAsCalled(id) {
@@ -246,7 +250,6 @@
             
             window.speechSynthesis.cancel();
             
-            // Eja nomor (SF001 -> S F 0 0 1)
             let spelledNumber = queueNum.split('').join(' ');
             const textToSpeak = `Nomor antrean, ${spelledNumber}. Silakan masuk ke area foto.`;
             
@@ -256,26 +259,45 @@
             const idVoice = voices.find(v => v.lang === 'id-ID' || v.lang === 'id_ID');
             if (idVoice) currentUtterance.voice = idVoice;
 
-            currentUtterance.rate = 1.0; 
+            currentUtterance.rate = 0.9; 
             currentUtterance.pitch = 1.0; 
             currentUtterance.volume = 1;
 
-            window.speechSynthesis.speak(currentUtterance);
+            // Efek bel diputar sebelum suara TTS
+            const bell = document.getElementById('audio-bell');
+            if (bell) {
+                bell.currentTime = 0;
+                bell.play().then(() => {
+                    setTimeout(() => {
+                        window.speechSynthesis.speak(currentUtterance);
+                    }, 1200);
+                }).catch(e => {
+                    // Fallback: kalau bel ditahan browser, langsung ngomong aja
+                    window.speechSynthesis.speak(currentUtterance);
+                });
+            } else {
+                window.speechSynthesis.speak(currentUtterance);
+            }
         }
 
         window.callNext = function() {
-            // Cegah error jika tidak ada antrean atau sisa antrean = 0 (hanya tersisa yang lagi foto)
-            if (queue.length <= 1) return; 
+            // Kalau antrean beneran kosong baru di-return
+            if (queue.length === 0) return; 
 
+            // Majuin antrean
             const currentFinished = queue.shift(); 
-            const nextPerson = queue[0]; 
-            
-            renderDisplay();
-            
-            const personNumber = getQueueNumber(nextPerson);
-            
             markAsCalled(currentFinished.id);
-            speakName(personNumber);
+
+            if (queue.length > 0) {
+                const nextPerson = queue[0]; 
+                const personNumber = getQueueNumber(nextPerson);
+                
+                renderDisplay();
+                speakName(personNumber); // Panggil suara untuk antrean baru
+            } else {
+                // Udah nggak ada antrean, kosongkan layar tanpa suara
+                renderDisplay();
+            }
         }
 
         window.addEventListener('keydown', (e) => {

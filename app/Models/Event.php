@@ -10,9 +10,9 @@ class Event extends Model
 {
     use HasFactory;
     
-    // Ganti guarded dengan fillable dan daftarkan semua nama kolomnya
     protected $fillable = [
         'nama_event',
+        'slug', // INI DITAMBAHIN
         'tanggal_event',
         'is_active',
         'gdrive_folder_id',

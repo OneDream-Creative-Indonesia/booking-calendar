@@ -14,7 +14,7 @@
     @foreach($this->events as $event)
         <div class="bg-white dark:bg-gray-900 shadow-sm ring-1 ring-gray-950/5 dark:ring-white/10 rounded-xl overflow-hidden mb-6">
             
-            <!-- JUDUL EVENT, ACTIVE TOGGLE, & TOMBOL HAPUS -->
+            <!-- JUDUL EVENT, ACTIVE TOGGLE, TOMBOL ANTREAN, & TOMBOL HAPUS -->
             <div class="p-4 bg-gray-50 dark:bg-white/5 border-b border-gray-200 dark:border-white/10 flex items-center justify-between">
                 
                 <div class="flex items-center gap-3">
@@ -34,6 +34,11 @@
                     >
                         {{ $event->is_active ? 'Active' : 'Inactive' }}
                     </x-filament::button>
+
+                    <!-- TOMBOL ANTREAN KHUSUS PER EVENT -->
+                    <a href="/antrian/{{ $event->slug }}" target="_blank" class="inline-flex items-center justify-center font-medium tracking-tight rounded-lg gap-1.5 px-3 py-1.5 text-sm shadow-sm bg-blue-600 text-white hover:bg-blue-500 focus:ring-blue-600 transition">
+                        Antrean 📺
+                    </a>
 
                     <!-- TOMBOL HAPUS EVENT (BAWAAN FILAMENT) -->
                     <x-filament::button 
@@ -93,7 +98,28 @@
                                 </td>
                                 
                                 <td class="p-3 text-center">
-                                    <a href="{{ route('filament.admin.resources.ticketings.edit', $ticket->id) }}" class="text-primary-600 hover:underline font-medium">Edit</a>
+                                    <!-- TOMBOL PANGGIL ANTREAN (OPTIMISTIC / INSTAN 0ms) -->
+                                    <div x-data="{ status: '{{ $ticket->status }}' }">
+                                        <button 
+                                            x-show="status === 'menunggu'"
+                                            type="button"
+                                            x-on:click="
+                                                status = 'dipanggil';
+                                                $wire.panggilAntrean({{ $ticket->id }});
+                                            "
+                                            class="inline-flex items-center justify-center font-semibold rounded-lg gap-1.5 px-3 py-1.5 text-sm bg-primary-600 text-white hover:bg-primary-500 shadow-sm transition active:scale-95 cursor-pointer"
+                                        >
+                                            Panggil
+                                        </button>
+
+                                        <span 
+                                            x-show="status !== 'menunggu'" 
+                                            x-cloak
+                                            class="bg-gray-100 text-gray-600 border border-gray-200 px-3 py-1.5 rounded-lg text-xs font-bold dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 inline-block"
+                                        >
+                                            Dipanggil
+                                        </span>
+                                    </div>
                                 </td>
                             </tr>
                         @empty
