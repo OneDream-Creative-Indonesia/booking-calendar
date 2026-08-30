@@ -114,6 +114,10 @@ class TicketingForms extends Component implements HasForms
         DB::transaction(function () use (&$newNumber, &$insertedId, $validate) {
             $query = DB::table('ticketings');
             
+            // Buat prefix unik berdasarkan ID event (Contoh: SF-1-)
+            $prefix = empty($validate['event_id']) ? 'SF-0-' : 'SF-' . $validate['event_id'] . '-';
+            $newNumber = $prefix . '001';
+            
             if (empty($validate['event_id'])) {
                 $query->whereNull('event_id');
             } else {
@@ -123,8 +127,9 @@ class TicketingForms extends Component implements HasForms
             $lastTicket = $query->orderBy('id', 'desc')->lockForUpdate()->first();
             
             if ($lastTicket && $lastTicket->queue_number) {
-                $lastNumber = (int) str_replace('SF', '', $lastTicket->queue_number);
-                $newNumber = 'SF' . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+                // Hapus prefix unik untuk mendapatkan angkanya saja
+                $lastNumber = (int) str_replace($prefix, '', $lastTicket->queue_number);
+                $newNumber = $prefix . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
             }
 
             $validate['queue_number'] = $newNumber; 
@@ -134,8 +139,8 @@ class TicketingForms extends Component implements HasForms
 
             $insertedId = DB::table('ticketings')->insertGetId($validate);
         });
-        
-        $angkaAntrean = (int) str_replace('SF', '', $newNumber);
+        $prefix = empty($validate['event_id']) ? 'SF-0-' : 'SF-' . $validate['event_id'] . '-';
+        $angkaAntrean = (int) str_replace($prefix, '', $newNumber);
         $nomorFormat = str_pad($angkaAntrean, 2, '0', STR_PAD_LEFT);
         $namaDepan = strtolower(explode(' ', trim($validate['nama']))[0]);
         $namaFolderDrive = $nomorFormat . ' ' . $namaDepan;
