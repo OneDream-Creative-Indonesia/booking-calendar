@@ -137,8 +137,10 @@ class TicketingForms extends Component implements HasForms
         
         $angkaAntrean = (int) str_replace('SF', '', $newNumber);
 
-        $nomorFormat = str_pad($angkaAntrean, 3, '0', STR_PAD_LEFT);
+        $nomorFormat = str_pad($angkaAntrean, 2, '0', STR_PAD_LEFT);
+
         $namaTanpaSpasi = strtolower(str_replace(' ', '', trim($validate['nama'])));
+
         $namaFolderDrive = $nomorFormat . ' ' . $namaTanpaSpasi;
 
         $event = null;
