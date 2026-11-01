@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Filament\Resources\KeychainResource\Pages;
+namespace App\Filament\Resources\AddonResource\Pages;
 
-use App\Filament\Resources\KeychainResource;
+use App\Filament\Resources\AddonResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
-class EditKeychain extends EditRecord
+class EditAddon extends EditRecord
 {
-    protected static string $resource = KeychainResource::class;
+    protected static string $resource = AddonResource::class;
 
     protected function getHeaderActions(): array
     {

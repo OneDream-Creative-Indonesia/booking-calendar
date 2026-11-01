@@ -73,9 +73,14 @@ class AdminPanelProvider extends PanelProvider
                     ->group('Studio')
                     ->sort(3),
                 NavigationItem::make('Photo Link')
-                    ->url('https://snapfunstudio.id/photo-link', shouldOpenInNewTab: true)
+                    ->url('https://send.snapfunstudio.id/', shouldOpenInNewTab: true)
                     ->icon('heroicon-o-camera') 
                     ->group('Studio')
+                    ->sort(3),
+                NavigationItem::make('Frame Manage')
+                    ->url('https://frame.snapfunstudio.id/', shouldOpenInNewTab: true)
+                    ->icon('heroicon-o-squares-plus') 
+                    ->group('Operational')
                     ->sort(3),
 
             ])
@@ -83,7 +88,6 @@ class AdminPanelProvider extends PanelProvider
                 'Studio', 
                 'Photobooth',        
                 'Operational',
-                'Settings',        
             ])
             ->authMiddleware([
                 Authenticate::class,

@@ -3,7 +3,7 @@
     @if (!$isSuccess)
         <!-- HALAMAN FORM INPUT -->
         <div class="w-full max-w-3xl p-8 bg-white rounded-lg shadow dark:bg-gray-800">
-             <h2 class="mb-4 font-bold text-center text-xl sm:text-2xl md:text-3xl">
+            <h2 class="mb-4 font-bold text-center text-xl sm:text-2xl md:text-3xl">
                 Silahkan Masukan Data Kamu
             </h2>
 
@@ -13,10 +13,35 @@
                 @if ($transaction_type === 'qris')
                 @endif
 
-                <div class="w-full mt-4">
-                    <x-filament::button type="submit" size="lg" class="w-full justify-center text-lg" style="background-color: #004fbf;">
-                        {{ __('Kirim') }}
-                    </x-filament::button>
+            <div class="w-full mt-4">
+                    <button 
+                        type="submit" 
+                        wire:loading.attr="disabled"
+                        wire:target="submit"
+                        class="w-full relative overflow-hidden rounded-lg shadow-sm transition-all hover:opacity-90 active:scale-95 disabled:cursor-not-allowed"
+                    >
+                        <!-- Placeholder transparan untuk mengunci ukuran tombol agar tidak bergeser -->
+                        <div class="invisible flex items-center justify-center gap-2 px-6 py-3 text-lg font-bold">
+                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="4"></circle></svg>
+                            <span>Memproses...</span>
+                        </div>
+
+                        <!-- Tampilan Normal (Warna Biru) -->
+                        <div wire:loading.remove wire:target="submit" class="absolute inset-0 flex items-center justify-center text-white" style="background-color: #004fbf;">
+                            <span class="text-lg font-bold">{{ __('Kirim') }}</span>
+                        </div>
+                        
+                        <!-- Tampilan Loading (Warna Kuning #ffc20e, Teks Hitam) -->
+                        <div wire:loading wire:target="submit" class="absolute inset-0" style="background-color: #ffc20e; color: #111827;">
+                            <div class="flex w-full h-full items-center justify-center gap-2">
+                                <svg class="w-5 h-5 animate-spin text-gray-900" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <span class="text-lg font-bold">Memproses...</span>
+                            </div>
+                        </div>
+                    </button>
                 </div>
             </form>
         </div>
@@ -41,21 +66,43 @@
                     <h2 style="margin: 5px 0 0 0; font-size: 3rem; font-weight: 900; color: #ffffff; letter-spacing: 2px;">{{ $this->queue_number }}</h2>
                 </div>
 
-                <!-- TAMBAHAN QR CODE LINK GOOGLE DRIVE -->
-                @if($this->drive_link)
-                <div style="margin-top: 1.8rem; display: flex; flex-direction: column; align-items: center;">
-                    <p style="margin: 0; font-size: 0.95rem; color: #333; font-weight: 700; margin-bottom: 0.8rem;">
-                        Scan QR ini untuk akses folder fotomu nanti:
-                    </p>
-                    
-                    <div style="background: white; padding: 12px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #eaeaea;">
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data={{ urlencode($this->drive_link) }}&margin=0" alt="QR Code Galeri" style="width: 140px; height: 140px; border-radius: 8px;">
+                <!-- TAMPILAN QR CODE & LINK GALERI SEND.SNAPFUNSTUDIO.ID -->
+                @if($this->album_id)
+                    @php
+                        $galleryUrl = ($this->drive_link && str_starts_with($this->drive_link, 'http'))
+                            ? $this->drive_link
+                            : 'https://send.snapfunstudio.id/gallery/' . $this->album_id;
+                    @endphp
+
+                    <div style="background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 1.25rem; margin-top: 1.25rem; width: 100%; max-width: 350px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06); display: flex; flex-direction: column; align-items: center;">
+                        <p style="margin: 0 0 0.75rem 0; font-size: 0.85rem; font-weight: 700; color: #4b5563; text-transform: uppercase; letter-spacing: 0.5px;">
+                            QR Code & Link Hasil Foto
+                        </p>
+
+                        <div style="background-color: #ffffff; padding: 0.5rem; border-radius: 12px; border: 1px solid #f3f4f6; margin-bottom: 0.75rem;">
+                            <img 
+                                src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=8&data={{ urlencode($galleryUrl) }}" 
+                                alt="QR Code Galeri {{ $this->queue_number }}" 
+                                style="width: 180px; height: 180px; object-fit: contain; display: block;"
+                            >
+                        </div>
+
+                        <p style="margin: 0 0 0.85rem 0; font-size: 0.8rem; color: #6b7280;">
+                            ID Folder: <strong style="color: #111827; font-family: monospace; font-size: 0.9rem;">{{ $this->album_id }}</strong>
+                        </p>
+
+                        <a 
+                            href="{{ $galleryUrl }}" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            style="background-color: #004fbf; color: #ffffff; text-decoration: none; font-weight: 700; font-size: 0.95rem; padding: 0.75rem 1.25rem; border-radius: 10px; width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 6px rgba(0, 79, 191, 0.25); transition: opacity 0.2s;"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" style="width: 18px; height: 18px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                            </svg>
+                            Klik Link Hasil Foto
+                        </a>
                     </div>
-                    
-                    <a href="{{ $this->drive_link }}" target="_blank" style="margin-top: 0.8rem; font-size: 0.85rem; color: #1759CA; font-weight: 700; text-decoration: underline;">
-                        Atau klik link ini
-                    </a>
-                </div>
                 @endif
 
                 <p style="margin-top: 1.5rem; margin-bottom: 1rem; font-size: 1.1rem; color: #555;">

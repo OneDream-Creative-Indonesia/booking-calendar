@@ -27,5 +27,9 @@ class Booking extends Model
     {
         return $this->belongsTo(\App\Models\Voucher::class);
     }
+    public function bookingAddons()
+    {
+        return $this->hasMany(BookingAddon::class);
+    }
 
 }

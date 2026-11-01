@@ -219,4 +219,12 @@ Route::prefix('photo-link')->name('photo-link.')->group(function () {
     Route::get('/download/file/{file}', [PhotoLinkController::class, 'downloadFile'])->name('download.file');
     Route::get('/download/zip/{album_id}', [PhotoLinkController::class, 'downloadZip'])->name('download.zip');
 });
+Route::get('/booking/success/{album_id}', function($album_id) {
+    $album = \Illuminate\Support\Facades\DB::table('albums')->where('id', $album_id)->first();
 
+    if (!$album) {
+        return redirect('/');
+    }
+
+    return view('booking-success', ['album' => $album]);
+})->name('booking.success');

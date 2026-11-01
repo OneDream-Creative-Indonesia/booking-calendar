@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Ticketing;
+use App\Services\GoogleDriveService;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -14,15 +15,17 @@ use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\PhotoboothTicketMail;
 
 class TicketingForms extends Component implements HasForms
 {
     use InteractsWithForms;
 
     public $isSuccess = false;
+    public $isSubmitting = false;
     public $customer_id = null;
     public $queue_number = null;
-    // PENTING: public $queueStatus; sudah dihapus agar tidak bentrok dengan method
     public $album_id = null; 
     public $drive_link = null; 
 
@@ -38,13 +41,12 @@ class TicketingForms extends Component implements HasForms
 
     public function mount()
     {
-        $activeEvents = DB::table('events')->where('is_active', true)->get();
+        $activeEvents = DB::table('events')->where('is_active', true)->orderBy('id', 'desc')->get();
 
         if ($activeEvents->count() > 1) {
             $this->isMultipleEvents = true;
             $this->form->fill();
-        } 
-        else {
+        } else {
             $this->isMultipleEvents = false;
             $this->event_id = $activeEvents->first()->id ?? null;
             $this->form->fill([
@@ -98,6 +100,11 @@ class TicketingForms extends Component implements HasForms
 
     public function submit()
     {
+        if ($this->isSuccess || $this->isSubmitting) {
+            return;
+        }
+        $this->isSubmitting = true;
+
         $validate = $this->validate([
             'event_id' => 'nullable', 
             'nama' => 'required|string|max:255',
@@ -107,6 +114,16 @@ class TicketingForms extends Component implements HasForms
             'cetak' => 'required|integer|min:0',
             'transaction_type' => 'required|string|in:tunai,qris',
         ]);
+
+        if (empty($validate['event_id'])) {
+            $activeEvent = DB::table('events')->where('is_active', true)->orderBy('id', 'desc')->first();
+            if ($activeEvent) {
+                $validate['event_id'] = $activeEvent->id;
+            }
+        }
+
+        // Rapikan spasi berlebih pada nama tanpa mengubah huruf besar/kecil
+        $validate['nama'] = trim($validate['nama']);
 
         $newNumber = 'SF001';
         $insertedId = null;
@@ -137,20 +154,24 @@ class TicketingForms extends Component implements HasForms
         
         $angkaAntrean = (int) str_replace('SF', '', $newNumber);
         $nomorFormat = str_pad($angkaAntrean, 2, '0', STR_PAD_LEFT);
-
-        // GANTI BAGIAN INI: Hapus str_replace agar spasi tidak hilang
-        $namaAsli = strtolower(trim($validate['nama'])); 
-
-        // GABUNGKAN
+        
+        // PERTAHANKAN HURUF BESAR & KECIL SESUAI INPUT REGISTRASI
+        $namaAsli = $validate['nama']; 
         $namaFolderDrive = $nomorFormat . ' ' . $namaAsli;
 
         $event = null;
         $folderUtamaDriveId = null;
+        $groupName = 'Antrean Tanpa Event';
 
         if (!empty($validate['event_id'])) {
             $event = DB::table('events')->where('id', $validate['event_id'])->first();
-            $folderUtamaDriveId = $event ? $event->gdrive_folder_id : null;
-        } else {
+            if ($event) {
+                $folderUtamaDriveId = $event->gdrive_folder_id;
+                $groupName = $event->nama_event . ' - ' . $event->tanggal_event;
+            }
+        }
+
+        if (!$folderUtamaDriveId) {
             $setting = DB::table('settings')->where('key', 'google_upload_folder')->first();
             if ($setting) {
                 $folderUtamaDriveId = json_decode($setting->value, true)['folder_id'] ?? null;
@@ -158,40 +179,96 @@ class TicketingForms extends Component implements HasForms
         }
         
         $driveData = $this->createDriveFolder($namaFolderDrive, $folderUtamaDriveId);
-        $albumId = strtoupper(Str::random(6));
+        $childFolderId = $driveData['id'] ?? null;
+        $driveLink = $childFolderId 
+            ? ('https://drive.google.com/drive/folders/' . $childFolderId) 
+            : ($driveData['webViewLink'] ?? null);
 
-        DB::table('albums')->insert([
-            'id' => $albumId,
-            'name' => $namaFolderDrive,
-            'phone' => $validate['telpon'],
-            'paket' => 'Self Photo',
-            'drive_link' => $driveData['webViewLink'] ?? null,
-            'folder_id' => $driveData['id'] ?? null,
-            'group_name' => $event ? $event->nama_event : 'Antrean Tanpa Event', 
-            'expires_at' => now()->addDays(14)->timestamp,
-            'created_at' => now()->timestamp,
-        ]);
+        $existingAlbum = DB::table('albums')
+            ->where('group_name', $groupName)
+            ->where('name', $namaFolderDrive)
+            ->first();
 
+        if ($existingAlbum) {
+            $albumId = $existingAlbum->id;
+            DB::table('albums')->where('id', $albumId)->update([
+                'name' => $namaFolderDrive,
+                'phone' => $validate['telpon'],
+                'paket' => 'Photobooth',
+                'folder_id' => $childFolderId ?? $existingAlbum->folder_id,
+                'drive_link' => $driveLink ?? $existingAlbum->drive_link,
+            ]);
+        } else {
+            $albumId = strtoupper(Str::random(6));
+            DB::table('albums')->insert([
+                'id' => $albumId,
+                'name' => $namaFolderDrive,
+                'phone' => $validate['telpon'],
+                'paket' => 'Photobooth',
+                'drive_link' => $driveLink,
+                'folder_id' => $childFolderId,
+                'group_name' => $groupName, 
+                'expires_at' => now()->addDays(14)->timestamp,
+                'created_at' => now()->timestamp,
+            ]);
+        }
+
+        // Set properties komponen
         $this->customer_id = $insertedId;
         $this->queue_number = $newNumber; 
         $this->event_id = $validate['event_id'];
         $this->album_id = $albumId;
-        $this->drive_link = rtrim(config('services.snaplink.url'), '/') . '/gallery/' . $albumId; 
+        
+        // Buat URL Galeri
+        $baseUrl = config('services.snaplink.url') ?: 'https://send.snapfunstudio.id';
+        $this->drive_link = rtrim($baseUrl, '/') . '/gallery/' . $albumId; 
+
+        // MULAI DARI SINI: KODE KIRIM EMAIL OTOMATIS
+        try {
+            $emailData = [
+                'nama' => $validate['nama'],
+                'queue_number' => $newNumber,
+                'album_id' => $albumId,
+                'drive_link' => $this->drive_link
+            ];
+
+            Mail::to($validate['email'])->send(new PhotoboothTicketMail($emailData));
+        } catch (\Exception $e) {
+            // Biarkan lewat jika email gagal agar customer tetap berhasil masuk antrean
+        }
+        // BATAS KODE KIRIM EMAIL
 
         $this->isSuccess = true;
+        $this->isSubmitting = false;
     }
 
     private function createDriveFolder($folderName, $parentFolderId)
     {
         try {
-            $setting = DB::table('settings')->where('key', 'google_oauth_tokens')->first();
-            if (!$setting) return null;
+            $drive = app(GoogleDriveService::class);
+            $accessToken = $drive->getValidAccessToken();
 
-            $tokens = json_decode($setting->value, true);
-            $accessToken = $tokens['access_token'];
+            if (!$accessToken) {
+                return null;
+            }
+
+            if ($parentFolderId) {
+                $escapedName = addslashes($folderName);
+                $checkQuery = "mimeType='application/vnd.google-apps.folder' and name='{$escapedName}' and '{$parentFolderId}' in parents and trashed=false";
+                
+                $checkResponse = Http::withToken($accessToken)
+                    ->get('https://www.googleapis.com/drive/v3/files', [
+                        'q' => $checkQuery,
+                        'fields' => 'files(id, name, webViewLink)',
+                    ]);
+
+                if ($checkResponse->successful() && !empty($checkResponse->json()['files'])) {
+                    return $checkResponse->json()['files'][0];
+                }
+            }
 
             $response = Http::withToken($accessToken)
-                ->post('https://www.googleapis.com/drive/v3/files', [
+                ->post('https://www.googleapis.com/drive/v3/files?fields=id,name,webViewLink', [
                     'name' => $folderName,
                     'mimeType' => 'application/vnd.google-apps.folder',
                     'parents' => $parentFolderId ? [$parentFolderId] : []
@@ -207,9 +284,6 @@ class TicketingForms extends Component implements HasForms
         }
     }
 
-    // ==========================================
-    // FUNGSI LIVE ANTREAN (MENGHITUNG SISA ORANG)
-    // ==========================================
     public function checkQueueStatus()
     {
         if (!$this->customer_id) {

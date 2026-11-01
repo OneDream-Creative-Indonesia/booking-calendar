@@ -6,9 +6,13 @@ use App\Filament\Resources\TicketingResource;
 use App\Models\Event;
 use App\Models\Ticketing;
 use Filament\Actions;
+use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Resources\Pages\Page;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -61,6 +65,113 @@ class ListTicketings extends Page
     }
 
     // ==========================================
+    // FUNGSI TAMBAH (+) & KURANG (-) ORANG, CETAK, ADDITIONAL
+    // ==========================================
+    public function updateCounter($ticketId, $column, $change)
+    {
+        if (!in_array($column, ['jumlah', 'cetak', 'additional'])) {
+            return;
+        }
+
+        $ticket = Ticketing::find($ticketId);
+        if ($ticket) {
+            $currentValue = (int) ($ticket->$column ?? 0);
+            $newValue = max(0, $currentValue + (int) $change);
+
+            DB::table('ticketings')
+                ->where('id', $ticketId)
+                ->update([$column => $newValue]);
+        }
+    }
+
+    // ==========================================
+    // FUNGSI EXPORT CSV PER FOLDER EVENT
+    // ==========================================
+    public function exportCsv($eventId = null)
+    {
+        $query = Ticketing::query();
+        $namaEvent = 'Tanpa-Event';
+        $event = null;
+
+        if ($eventId && $eventId !== 'no-event') {
+            $event = Event::find($eventId);
+            $namaEvent = $event ? Str::slug($event->nama_event) : 'Event';
+            $query->where('event_id', $eventId);
+        } else {
+            $query->whereNull('event_id');
+        }
+
+        $allEventTicketIds = (clone $query)->pluck('id')->toArray();
+        $selectedInThisEvent = array_intersect($this->selectedTickets, $allEventTicketIds);
+
+        if (!empty($selectedInThisEvent)) {
+            $query->whereIn('id', $selectedInThisEvent);
+        }
+
+        $tickets = $query->orderBy('id', 'asc')->get();
+
+        if ($tickets->isEmpty()) {
+            Notification::make()
+                ->title('Tidak ada data antrean untuk di-export pada event ini.')
+                ->warning()
+                ->send();
+            return;
+        }
+
+        $fileName = 'Export-' . $namaEvent . '-' . now()->format('Y-m-d_His') . '.csv';
+
+        return response()->streamDownload(function () use ($tickets, $event) {
+            $handle = fopen('php://output', 'w');
+            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            $stripPrice = $event ? ($event->strip_price ?? 0) : 0;
+            $addPrice = ($event && $event->is_additional_active) ? ($event->additional_price ?? 0) : 0;
+
+            fputcsv($handle, [
+                'No. Antrean',
+                'Nama',
+                'Email',
+                'No. HP',
+                'Jumlah Orang',
+                'Jumlah Cetak',
+                'Jumlah Additional',
+                'Pembayaran',
+                'Pendapatan',
+                'Status',
+                'Foto',
+                'Export',
+                'Print',
+                'Waktu Daftar',
+            ]);
+
+            foreach ($tickets as $ticket) {
+                $pendapatan = ($stripPrice * (int) $ticket->cetak) + ($addPrice * (int) ($ticket->additional ?? 0));
+
+                fputcsv($handle, [
+                    $ticket->queue_number ?? '#' . $ticket->id,
+                    $ticket->nama,
+                    $ticket->email,
+                    $ticket->telpon,
+                    (int) $ticket->jumlah,
+                    (int) $ticket->cetak,
+                    (int) ($ticket->additional ?? 0),
+                    strtoupper($ticket->transaction_type ?? '-'),
+                    $pendapatan,
+                    $ticket->status ?? 'menunggu',
+                    $ticket->is_foto ? 'Ya' : 'Tidak',
+                    $ticket->is_export ? 'Ya' : 'Tidak',
+                    $ticket->is_print ? 'Ya' : 'Tidak',
+                    $ticket->created_at ? $ticket->created_at->format('Y-m-d H:i:s') : '-',
+                ]);
+            }
+
+            fclose($handle);
+        }, $fileName, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
+    }
+
+    // ==========================================
     // FUNGSI PANGGIL ANTREAN DARI ADMIN
     // ==========================================
     public function panggilAntrean($ticketId)
@@ -68,7 +179,6 @@ class ListTicketings extends Page
         $ticket = Ticketing::find($ticketId);
         
         if ($ticket) {
-            // Ubah status agar terbaca "dipanggil" oleh layar display TV & API
             $ticket->status = 'dipanggil'; 
             $ticket->save();
 
@@ -81,6 +191,90 @@ class ListTicketings extends Page
         }
     }
 
+    // ==========================================
+    // FUNGSI HAPUS 1 BARIS TIKET / LIST
+    // ==========================================
+    public function deleteTicket($ticketId)
+    {
+        $ticket = Ticketing::find($ticketId);
+        if ($ticket) {
+            $ticket->delete();
+            Notification::make()
+                ->title('Data antrean berhasil dihapus!')
+                ->success()
+                ->send();
+        }
+    }
+
+    // ==========================================
+    // FUNGSI POP-UP EDIT EVENT & HARGA STRIP
+    // ==========================================
+    public function editEventAction(): Action
+    {
+        return Action::make('editEvent')
+            ->modalHeading('Edit Event & Harga')
+            ->fillForm(function (array $arguments): array {
+                $event = Event::find($arguments['id'] ?? null);
+                return $event ? [
+                    'nama_event' => $event->nama_event,
+                    'tanggal_event' => $event->tanggal_event,
+                    'strip_price' => (int) ($event->strip_price ?? 0),
+                    'is_additional_active' => (bool) ($event->is_additional_active ?? false),
+                    'additional_price' => (int) ($event->additional_price ?? 0),
+                ] : [];
+            })
+            ->form([
+                TextInput::make('nama_event')
+                    ->label('Nama Event')
+                    ->required(),
+                DatePicker::make('tanggal_event')
+                    ->label('Tanggal Event')
+                    ->required(),
+                TextInput::make('strip_price')
+                    ->label('Harga Strip')
+                    ->numeric()
+                    ->prefix('Rp')
+                    ->required(),
+                Toggle::make('is_additional_active')
+                    ->label('Aktifkan Fitur Additional?')
+                    ->live()
+                    ->afterStateUpdated(function ($state, Set $set) {
+                        if (!$state) {
+                            $set('additional_price', 0);
+                        }
+                    }),
+                TextInput::make('additional_price')
+                    ->label('Harga Additional')
+                    ->numeric()
+                    ->prefix('Rp')
+                    ->default(0)
+                    ->visible(fn (Get $get): bool => (bool) $get('is_additional_active'))
+                    ->required(fn (Get $get): bool => (bool) $get('is_additional_active')),
+            ])
+            ->action(function (array $data, array $arguments): void {
+                $eventId = $arguments['id'] ?? null;
+                if ($eventId) {
+                    $stripPrice = (float) preg_replace('/[^0-9]/', '', (string) ($data['strip_price'] ?? 0));
+                    $isAdditional = (bool) ($data['is_additional_active'] ?? false);
+                    $additionalPrice = $isAdditional ? (float) preg_replace('/[^0-9]/', '', (string) ($data['additional_price'] ?? 0)) : 0;
+
+                    DB::table('events')->where('id', $eventId)->update([
+                        'nama_event' => $data['nama_event'],
+                        'tanggal_event' => $data['tanggal_event'],
+                        'strip_price' => $stripPrice,
+                        'is_additional_active' => $isAdditional ? 1 : 0,
+                        'additional_price' => $additionalPrice,
+                        'updated_at' => now(),
+                    ]);
+
+                    Notification::make()
+                        ->title('Data Event & Harga berhasil diperbarui!')
+                        ->success()
+                        ->send();
+                }
+            });
+    }
+
     public function deleteSelected()
     {
         Ticketing::whereIn('id', $this->selectedTickets)->delete();
@@ -88,9 +282,6 @@ class ListTicketings extends Page
         Notification::make()->title('Tiket berhasil dihapus')->success()->send();
     }
 
-    // ==========================================
-    // FUNGSI TOGGLE ACTIVE / INACTIVE EVENT
-    // ==========================================
     public function toggleEventActive($eventId)
     {
         $event = Event::find($eventId);
@@ -106,22 +297,15 @@ class ListTicketings extends Page
         }
     }
 
-    // ==========================================
-    // FUNGSI HAPUS EVENT (TANPA HAPUS FOLDER GDRIVE)
-    // ==========================================
     public function deleteEvent($eventId)
     {
         $event = Event::find($eventId);
         
         if (!$event) return;
 
-        // 1. Hapus semua antrean (tiket) yang ada di dalam event ini
         Ticketing::where('event_id', $event->id)->delete();
-
-        // 2. Hapus Event-nya dari Database
         $event->delete();
 
-        // Tampilkan Notifikasi
         Notification::make()
             ->title('Event dan Tiket berhasil dihapus (Folder GDrive aman)!')
             ->success()
@@ -131,27 +315,52 @@ class ListTicketings extends Page
     protected function getHeaderActions(): array
     {
         return [
-            Actions\Action::make('export_ticketing')
-                ->label('Export Terpilih (' . count($this->selectedTickets) . ')')
-                ->color('primary')
-                ->icon('heroicon-o-arrow-down-tray')
-                ->disabled(count($this->selectedTickets) === 0)
-                ->action(function () {
-                    // Logika export CSV
-                }),
-
             Actions\Action::make('add_event')
                 ->label('Add Event')
                 ->icon('heroicon-o-plus')
                 ->modalHeading('Buat Event Baru')
                 ->form([
-                    TextInput::make('nama_event')->label('Nama Event')->required(),
-                    DatePicker::make('tanggal_event')->label('Tanggal Event')->default(now())->required(),
-                    Toggle::make('is_active')->label('Buka Pendaftaran?')->default(true),
+                    TextInput::make('nama_event')
+                        ->label('Nama Event')
+                        ->required(),
+                    
+                    DatePicker::make('tanggal_event')
+                        ->label('Tanggal Event')
+                        ->default(now())
+                        ->required(),
+
+                    TextInput::make('strip_price')
+                        ->label('Harga Strip')
+                        ->numeric()
+                        ->prefix('Rp')
+                        ->default(0)
+                        ->required(),
+
+                    Toggle::make('is_additional_active')
+                        ->label('Aktifkan Fitur Additional?')
+                        ->default(false)
+                        ->live()
+                        ->afterStateUpdated(function ($state, Set $set) {
+                            if (!$state) {
+                                $set('additional_price', 0);
+                            }
+                        }),
+
+                    TextInput::make('additional_price')
+                        ->label('Harga Additional')
+                        ->numeric()
+                        ->prefix('Rp')
+                        ->default(0)
+                        ->visible(fn (Get $get): bool => (bool) $get('is_additional_active'))
+                        ->required(fn (Get $get): bool => (bool) $get('is_additional_active')),
+
+                    Toggle::make('is_active')
+                        ->label('Buka Pendaftaran?')
+                        ->default(true),
                 ])
                 ->action(function (array $data) {
                     $folderName = $data['nama_event'] . ' - ' . $data['tanggal_event'];
-                    $eventSlug = Str::slug($data['nama_event']); // Generate slug otomatis
+                    $eventSlug = Str::slug($data['nama_event']);
                     
                     try {
                         $drive = app(GoogleDriveService::class);
@@ -175,30 +384,42 @@ class ListTicketings extends Page
                         if ($response->successful()) {
                             $folderId = $response->json()['id'];
 
-                            // 1. Simpan ke tabel events (Termasuk Slug)
-                            Event::create([
+                            $stripPrice = (float) preg_replace('/[^0-9]/', '', (string) ($data['strip_price'] ?? 0));
+                            $isAdditional = (bool) ($data['is_additional_active'] ?? false);
+                            $additionalPrice = $isAdditional ? (float) preg_replace('/[^0-9]/', '', (string) ($data['additional_price'] ?? 0)) : 0;
+
+                            Event::unguard();
+                            $newEvent = Event::create([
                                 'nama_event' => $data['nama_event'],
                                 'slug' => $eventSlug,
                                 'tanggal_event' => $data['tanggal_event'],
                                 'is_active' => $data['is_active'],
                                 'gdrive_folder_id' => $folderId,
+                                'strip_price' => $stripPrice,
+                                'is_additional_active' => $isAdditional,
+                                'additional_price' => $additionalPrice,
+                            ]);
+                            Event::reguard();
+
+                            DB::table('events')->where('id', $newEvent->id)->update([
+                                'strip_price' => $stripPrice,
+                                'is_additional_active' => $isAdditional ? 1 : 0,
+                                'additional_price' => $additionalPrice,
                             ]);
 
-                            // 2. Simpan ke tabel albums Nuxt
                             DB::table('albums')->insert([
-                                'id' => strtoupper(Str::random(6)), // Generate ID untuk Nuxt
+                                'id' => strtoupper(Str::random(6)),
                                 'name' => $data['nama_event'], 
-                                'paket' => 'Self Photo',
+                                'paket' => 'Photobooth',
                                 'folder_id' => $folderId,
                                 'drive_link' => 'https://drive.google.com/drive/folders/' . $folderId,
                                 'group_name' => $folderName,
                                 'expires_at' => now()->addDays(14)->timestamp,
-                                'created_at' => now()->timestamp, // Format timestamp murni
+                                'created_at' => now()->timestamp,
                             ]);
 
                             Notification::make()->title('Event & Folder Berhasil Dibuat!')->success()->send();
                         } else {
-                            // TANGKAP ERROR GOOGLE DRIVE API
                             $errorDetail = $response->json();
                             $pesanError = $errorDetail['error']['message'] ?? 'API Google Error';
                             
@@ -210,7 +431,6 @@ class ListTicketings extends Page
                                 ->send();
                         }
                     } catch (\Exception $e) {
-                        // TANGKAP ERROR DATABASE / SISTEM
                         Notification::make()
                             ->title('System Error')
                             ->body($e->getMessage())

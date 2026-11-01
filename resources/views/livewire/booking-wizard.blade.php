@@ -1,3 +1,3 @@
-<div class="">
+<div>
     {{ $this->form }}
 </div>

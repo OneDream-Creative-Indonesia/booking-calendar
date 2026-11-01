@@ -7,22 +7,24 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Ticketing extends Model
 {
-    use HasFactory;
     protected $fillable = [
+        'event_id',
         'nama',
         'email',
         'jumlah',
         'cetak',
         'telpon',
         'transaction_type',
-        'queue_number', 
+        'queue_number',
         'status',
-        'is_foto',   // <--- PASTIKAN INI ADA
-        'is_export', // <--- PASTIKAN INI ADA
-        'is_print'   // <--- PASTIKAN INI ADA
+        'is_foto',
+        'is_export',
+        'is_print',
+        'total_price',
     ];
-    public function event(): BelongsTo
+    
+    public function event()
     {
-        return $this->belongsTo(Event::class);
+        return $this->belongsTo(Event::class, 'event_id');
     }
 }

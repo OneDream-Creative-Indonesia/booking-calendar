@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use App\Models\OperationalHour;
+use App\Models\Booking;
 use Illuminate\Support\HtmlString;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
@@ -11,15 +12,23 @@ use Filament\Forms\Components\Wizard;
 use Illuminate\Support\Facades\Blade;
 use Filament\Forms\Contracts\HasForms;
 use App\Services\GoogleCalendarService;
+use App\Services\GoogleDriveService;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\BookingStudioTicketMail;
+
 class BookingWizard extends Component implements HasForms
 {
     use InteractsWithForms;
+    
     public $date;
     public $time;
     public $name;
@@ -28,14 +37,16 @@ class BookingWizard extends Component implements HasForms
     public $confirmation;
     public $email;
     public $people_count;
+    
     protected $listeners = ['setDate'];
-    protected static ?string $title = 'My Custom Wizard Title';  // Or use getTitle()
-    protected static ?string $heading = 'Custom Wizard Heading';
+    protected static ?string $title = 'Booking Studio';  
+    protected static ?string $heading = 'Form Booking Studio';
 
     public function setDate($date)
     {
         $this->date = $date;
     }
+    
     public function mount()
     {
         $this->form->fill([
@@ -49,9 +60,10 @@ class BookingWizard extends Component implements HasForms
             "confirmation" => false
         ]);
     }
+    
     public function render()
     {
-        $disabledDates = OperationalHour::pluck('day')->toArray(); // asumsi ada kolom 'date'
+        $disabledDates = OperationalHour::pluck('day')->toArray(); 
 
         return view('livewire.booking-wizard', [
             'disabledDates' => $disabledDates,
@@ -93,7 +105,7 @@ class BookingWizard extends Component implements HasForms
                                     ")
                                     : '';
                             }),
-                        ]),
+                    ]),
 
                 Wizard\Step::make('Data Pemesan')
                     ->schema([
@@ -120,30 +132,33 @@ class BookingWizard extends Component implements HasForms
                             ->label('')
                             ->content(new HtmlString('Pembayaran DP melalui Transfer QRIS <a href="LINK_QRIS" target="_blank" style="color: blue; text-decoration: underline;">KLIK DISINI</a>, bila ada kesulitan silahkan hubungi admin kami <a href="LINK_ADMIN" target="_blank" style="color: blue; text-decoration: underline;">KLIK DISINI</a>.')),
                         Toggle::make('confirmation')
-                            ->label('
-                            Saya bersedia Kehilangan DP senilai Rp.30.000, jika melakukan cancel di HARI JADWAL SESI yang saya ambil. (Diperlukan)')
+                            ->label('Saya bersedia Kehilangan DP senilai Rp.30.000, jika melakukan cancel di HARI JADWAL SESI yang saya ambil. (Diperlukan)')
                             ->required(),
-                            Placeholder::make('qris_payment')
+                            Placeholder::make('qris_payment2')
                             ->label('')
                             ->content(new HtmlString('WAJIB! KIRIM BUKTI BOOKING YANG MUNCUL SETELAH KLIK (Confirm Booking) DAN KIRIM BUKTI TRANSFER KE ADMIN KAMI (Via WhatsApp).')),
                     ]),
-                    ])->submitAction(new HtmlString(Blade::render(<<<BLADE
-                    <x-filament::button
-                        wire:click="submit"
-                        type="submit"
-                        size="sm"
-                    >
-                        Submit
-                    </x-filament::button>
-                BLADE))),
-            ];
+            ])->submitAction(new HtmlString(Blade::render('
+                <x-filament::button
+                    wire:click="submit"
+                    type="button"
+                    size="sm"
+                    wire:loading.attr="disabled"
+                    wire:target="submit"
+                >
+                    <span wire:loading.remove wire:target="submit">Submit Booking</span>
+                    <span wire:loading wire:target="submit" class="flex items-center gap-1">
+                        Memproses...
+                    </span>
+                </x-filament::button>
+            '))),
+        ];
     }
 
     protected function getTimeOptions(): array
     {
-        $dayOfWeek = \Carbon\Carbon::parse($this->date)->locale('id')->translatedFormat('l');// 'l' untuk nama hari lengkap, e.g., 'Monday'
+        $dayOfWeek = \Carbon\Carbon::parse($this->date)->locale('id')->translatedFormat('l');
 
-        // Cek apakah hari ini buka atau tidak
         $operationalHour = \App\Models\OperationalHour::where('day', $dayOfWeek)->first();
         if (!$operationalHour || !$operationalHour->is_open) {
             return [];
@@ -162,13 +177,11 @@ class BookingWizard extends Component implements HasForms
         while ($start <= $end) {
             $time = $start->format('H:i');
 
-            // Nonaktifkan jam yang sudah lewat jika memilih hari ini
             if ($this->date === $now->toDateString() && $start->lessThan($now)) {
                 $start->addMinutes(30);
                 continue;
             }
 
-            // Nonaktifkan jam yang sudah dibooking
             if (in_array($time, $bookedTimes)) {
                 $start->addMinutes(30);
                 continue;
@@ -193,6 +206,7 @@ class BookingWizard extends Component implements HasForms
             'people_count' => 'required|integer|min:1|max:15',
             'confirmation' => 'required|boolean',
         ]);
+        
         $package = \App\Models\Package::find($this->package);
 
         if (!$package) {
@@ -200,7 +214,8 @@ class BookingWizard extends Component implements HasForms
             return;
         }
 
-        $booking = \App\Models\Booking::create([
+        // 1. Simpan data booking utama
+        Booking::create([
             'date' => $this->date,
             'time' => $this->time,
             'name' => $this->name,
@@ -211,10 +226,98 @@ class BookingWizard extends Component implements HasForms
             'confirmation' => $this->confirmation,
             'status' => 'pending',
         ]);
-        // $googleCalendarService->refreshTokenIfNeeded();
-        // $googleCalendarService->createEvent($booking);
 
-        $this->dispatch('bookingSuccess', 'Silakan kirim bukti booking ke admin kami.');
-        return redirect()->route('booking.calendar');
+        // 2. Persiapan Album ID & Link
+        $albumId = strtoupper(Str::random(6));
+        $baseUrl = config('services.snaplink.url') ?: 'https://send.snapfunstudio.id';
+        $finalDriveLink = rtrim($baseUrl, '/') . '/gallery/' . $albumId; 
+
+        // 3. Buat Folder Drive & Record di Tabel Albums
+        try {
+            $namaFolderDrive = trim($this->name) . ' - ' . \Carbon\Carbon::parse($this->date)->format('dMy') . ' ' . str_replace(':', '', $this->time);
+            
+            $setting = DB::table('settings')->where('key', 'google_upload_folder')->first();
+            $folderUtamaDriveId = $setting ? (json_decode($setting->value, true)['folder_id'] ?? null) : null;
+            
+            $driveData = $this->createDriveFolder($namaFolderDrive, $folderUtamaDriveId);
+            $childFolderId = $driveData['id'] ?? null;
+            $actualDriveLink = $childFolderId 
+                ? ('https://drive.google.com/drive/folders/' . $childFolderId) 
+                : ($driveData['webViewLink'] ?? null);
+
+            DB::table('albums')->insert([
+                'id' => $albumId,
+                'name' => $namaFolderDrive,
+                'phone' => $this->whatsapp,
+                'paket' => $package->title,
+                'drive_link' => $actualDriveLink,
+                'folder_id' => $childFolderId,
+                'group_name' => 'Booking Studio',
+                'expires_at' => now()->addDays(14)->timestamp,
+                'created_at' => now()->timestamp,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error("Gagal buat Album: " . $e->getMessage());
+        }
+
+        // 4. Kirim Email 
+        try {
+            $emailData = [
+                'nama' => $this->name,
+                'tanggal' => \Carbon\Carbon::parse($this->date)->translatedFormat('d F Y'),
+                'waktu' => $this->time,
+                'paket_nama' => $package->title,
+                'album_id' => $albumId,
+                'drive_link' => $finalDriveLink
+            ];
+
+            Mail::to($this->email)->send(new BookingStudioTicketMail($emailData));
+        } catch (\Throwable $e) {
+            Log::error("Gagal kirim email: " . $e->getMessage());
+        }
+
+        // 5. REDIRECT PAKSA KE HALAMAN SUKSES (Bebas dari bug Livewire!)
+        return redirect()->route('booking.success', ['album_id' => $albumId]);
+    }
+
+    private function createDriveFolder($folderName, $parentFolderId)
+    {
+        try {
+            $drive = app(GoogleDriveService::class);
+            $accessToken = $drive->getValidAccessToken();
+
+            if (!$accessToken) {
+                return null;
+            }
+
+            if ($parentFolderId) {
+                $escapedName = addslashes($folderName);
+                $checkQuery = "mimeType='application/vnd.google-apps.folder' and name='{$escapedName}' and '{$parentFolderId}' in parents and trashed=false";
+                
+                $checkResponse = Http::withToken($accessToken)
+                    ->get('https://www.googleapis.com/drive/v3/files', [
+                        'q' => $checkQuery,
+                        'fields' => 'files(id, name, webViewLink)',
+                    ]);
+
+                if ($checkResponse->successful() && !empty($checkResponse->json()['files'])) {
+                    return $checkResponse->json()['files'][0];
+                }
+            }
+
+            $response = Http::withToken($accessToken)
+                ->post('https://www.googleapis.com/drive/v3/files?fields=id,name,webViewLink', [
+                    'name' => $folderName,
+                    'mimeType' => 'application/vnd.google-apps.folder',
+                    'parents' => $parentFolderId ? [$parentFolderId] : []
+                ]);
+
+            if ($response->successful()) {
+                return $response->json(); 
+            }
+            return null;
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 }
