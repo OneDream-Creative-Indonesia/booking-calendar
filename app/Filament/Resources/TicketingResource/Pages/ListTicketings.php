@@ -249,7 +249,7 @@ class ListTicketings extends Page
                     ->directory('event-videos')
                     ->visibility('public')
                     ->acceptedFileTypes(['video/mp4', 'video/quicktime', 'video/webm'])
-                    ->maxSize(153600)
+                    ->maxSize(256000)
                     ->helperText('Upload video MP4 untuk display antrean. Kosongkan untuk pakai default.'),
                 TextInput::make('strip_price')
                     ->label('Harga Strip')
@@ -367,7 +367,7 @@ class ListTicketings extends Page
                         ->directory('event-videos')
                         ->visibility('public')
                         ->acceptedFileTypes(['video/mp4', 'video/quicktime', 'video/webm'])
-                        ->maxSize(153600)
+                        ->maxSize(256000)
                         ->helperText('Upload video MP4 untuk display antrean. Kosongkan jika ingin video default.'),
 
                     TextInput::make('strip_price')
