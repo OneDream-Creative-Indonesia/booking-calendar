@@ -124,14 +124,43 @@ Route::get('/api/antrian/get_queue/{slug?}', function($slug = null) {
 
         $history = $historyQuery->orderBy('updated_at', 'desc')->take(30)->get();
 
-        return response()->json(['success' => true, 'data' => $queue, 'history' => $history]);
+                $videoUrl = asset('img/sfanimasi.mp4');
+        if ($event && !empty($event->video_path)) {
+            if (\Illuminate\Support\Facades\Storage::disk('public')->exists($event->video_path)) {
+                $videoUrl = \Illuminate\Support\Facades\Storage::disk('public')->url($event->video_path);
+            } else {
+                $videoUrl = asset('storage/' . ltrim($event->video_path, '/'));
+            }
+        }
+
+        return response()->json([
+            'success' => true, 
+            'data' => $queue, 
+            'history' => $history,
+            'video_url' => $videoUrl
+        ]);
     } catch (\Exception $e) {
         return response()->json(['success' => false, 'message' => $e->getMessage()]);
     }
 });
 Route::get('/antrian/{slug?}', function($slug = null) {
-    // Pastikan nama file di folder resources/views adalah antrian.blade.php
-    return view('antrian');
+    $event = null;
+    if ($slug) {
+        $event = DB::table('events')->where('slug', $slug)->first();
+    } else {
+        $event = DB::table('events')->where('is_active', 1)->first();
+    }
+
+    $videoUrl = asset('img/sfanimasi.mp4');
+    if ($event && !empty($event->video_path)) {
+        if (\Illuminate\Support\Facades\Storage::disk('public')->exists($event->video_path)) {
+            $videoUrl = \Illuminate\Support\Facades\Storage::disk('public')->url($event->video_path);
+        } else {
+            $videoUrl = asset('storage/' . ltrim($event->video_path, '/'));
+        }
+    }
+
+    return view('antrian', compact('event', 'videoUrl'));
 });
 Route::get('/api/antrian/get_queue', function() {
     try {

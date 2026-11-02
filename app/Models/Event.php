@@ -10,15 +10,7 @@ class Event extends Model
 {
     use HasFactory;
 
-    protected $guarded = [
-        'nama_event',
-        'slug', // INI DITAMBAHIN
-        'tanggal_event',
-        'is_active',
-        'gdrive_folder_id',
-        'is_additional_active',
-        'additional_price',
-    ];
+    protected $guarded = ['id'];
 
     protected $casts = [
         'tanggal_event' => 'date',

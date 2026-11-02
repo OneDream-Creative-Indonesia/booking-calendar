@@ -8,6 +8,7 @@ use App\Models\Ticketing;
 use Filament\Actions;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -15,6 +16,7 @@ use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Resources\Pages\Page;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Http;
 use Filament\Notifications\Notification;
 use App\Services\GoogleDriveService;
@@ -231,6 +233,7 @@ class ListTicketings extends Page
                     'strip_price' => (int) ($event->strip_price ?? 0),
                     'is_additional_active' => (bool) ($event->is_additional_active ?? false),
                     'additional_price' => (int) ($event->additional_price ?? 0),
+                    'video_path' => $event->video_path ?? null,
                 ] : [];
             })
             ->form([
@@ -240,6 +243,14 @@ class ListTicketings extends Page
                 DatePicker::make('tanggal_event')
                     ->label('Tanggal Event')
                     ->required(),
+                FileUpload::make('video_path')
+                    ->label('Upload Video Antrean / Waiting List')
+                    ->disk('public')
+                    ->directory('event-videos')
+                    ->visibility('public')
+                    ->acceptedFileTypes(['video/mp4', 'video/quicktime', 'video/webm'])
+                    ->maxSize(153600)
+                    ->helperText('Upload video MP4 untuk display antrean. Kosongkan untuk pakai default.'),
                 TextInput::make('strip_price')
                     ->label('Harga Strip')
                     ->numeric()
@@ -268,12 +279,19 @@ class ListTicketings extends Page
                     $isAdditional = (bool) ($data['is_additional_active'] ?? false);
                     $additionalPrice = $isAdditional ? (float) preg_replace('/[^0-9]/', '', (string) ($data['additional_price'] ?? 0)) : 0;
 
+                    if (!Schema::hasColumn('events', 'video_path')) {
+                        Schema::table('events', function ($table) {
+                            $table->string('video_path')->nullable();
+                        });
+                    }
+
                     DB::table('events')->where('id', $eventId)->update([
                         'nama_event' => $data['nama_event'],
                         'tanggal_event' => $data['tanggal_event'],
                         'strip_price' => $stripPrice,
                         'is_additional_active' => $isAdditional ? 1 : 0,
                         'additional_price' => $additionalPrice,
+                        'video_path' => $data['video_path'] ?? null,
                         'updated_at' => now(),
                     ]);
 
@@ -343,6 +361,15 @@ class ListTicketings extends Page
                         ->default(now())
                         ->required(),
 
+                    FileUpload::make('video_path')
+                        ->label('Upload Video Antrean / Waiting List')
+                        ->disk('public')
+                        ->directory('event-videos')
+                        ->visibility('public')
+                        ->acceptedFileTypes(['video/mp4', 'video/quicktime', 'video/webm'])
+                        ->maxSize(153600)
+                        ->helperText('Upload video MP4 untuk display antrean. Kosongkan jika ingin video default.'),
+
                     TextInput::make('strip_price')
                         ->label('Harga Strip')
                         ->numeric()
@@ -402,6 +429,12 @@ class ListTicketings extends Page
                             $isAdditional = (bool) ($data['is_additional_active'] ?? false);
                             $additionalPrice = $isAdditional ? (float) preg_replace('/[^0-9]/', '', (string) ($data['additional_price'] ?? 0)) : 0;
 
+                            if (!Schema::hasColumn('events', 'video_path')) {
+                                Schema::table('events', function ($table) {
+                                    $table->string('video_path')->nullable();
+                                });
+                            }
+
                             Event::unguard();
                             $newEvent = Event::create([
                                 'nama_event' => $data['nama_event'],
@@ -412,6 +445,7 @@ class ListTicketings extends Page
                                 'strip_price' => $stripPrice,
                                 'is_additional_active' => $isAdditional,
                                 'additional_price' => $additionalPrice,
+                                'video_path' => $data['video_path'] ?? null,
                             ]);
                             Event::reguard();
 
@@ -419,6 +453,7 @@ class ListTicketings extends Page
                                 'strip_price' => $stripPrice,
                                 'is_additional_active' => $isAdditional ? 1 : 0,
                                 'additional_price' => $additionalPrice,
+                                'video_path' => $data['video_path'] ?? null,
                             ]);
 
                             DB::table('albums')->insert([

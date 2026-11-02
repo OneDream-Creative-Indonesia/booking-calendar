@@ -101,6 +101,7 @@
         let queue = [];
         let voices = [];
         let currentUtterance = null; 
+        let currentVideoPath = @js($videoUrl ?? asset("img/sfanimasi.mp4"));
 
         // Elemen DOM
         const currentQueueEl = document.getElementById('current-queue');
@@ -111,9 +112,9 @@
         const videoLoader = document.getElementById('video-loader');
 
         // TRIK ANTI JARINGAN LEMAH: Load video ke RAM (Blob)
-        async function loadVideoToMemory() {
+        async function loadVideoToMemory(targetPath = null) {
             try {
-                const videoPath = '{{ asset("img/sfanimasi.mp4") }}'; 
+                const videoPath = targetPath || currentVideoPath; 
                 
                 const response = await fetch(videoPath);
                 if (!response.ok) throw new Error("Video tidak ditemukan");
@@ -129,7 +130,7 @@
                 };
             } catch (error) {
                 console.error("Gagal caching video, fallback ke src biasa:", error);
-                videoEl.src = '{{ asset("img/sfanimasi.mp4") }}';
+                videoEl.src = targetPath || currentVideoPath;
                 videoLoader.style.display = 'none';
                 videoEl.style.opacity = '1';
             }
@@ -205,6 +206,12 @@
                 if (!response.ok) return; 
                 
                 const result = await response.json();
+                
+                // Jika event memiliki video baru yang diupdate via admin, reload video
+                if (result.video_url && result.video_url !== currentVideoPath) {
+                    currentVideoPath = result.video_url;
+                    loadVideoToMemory(currentVideoPath);
+                }
                 
                 if (result.success) {
                     const oldTop = queue.length > 0 ? queue[0] : null;
