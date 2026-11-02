@@ -88,7 +88,7 @@ class AdminPanelProvider extends PanelProvider
                     ->icon('heroicon-o-squares-plus') 
                     ->group('Operational')
                     ->sort(3)
-                    ->visible(fn () => auth()->user()?->hasAnyRole(['super_admin', 'event', 'event_viewer']) || (auth()->user()?->can('view_any_ticketing') ?? false)),
+                    ->visible(fn () => auth()->user()?->hasAnyRole(['super_admin', 'event']) || ((auth()->user()?->can('view_any_ticketing') ?? false) && !auth()->user()?->hasRole('event_viewer'))),
 
             ])
             ->navigationGroups([

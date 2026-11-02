@@ -7,11 +7,32 @@ use App\Models\Addon;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Illuminate\Database\Eloquent\Model;
 use Filament\Tables;
 use Filament\Tables\Table;
 
 class AddonResource extends Resource
 {
+    public static function canViewAny(): bool
+    {
+        return auth()->user()?->can('view_any_addon') ?? false;
+    }
+
+    public static function canCreate(): bool
+    {
+        return auth()->user()?->can('create_addon') ?? false;
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        return auth()->user()?->can('update_addon') ?? false;
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return auth()->user()?->can('delete_addon') ?? false;
+    }
+
     protected static ?string $model = Addon::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-plus-circle';
