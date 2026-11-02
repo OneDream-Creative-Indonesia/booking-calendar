@@ -18,6 +18,10 @@ class GoogleDriveAuthController extends Controller
             return redirect('/gdrive/select-folder')->with('error', 'Login Google dibatalkan.');
         }
 
+        if (!$request->filled('code')) {
+            return redirect('/gdrive/select-folder')->with('error', 'Kode otorisasi Google tidak ditemukan. Mulai lagi dari /gdrive/connect.');
+        }
+
         $success = $drive->handleCallback($request->get('code'));
 
         if (!$success) {

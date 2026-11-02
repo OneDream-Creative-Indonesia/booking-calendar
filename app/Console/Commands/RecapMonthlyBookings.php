@@ -11,7 +11,7 @@ use SimpleXMLElement;
 class RecapMonthlyBookings extends Command
 {
     protected $signature = 'booking:recap-monthly';
-    protected $description = 'Otomatis rekap semua booking sebelum bulan ini ke format XML dan hapus data lama';
+    protected $description = 'Otomatis arsipkan semua booking sebelum bulan ini ke format XML (data tidak dihapus; hapus manual via E-Statement Booking)';
 
     public function handle()
     {
@@ -20,7 +20,7 @@ class RecapMonthlyBookings extends Command
         $startOfCurrentMonth = Carbon::now()->startOfMonth();
 
         // Ambil semua data booking yang lebih lama dari awal bulan ini
-        $oldBookings = Booking::where('created_at', '<', $startOfCurrentMonth)->get();
+        $oldBookings = Booking::with(['package', 'background', 'voucher'])->where('created_at', '<', $startOfCurrentMonth)->get();
 
         if ($oldBookings->isEmpty()) {
             $this->info("Tidak ada data booking lama yang perlu direkap.");
@@ -41,9 +41,22 @@ class RecapMonthlyBookings extends Command
             foreach ($bookings as $booking) {
                 $item = $xml->addChild('Booking');
                 $item->addChild('ID', $booking->id);
-                // Sesuaikan 'customer_name' dengan nama kolom yang ada di tabel bookings Anda
-                $item->addChild('CustomerName', htmlspecialchars($booking->customer_name ?? 'N/A')); 
-                $item->addChild('BookingDate', $booking->created_at->format('Y-m-d H:i:s'));
+                foreach ([
+                    'CustomerName' => $booking->name,
+                    'WhatsApp' => $booking->whatsapp,
+                    'Email' => $booking->email,
+                    'BookingDate' => $booking->date,
+                    'Time' => $booking->time,
+                    'Package' => $booking->package?->title,
+                    'Background' => $booking->background?->name,
+                    'PeopleCount' => $booking->people_count,
+                    'Voucher' => $booking->voucher?->code_voucher,
+                    'Price' => $booking->price,
+                    'Status' => $booking->status,
+                    'CreatedAt' => $booking->created_at->format('Y-m-d H:i:s'),
+                ] as $tag => $value) {
+                    $item->addChild($tag, htmlspecialchars((string) $value));
+                }
             }
 
             // Nama file contoh: rekap_booking_2026_08.xml
@@ -52,13 +65,9 @@ class RecapMonthlyBookings extends Command
             // Simpan ke storage/app/recaps/
             Storage::disk('local')->put("recaps/{$fileName}", $xml->asXML());
 
-            // Hapus data booking HANYA untuk bulan yang barusan sukses dibuatkan XML-nya
-            $bookingIds = $bookings->pluck('id')->toArray();
-            Booking::whereIn('id', $bookingIds)->delete();
-
             $this->info("Rekap XML berhasil dibuat dan diarsipkan: {$fileName}");
         }
 
-        $this->info("Pembersihan selesai! Hanya data bulan ini yang tersisa di database.");
+        $this->info("Arsip selesai.");
     }
 }
