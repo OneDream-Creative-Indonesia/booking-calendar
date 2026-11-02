@@ -165,7 +165,7 @@ class MonthlyRecap extends Page implements HasForms, HasTable
                 ->color('info')
                 ->requiresConfirmation()
                 ->modalHeading('Sinkron ke Google Spreadsheet')
-                ->modalDescription(fn () => 'Data ' . $this->getPeriodLabel() . ' akan ditulis ke spreadsheet "E-Statement Booking ' . $this->year . '" pada tab ' . BookingReportService::monthName($this->month) . '. Tab baru dibuat otomatis jika belum ada.')
+                ->modalDescription(fn () => 'Data ' . $this->getPeriodLabel() . ' akan digabungkan ke spreadsheet "E-Statement Booking ' . $this->year . '" pada tab ' . BookingReportService::monthName($this->month) . '. Tab baru dibuat otomatis jika belum ada. Baris lama di spreadsheet tidak akan dihapus.')
                 ->action(fn () => $this->syncSheets()),
         ];
     }
@@ -205,10 +205,12 @@ class MonthlyRecap extends Page implements HasForms, HasTable
     public function syncSheets(): void
     {
         try {
-            $url = app(GoogleSheetsService::class)->syncMonth($this->year, $this->month);
+            $result = app(GoogleSheetsService::class)->syncMonth($this->year, $this->month);
+            $url = $result['url'];
 
             Notification::make()->title('Sinkronisasi berhasil')
-                ->body('Tab ' . BookingReportService::monthName($this->month) . " di spreadsheet {$this->year} sudah diperbarui.")
+                ->body('Tab ' . BookingReportService::monthName($this->month) . " di spreadsheet {$this->year} diperbarui ({$result['total']} baris)."
+                    . ($result['kept'] ? " {$result['kept']} baris yang sudah dihapus dari web tetap disimpan di spreadsheet." : ''))
                 ->actions([\Filament\Notifications\Actions\Action::make('open')->label('Buka Spreadsheet')->url($url, shouldOpenInNewTab: true)])
                 ->success()->persistent()->send();
         } catch (\Throwable $e) {

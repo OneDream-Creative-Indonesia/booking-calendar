@@ -26,8 +26,14 @@ class GoogleSheetsService
         return $this->drive->isConnected();
     }
 
-    /** @return string URL spreadsheet */
-    public function syncMonth(int $year, int $month): string
+    /**
+     * Sinkron aman: baris yang sudah ada di spreadsheet TIDAK pernah dihapus.
+     * Baris dengan ID yang sama diperbarui, ID baru ditambahkan, dan baris yang
+     * sudah dihapus dari database tetap dipertahankan di spreadsheet.
+     *
+     * @return array{url:string, kept:int, total:int} kept = baris yang hanya ada di spreadsheet
+     */
+    public function syncMonth(int $year, int $month): array
     {
         $token = $this->drive->getValidAccessToken();
         if (! $token) {
@@ -45,13 +51,62 @@ class GoogleSheetsService
             $this->batch($token, $id, [['addSheet' => ['properties' => ['title' => self::DASHBOARD_TAB, 'index' => 0]]]]);
         }
 
-        // Tab bulan
-        $this->writeValues($token, $id, $tab, $this->report->tableRows($this->report->bookings($year, $month)));
+        // Tab bulan: gabungkan data database dengan baris yang sudah ada (tanpa menghapus).
+        $fresh = $this->report->tableRows($this->report->bookings($year, $month));
+        [$merged, $kept] = $this->merge($fresh, $this->readValues($token, $id, $tab));
+        $this->writeValues($token, $id, $tab, $merged);
 
         // Tab dashboard tahunan
         $this->writeValues($token, $id, self::DASHBOARD_TAB, $this->dashboardRows($year));
 
-        return $url;
+        return ['url' => $url, 'kept' => $kept, 'total' => count($merged) - 1];
+    }
+
+    /** @return array{0:array,1:int} [baris gabungan, jumlah baris yang hanya ada di spreadsheet] */
+    protected function merge(array $fresh, array $existing): array
+    {
+        $header = array_shift($fresh);
+        $byId = [];
+        foreach ($fresh as $row) {
+            $byId[(string) $row[1]] = $row;
+        }
+
+        $rows = [];
+        $kept = 0;
+        foreach (array_slice($existing, 1) as $row) {
+            $rid = isset($row[1]) ? (string) $row[1] : '';
+            if ($rid === '') {
+                continue;
+            }
+            if (isset($byId[$rid])) {
+                $rows[$rid] = $byId[$rid];
+                unset($byId[$rid]);
+            } else {
+                $rows[$rid] = $row; // sudah dihapus dari database, tetap disimpan
+                $kept++;
+            }
+        }
+        foreach ($byId as $rid => $row) {
+            $rows[$rid] = $row;
+        }
+
+        $rows = array_values($rows);
+        usort($rows, fn ($a, $b) => [$a[2] ?? '', $a[3] ?? ''] <=> [$b[2] ?? '', $b[3] ?? '']);
+        foreach ($rows as $i => &$row) {
+            $row[0] = $i + 1;
+        }
+        unset($row);
+
+        return [array_merge([$header], $rows), $kept];
+    }
+
+    protected function readValues(string $token, string $id, string $tab): array
+    {
+        $range = rawurlencode("'{$tab}'");
+        $res = Http::withoutVerifying()->withToken($token)
+            ->get(self::API . "/{$id}/values/{$range}", ['valueRenderOption' => 'UNFORMATTED_VALUE']);
+
+        return $res->successful() ? ($res->json('values') ?? []) : [];
     }
 
     protected function dashboardRows(int $year): array
