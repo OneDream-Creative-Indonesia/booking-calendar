@@ -57,7 +57,13 @@ class ListTicketings extends Page
 
     public function toggleStatus($ticketId, $column)
     {
-        abort_unless(auth()->user()?->can('update_ticketing'), 403, 'Anda tidak memiliki hak untuk mengubah data.');
+        // Event view masih bisa ceklis bagian section foto
+        if ($column === 'is_foto') {
+            abort_unless(auth()->user()?->can('view_any_ticketing'), 403, 'Anda tidak memiliki hak untuk mengubah status foto.');
+        } else {
+            abort_unless(auth()->user()?->can('update_ticketing'), 403, 'Anda tidak memiliki hak untuk mengubah status ini.');
+        }
+
         $ticket = Ticketing::find($ticketId);
         if ($ticket) {
             $ticket->$column = !$ticket->$column;

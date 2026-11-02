@@ -258,7 +258,7 @@
                                 <td class="p-3 text-gray-600 dark:text-gray-400 font-bold">{{ $ticket->queue_number }}</td>
                                 
                                 <td class="p-3 text-center">
-                                    <input type="checkbox" @if($canUpdateTicket) wire:click="toggleStatus({{ $ticket->id }}, 'is_foto')" @else disabled @endif {{ $ticket->is_foto ? 'checked' : '' }} class="rounded border-gray-300 text-green-600 focus:ring-green-600 w-5 h-5 {{ $canUpdateTicket ? 'cursor-pointer' : 'cursor-not-allowed opacity-60' }}">
+                                    <input type="checkbox" wire:click="toggleStatus({{ $ticket->id }}, 'is_foto')" {{ $ticket->is_foto ? 'checked' : '' }} class="rounded border-gray-300 text-green-600 focus:ring-green-600 w-5 h-5 cursor-pointer">
                                 </td>
                                 <td class="p-3 text-center">
                                     <input type="checkbox" @if($canUpdateTicket) wire:click="toggleStatus({{ $ticket->id }}, 'is_export')" @else disabled @endif {{ $ticket->is_export ? 'checked' : '' }} class="rounded border-gray-300 text-blue-600 focus:ring-blue-600 w-5 h-5 {{ $canUpdateTicket ? 'cursor-pointer' : 'cursor-not-allowed opacity-60' }}">

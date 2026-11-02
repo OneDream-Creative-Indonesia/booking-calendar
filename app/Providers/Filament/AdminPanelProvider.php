@@ -66,22 +66,29 @@ class AdminPanelProvider extends PanelProvider
                     ->url('https://snapfunstudio.id/antrian', shouldOpenInNewTab: true) 
                     ->icon('heroicon-o-queue-list') 
                     ->group('Photobooth')
-                    ->sort(2),
+                    ->sort(2)
+                    ->visible(fn () => auth()->user()?->can('view_any_ticketing') ?? false),
+
                 NavigationItem::make('Photo Edit')
                     ->url('https://snapfunstudio.id/edit', shouldOpenInNewTab: true)
                     ->icon('heroicon-o-paint-brush') 
                     ->group('Studio')
-                    ->sort(3),
+                    ->sort(3)
+                    ->visible(fn () => auth()->user()?->can('view_any_booking') ?? false),
+
                 NavigationItem::make('Photo Link')
                     ->url('https://send.snapfunstudio.id/', shouldOpenInNewTab: true)
                     ->icon('heroicon-o-camera') 
                     ->group('Studio')
-                    ->sort(3),
+                    ->sort(3)
+                    ->visible(fn () => auth()->user()?->can('view_any_booking') ?? false),
+
                 NavigationItem::make('Frame Manage')
                     ->url('https://frame.snapfunstudio.id/', shouldOpenInNewTab: true)
                     ->icon('heroicon-o-squares-plus') 
                     ->group('Operational')
-                    ->sort(3),
+                    ->sort(3)
+                    ->visible(fn () => auth()->user()?->hasAnyRole(['super_admin', 'event', 'event_viewer']) || (auth()->user()?->can('view_any_ticketing') ?? false)),
 
             ])
             ->navigationGroups([

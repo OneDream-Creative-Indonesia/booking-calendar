@@ -26,7 +26,10 @@ class RolePermissionSeeder extends Seeder
             'delete_ticketing',
             'delete_any_ticketing',
 
-            // Studio: Booking & E-Statement
+            // Laporan E-Statement (Hanya Super Admin / Finance)
+            'view_monthly_recap',
+
+            // Studio: Booking
             'view_any_booking',
             'view_booking',
             'create_booking',
@@ -82,7 +85,7 @@ class RolePermissionSeeder extends Seeder
         }
 
         // 2. ROLE STUDIO
-        // Akses Studio & Operational, TIDAK BISA akses Photobooth/Register
+        // Akses Studio & Operational, TIDAK BISA akses Photobooth dan TIDAK BISA akses E-Statement
         $studioRole = Role::firstOrCreate(['name' => 'studio', 'guard_name' => 'web']);
         $studioPermissions = [
             'view_any_booking', 'view_booking', 'create_booking', 'update_booking', 'delete_booking', 'delete_any_booking',
@@ -95,8 +98,8 @@ class RolePermissionSeeder extends Seeder
         ];
         $studioRole->syncPermissions($studioPermissions);
 
-        // 3. ROLE EVENT (Bisa Mengubah & Menambahkan di Register)
-        // HANYA Photobooth / Register, TIDAK BISA akses Studio/Operational
+        // 3. ROLE EVENT (Bisa Mengubah & Menambahkan di Register, Waiting List, Frame Manage)
+        // HANYA Photobooth / Register, Waiting List, Frame Manage. TIDAK BISA akses Studio/Operational
         $eventRole = Role::firstOrCreate(['name' => 'event', 'guard_name' => 'web']);
         $eventPermissions = [
             'view_any_ticketing',
@@ -108,12 +111,16 @@ class RolePermissionSeeder extends Seeder
         ];
         $eventRole->syncPermissions($eventPermissions);
 
-        // 4. ROLE EVENT VIEWER (Read-only di Register: Tidak bisa tambah atau ubah)
+        // 4. ROLE EVENT VIEWER (Read-only di Register, tapi bisa ceklis Foto, Waiting List, Frame Manage)
         $eventViewerRole = Role::firstOrCreate(['name' => 'event_viewer', 'guard_name' => 'web']);
         $eventViewerPermissions = [
             'view_any_ticketing',
             'view_ticketing',
         ];
         $eventViewerRole->syncPermissions($eventViewerPermissions);
+
+        // 5. ROLE SUPER ADMIN (Akses Semua)
+        $superAdminRole = Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
+        $superAdminRole->syncPermissions(Permission::all());
     }
 }

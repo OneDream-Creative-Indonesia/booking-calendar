@@ -35,7 +35,17 @@ class MonthlyRecap extends Page implements HasForms, HasTable
 
     public static function canAccess(): bool
     {
-        return auth()->user()?->can('view_any_booking') ?? false;
+        $user = auth()->user();
+        if (!$user) {
+            return false;
+        }
+
+        // Role studio, event, dan event_viewer tidak bisa mengakses E-Statement sama sekali
+        if ($user->hasAnyRole(['studio', 'event', 'event_viewer'])) {
+            return false;
+        }
+
+        return $user->hasRole('super_admin') || $user->can('view_monthly_recap');
     }
 
     /** Pilihan di form (belum diterapkan sampai klik "Tarik Data"). */
