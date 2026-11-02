@@ -99,7 +99,7 @@ class MonthlyRecap extends Page implements HasForms, HasTable
                 ->with(['package', 'background', 'voucher', 'bookingAddons.addon'])
                 ->whereYear('date', $this->year)
                 ->whereMonth('date', $this->month)
-                ->whereNull('statement_hidden_at'))
+                ->when(\Illuminate\Support\Facades\Schema::hasColumn('bookings', 'statement_hidden_at'), fn ($q) => $q->whereNull('statement_hidden_at')))
             ->defaultSort('date', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('date')->label('Tanggal')->date('d M Y')->sortable(),
@@ -149,6 +149,11 @@ class MonthlyRecap extends Page implements HasForms, HasTable
                         ->modalHeading('Hapus dari E-Statement?')
                         ->modalDescription('Data hanya dihapus dari tampilan E-Statement. Data di List Booking, dashboard, dan spreadsheet tidak ikut terhapus.')
                         ->action(function (\Illuminate\Support\Collection $records) {
+                            if (!\Illuminate\Support\Facades\Schema::hasColumn('bookings', 'statement_hidden_at')) {
+                                \Illuminate\Support\Facades\Schema::table('bookings', function (\Illuminate\Database\Schema\Blueprint $table) {
+                                    $table->timestamp('statement_hidden_at')->nullable();
+                                });
+                            }
                             Booking::whereIn('id', $records->pluck('id'))->update(['statement_hidden_at' => now()]);
                             Notification::make()->title($records->count() . ' data dihapus dari E-Statement')->success()->send();
                         })

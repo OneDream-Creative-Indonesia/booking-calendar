@@ -23,7 +23,7 @@ class BookingReportService
         return Booking::query()
             ->whereYear('date', $year)
             ->when($month, fn ($q) => $q->whereMonth('date', $month))
-            ->when($statementOnly, fn ($q) => $q->whereNull('statement_hidden_at'));
+            ->when($statementOnly && \Illuminate\Support\Facades\Schema::hasColumn('bookings', 'statement_hidden_at'), fn ($q) => $q->whereNull('statement_hidden_at'));
     }
 
     /** $statementOnly = true: hanya booking yang tidak disembunyikan dari E-Statement. */
