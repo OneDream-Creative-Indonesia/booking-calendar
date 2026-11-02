@@ -18,16 +18,18 @@ class BookingReportService
         return self::MONTHS[$month] ?? (string) $month;
     }
 
-    public function query(int $year, ?int $month = null): Builder
+    public function query(int $year, ?int $month = null, bool $statementOnly = false): Builder
     {
         return Booking::query()
             ->whereYear('date', $year)
-            ->when($month, fn ($q) => $q->whereMonth('date', $month));
+            ->when($month, fn ($q) => $q->whereMonth('date', $month))
+            ->when($statementOnly, fn ($q) => $q->whereNull('statement_hidden_at'));
     }
 
-    public function bookings(int $year, ?int $month = null): Collection
+    /** $statementOnly = true: hanya booking yang tidak disembunyikan dari E-Statement. */
+    public function bookings(int $year, ?int $month = null, bool $statementOnly = false): Collection
     {
-        return $this->query($year, $month)
+        return $this->query($year, $month, $statementOnly)
             ->with(['package', 'background', 'voucher', 'bookingAddons.addon'])
             ->orderBy('date')->orderBy('time')
             ->get();

@@ -24,11 +24,10 @@ class BookingStatsOverview extends BaseWidget
                 ->description('Total jumlah orang bulan ini')->icon('heroicon-o-users')->color('info'),
             Stat::make("Booking {$label}", $month['bookings'])
                 ->description('Booking aktif (tanpa batal)')->icon('heroicon-o-calendar-days')->color('primary'),
-            Stat::make("Pendapatan {$label}", BookingReportService::rupiah($month['revenue']))
-                ->icon('heroicon-o-banknotes')->color('success'),
-            Stat::make('Pendapatan Keseluruhan', BookingReportService::rupiah($all['revenue']))
-                ->description($all['bookings'] . ' booking · ' . number_format($all['visitors'], 0, ',', '.') . ' pengunjung')
-                ->icon('heroicon-o-currency-dollar')->color('warning'),
+            Stat::make('Total Pengunjung', number_format($all['visitors'], 0, ',', '.'))
+                ->description('Keseluruhan, dari List Booking')->icon('heroicon-o-user-group')->color('success'),
+            Stat::make('Total Booking', $all['bookings'])
+                ->description('Keseluruhan, dari List Booking')->icon('heroicon-o-clipboard-document-list')->color('warning'),
         ];
     }
 }

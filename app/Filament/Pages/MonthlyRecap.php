@@ -89,7 +89,7 @@ class MonthlyRecap extends Page implements HasForms, HasTable
     {
         $svc = app(BookingReportService::class);
 
-        return $svc->summary($svc->bookings($this->year, $this->month));
+        return $svc->summary($svc->bookings($this->year, $this->month, true));
     }
 
     public function table(Table $table): Table
@@ -98,7 +98,8 @@ class MonthlyRecap extends Page implements HasForms, HasTable
             ->query(fn (): Builder => Booking::query()
                 ->with(['package', 'background', 'voucher', 'bookingAddons.addon'])
                 ->whereYear('date', $this->year)
-                ->whereMonth('date', $this->month))
+                ->whereMonth('date', $this->month)
+                ->whereNull('statement_hidden_at'))
             ->defaultSort('date', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('date')->label('Tanggal')->date('d M Y')->sortable(),
@@ -140,10 +141,17 @@ class MonthlyRecap extends Page implements HasForms, HasTable
             ->searchPlaceholder('Cari nama / WhatsApp / email')
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make()
-                        ->label('Hapus yang dicentang')
-                        ->modalHeading('Hapus data booking terpilih?')
-                        ->modalDescription('Data yang dihapus tidak dapat dikembalikan.')
+                    Tables\Actions\BulkAction::make('removeFromStatement')
+                        ->label('Hapus dari E-Statement')
+                        ->icon('heroicon-o-trash')
+                        ->color('danger')
+                        ->requiresConfirmation()
+                        ->modalHeading('Hapus dari E-Statement?')
+                        ->modalDescription('Data hanya dihapus dari tampilan E-Statement. Data di List Booking, dashboard, dan spreadsheet tidak ikut terhapus.')
+                        ->action(function (\Illuminate\Support\Collection $records) {
+                            Booking::whereIn('id', $records->pluck('id'))->update(['statement_hidden_at' => now()]);
+                            Notification::make()->title($records->count() . ' data dihapus dari E-Statement')->success()->send();
+                        })
                         ->deselectRecordsAfterCompletion(),
                 ]),
             ])
@@ -173,7 +181,7 @@ class MonthlyRecap extends Page implements HasForms, HasTable
     public function exportExcel()
     {
         $svc = app(BookingReportService::class);
-        $bookings = $svc->bookings($this->year, $this->month);
+        $bookings = $svc->bookings($this->year, $this->month, true);
 
         $summary = $svc->summary($bookings);
         $recap = [['Ringkasan', 'Nilai'],

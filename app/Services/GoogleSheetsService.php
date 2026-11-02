@@ -52,7 +52,7 @@ class GoogleSheetsService
         }
 
         // Tab bulan: gabungkan data database dengan baris yang sudah ada (tanpa menghapus).
-        $fresh = $this->report->tableRows($this->report->bookings($year, $month));
+        $fresh = $this->report->tableRows($this->report->bookings($year, $month, true));
         [$merged, $kept] = $this->merge($fresh, $this->readValues($token, $id, $tab));
         $this->writeValues($token, $id, $tab, $merged);
 
