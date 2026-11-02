@@ -1,7 +1,11 @@
 <x-filament-panels::page>
+@php
+    $canUpdateTicket = auth()->user()?->can('update_ticketing');
+    $canDeleteTicket = auth()->user()?->can('delete_ticketing');
+@endphp
 
     <!-- Tombol Bulk Delete -->
-    @if(count($selectedTickets) > 0)
+    @if($canDeleteTicket && count($selectedTickets) > 0)
         <div class="p-4 bg-white dark:bg-gray-900 shadow-sm ring-1 ring-gray-950/5 dark:ring-white/10 rounded-xl flex items-center justify-between mb-4">
             <span class="font-bold text-gray-700 dark:text-gray-200">{{ count($selectedTickets) }} Tiket Terpilih</span>
             <x-filament::button wire:click="deleteSelected" color="danger" icon="heroicon-o-trash">
@@ -45,6 +49,7 @@
 
                 <div class="flex flex-wrap items-center gap-2">
                     
+@if($canUpdateTicket)
                     <!-- TOMBOL EDIT EVENT -->
                     <x-filament::button 
                         wire:click="mountAction('editEvent', { id: {{ $event->id }} })"
@@ -55,6 +60,7 @@
                     >
                         Edit
                     </x-filament::button>
+@endif
 
                     <!-- TOMBOL EXPORT CSV -->
                     <x-filament::button 
@@ -66,6 +72,7 @@
                         Export CSV
                     </x-filament::button>
 
+@if($canUpdateTicket)
                     <!-- TOMBOL ACTIVE/INACTIVE -->
                     <x-filament::button 
                         wire:click="toggleEventActive({{ $event->id }})"
@@ -74,6 +81,11 @@
                     >
                         {{ $event->is_active ? 'Active' : 'Inactive' }}
                     </x-filament::button>
+@else
+                    <span class="inline-flex items-center px-2.5 py-1.5 rounded-md text-xs font-semibold {{ $event->is_active ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300' : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300' }}">
+                        {{ $event->is_active ? 'Active' : 'Inactive' }}
+                    </span>
+@endif
 
                     <!-- TOMBOL ANTREAN -->
                     <x-filament::button 
@@ -88,6 +100,7 @@
                         Antrean
                     </x-filament::button>
 
+@if($canDeleteTicket)
                     <!-- TOMBOL HAPUS EVENT -->
                     <x-filament::button 
                         wire:click="deleteEvent({{ $event->id }})"
@@ -99,6 +112,7 @@
                     >
                         Hapus
                     </x-filament::button>
+@endif
 
                 </div>
 
@@ -167,63 +181,75 @@
                                 <!-- KOLOM ORANG (+ / -) -->
                                 <td class="p-3 text-center">
                                     <div class="inline-flex items-center justify-center gap-1.5">
+                                        @if($canUpdateTicket)
                                         <x-filament::icon-button
                                             icon="heroicon-m-minus"
                                             color="gray"
                                             size="xs"
                                             wire:click="updateCounter({{ $ticket->id }}, 'jumlah', -1)"
                                         />
+                                        @endif
                                         <span class="w-6 text-center font-semibold text-gray-800 dark:text-gray-200">
                                             {{ $ticket->jumlah ?? 0 }}
                                         </span>
+                                        @if($canUpdateTicket)
                                         <x-filament::icon-button
                                             icon="heroicon-m-plus"
                                             color="gray"
                                             size="xs"
                                             wire:click="updateCounter({{ $ticket->id }}, 'jumlah', 1)"
                                         />
+                                        @endif
                                     </div>
                                 </td>
 
                                 <!-- KOLOM CETAK (+ / -) -->
                                 <td class="p-3 text-center">
                                     <div class="inline-flex items-center justify-center gap-1.5">
+                                        @if($canUpdateTicket)
                                         <x-filament::icon-button
                                             icon="heroicon-m-minus"
                                             color="gray"
                                             size="xs"
                                             wire:click="updateCounter({{ $ticket->id }}, 'cetak', -1)"
                                         />
+                                        @endif
                                         <span class="w-6 text-center font-semibold text-gray-800 dark:text-gray-200">
                                             {{ $ticket->cetak ?? 0 }}
                                         </span>
+                                        @if($canUpdateTicket)
                                         <x-filament::icon-button
                                             icon="heroicon-m-plus"
                                             color="gray"
                                             size="xs"
                                             wire:click="updateCounter({{ $ticket->id }}, 'cetak', 1)"
                                         />
+                                        @endif
                                     </div>
                                 </td>
 
                                 <!-- KOLOM ADDITIONAL (+ / -) -->
                                 <td class="p-3 text-center">
                                     <div class="inline-flex items-center justify-center gap-1.5">
+                                        @if($canUpdateTicket)
                                         <x-filament::icon-button
                                             icon="heroicon-m-minus"
                                             color="gray"
                                             size="xs"
                                             wire:click="updateCounter({{ $ticket->id }}, 'additional', -1)"
                                         />
+                                        @endif
                                         <span class="w-6 text-center font-semibold text-gray-800 dark:text-gray-200">
                                             {{ $ticket->additional ?? 0 }}
                                         </span>
+                                        @if($canUpdateTicket)
                                         <x-filament::icon-button
                                             icon="heroicon-m-plus"
                                             color="gray"
                                             size="xs"
                                             wire:click="updateCounter({{ $ticket->id }}, 'additional', 1)"
                                         />
+                                        @endif
                                     </div>
                                 </td>
 
@@ -232,13 +258,13 @@
                                 <td class="p-3 text-gray-600 dark:text-gray-400 font-bold">{{ $ticket->queue_number }}</td>
                                 
                                 <td class="p-3 text-center">
-                                    <input type="checkbox" wire:click="toggleStatus({{ $ticket->id }}, 'is_foto')" {{ $ticket->is_foto ? 'checked' : '' }} class="rounded border-gray-300 text-green-600 focus:ring-green-600 cursor-pointer w-5 h-5">
+                                    <input type="checkbox" @if($canUpdateTicket) wire:click="toggleStatus({{ $ticket->id }}, 'is_foto')" @else disabled @endif {{ $ticket->is_foto ? 'checked' : '' }} class="rounded border-gray-300 text-green-600 focus:ring-green-600 w-5 h-5 {{ $canUpdateTicket ? 'cursor-pointer' : 'cursor-not-allowed opacity-60' }}">
                                 </td>
                                 <td class="p-3 text-center">
-                                    <input type="checkbox" wire:click="toggleStatus({{ $ticket->id }}, 'is_export')" {{ $ticket->is_export ? 'checked' : '' }} class="rounded border-gray-300 text-blue-600 focus:ring-blue-600 cursor-pointer w-5 h-5">
+                                    <input type="checkbox" @if($canUpdateTicket) wire:click="toggleStatus({{ $ticket->id }}, 'is_export')" @else disabled @endif {{ $ticket->is_export ? 'checked' : '' }} class="rounded border-gray-300 text-blue-600 focus:ring-blue-600 w-5 h-5 {{ $canUpdateTicket ? 'cursor-pointer' : 'cursor-not-allowed opacity-60' }}">
                                 </td>
                                 <td class="p-3 text-center">
-                                    <input type="checkbox" wire:click="toggleStatus({{ $ticket->id }}, 'is_print')" {{ $ticket->is_print ? 'checked' : '' }} class="rounded border-gray-300 text-purple-600 focus:ring-purple-600 cursor-pointer w-5 h-5">
+                                    <input type="checkbox" @if($canUpdateTicket) wire:click="toggleStatus({{ $ticket->id }}, 'is_print')" @else disabled @endif {{ $ticket->is_print ? 'checked' : '' }} class="rounded border-gray-300 text-purple-600 focus:ring-purple-600 w-5 h-5 {{ $canUpdateTicket ? 'cursor-pointer' : 'cursor-not-allowed opacity-60' }}">
                                 </td>
                                 
                                 <!-- KOLOM AKSI (ICON BUTTONS) -->
@@ -270,6 +296,7 @@
                                             </div>
                                         </div>
 
+@if($canUpdateTicket)
                                         <!-- ICON EDIT TIAP LIST -->
                                         <x-filament::icon-button
                                             href="{{ \App\Filament\Resources\TicketingResource::getUrl('edit', ['record' => $ticket->id]) }}"
@@ -279,7 +306,9 @@
                                             size="sm"
                                             tooltip="Edit Data"
                                         />
+@endif
 
+@if($canDeleteTicket)
                                         <!-- ICON HAPUS TIAP LIST -->
                                         <x-filament::icon-button
                                             icon="heroicon-o-trash"
@@ -289,6 +318,7 @@
                                             wire:click="deleteTicket({{ $ticket->id }})"
                                             wire:confirm="Yakin ingin menghapus antrean {{ $ticket->nama }}?"
                                         />
+@endif
                                     </div>
                                 </td>
                             </tr>

@@ -107,24 +107,23 @@ class TicketingResource extends Resource
         return 'Ticketing';
     }
 
-    // WAJIB ADA AGAR MENU REGISTER SELALU MUNCUL DI SIDEBAR DASHBOARD
     public static function canViewAny(): bool
     {
-        return true;
+        return auth()->user()?->can('view_any_ticketing') ?? false;
     }
 
     public static function canCreate(): bool
     {
-        return true;
+        return auth()->user()?->can('create_ticketing') ?? false;
     }
 
     public static function canEdit(Model $record): bool
     {
-        return true;
+        return auth()->user()?->can('update_ticketing') ?? false;
     }
 
     public static function canDelete(Model $record): bool
     {
-        return true;
+        return auth()->user()?->can('delete_ticketing') ?? false;
     }
 }

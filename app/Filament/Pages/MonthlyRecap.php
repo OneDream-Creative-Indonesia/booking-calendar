@@ -33,6 +33,11 @@ class MonthlyRecap extends Page implements HasForms, HasTable
 
     protected static string $view = 'filament.pages.monthly-recap';
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('view_any_booking') ?? false;
+    }
+
     /** Pilihan di form (belum diterapkan sampai klik "Tarik Data"). */
     public int $selectedYear;
     public int $selectedMonth;

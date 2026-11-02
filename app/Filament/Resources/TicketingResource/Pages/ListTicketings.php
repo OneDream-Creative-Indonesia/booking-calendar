@@ -57,6 +57,7 @@ class ListTicketings extends Page
 
     public function toggleStatus($ticketId, $column)
     {
+        abort_unless(auth()->user()?->can('update_ticketing'), 403, 'Anda tidak memiliki hak untuk mengubah data.');
         $ticket = Ticketing::find($ticketId);
         if ($ticket) {
             $ticket->$column = !$ticket->$column;
@@ -69,6 +70,7 @@ class ListTicketings extends Page
     // ==========================================
     public function updateCounter($ticketId, $column, $change)
     {
+        abort_unless(auth()->user()?->can('update_ticketing'), 403, 'Anda tidak memiliki hak untuk mengubah data.');
         if (!in_array($column, ['jumlah', 'cetak', 'additional'])) {
             return;
         }
@@ -196,6 +198,7 @@ class ListTicketings extends Page
     // ==========================================
     public function deleteTicket($ticketId)
     {
+        abort_unless(auth()->user()?->can('delete_ticketing'), 403, 'Anda tidak memiliki hak untuk menghapus data.');
         $ticket = Ticketing::find($ticketId);
         if ($ticket) {
             $ticket->delete();
@@ -212,6 +215,7 @@ class ListTicketings extends Page
     public function editEventAction(): Action
     {
         return Action::make('editEvent')
+            ->visible(fn () => auth()->user()?->can('update_ticketing') ?? false)
             ->modalHeading('Edit Event & Harga')
             ->fillForm(function (array $arguments): array {
                 $event = Event::find($arguments['id'] ?? null);
@@ -277,6 +281,7 @@ class ListTicketings extends Page
 
     public function deleteSelected()
     {
+        abort_unless(auth()->user()?->can('delete_ticketing'), 403, 'Anda tidak memiliki hak untuk menghapus data.');
         Ticketing::whereIn('id', $this->selectedTickets)->delete();
         $this->selectedTickets = [];
         Notification::make()->title('Tiket berhasil dihapus')->success()->send();
@@ -284,6 +289,7 @@ class ListTicketings extends Page
 
     public function toggleEventActive($eventId)
     {
+        abort_unless(auth()->user()?->can('update_ticketing'), 403, 'Anda tidak memiliki hak untuk mengubah data.');
         $event = Event::find($eventId);
         if ($event) {
             $event->is_active = !$event->is_active;
@@ -299,6 +305,7 @@ class ListTicketings extends Page
 
     public function deleteEvent($eventId)
     {
+        abort_unless(auth()->user()?->can('delete_ticketing'), 403, 'Anda tidak memiliki hak untuk menghapus data.');
         $event = Event::find($eventId);
         
         if (!$event) return;
@@ -316,6 +323,7 @@ class ListTicketings extends Page
     {
         return [
             Actions\Action::make('add_event')
+                ->visible(fn () => auth()->user()?->can('create_ticketing') ?? false)
                 ->label('Add Event')
                 ->icon('heroicon-o-plus')
                 ->modalHeading('Buat Event Baru')

@@ -8,6 +8,11 @@ use Filament\Widgets\ChartWidget;
 
 class PackageBookingChart extends ChartWidget
 {
+    public static function canView(): bool
+    {
+        return auth()->user()?->can('view_any_booking') ?? false;
+    }
+
     protected static ?string $heading = 'Jumlah Booking per Paket';
     protected static ?int $sort = 2;
     protected int|string|array $columnSpan = 1;

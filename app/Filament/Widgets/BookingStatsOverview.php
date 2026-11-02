@@ -9,6 +9,11 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class BookingStatsOverview extends BaseWidget
 {
+    public static function canView(): bool
+    {
+        return auth()->user()?->can('view_any_booking') ?? false;
+    }
+
     protected static ?int $sort = 1;
     protected static ?string $pollingInterval = null;
 

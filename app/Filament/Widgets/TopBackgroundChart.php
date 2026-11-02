@@ -8,6 +8,11 @@ use Filament\Widgets\ChartWidget;
 
 class TopBackgroundChart extends ChartWidget
 {
+    public static function canView(): bool
+    {
+        return auth()->user()?->can('view_any_booking') ?? false;
+    }
+
     protected static ?string $heading = 'Top Favorit Background';
     protected static ?int $sort = 3;
     protected int|string|array $columnSpan = 1;
