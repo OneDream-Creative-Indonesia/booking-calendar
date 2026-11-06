@@ -55,13 +55,15 @@ class SirkelRegistrationResource extends Resource
 
     public static function table(Table $table): Table
     {
+        \App\Support\Site::ensureSeeded();
+
         return $table->columns([
             Tables\Columns\TextColumn::make('created_at')->label('Daftar')->dateTime('d M Y H:i')->sortable(),
             Tables\Columns\TextColumn::make('name')->label('Nama')->searchable(),
             Tables\Columns\TextColumn::make('age')->label('Usia'),
             Tables\Columns\TextColumn::make('city')->label('Domisili')->searchable(),
             Tables\Columns\TextColumn::make('whatsapp')->label('WhatsApp')->searchable()
-                ->url(fn ($r) => 'https://wa.me/' . preg_replace('/\D+/', '', preg_replace('/^0/', '62', trim($r->whatsapp))), true),
+                ->url(fn ($record) => 'https://wa.me/' . preg_replace('/\D+/', '', preg_replace('/^0/', '62', trim($record->whatsapp))), true),
             Tables\Columns\TextColumn::make('instagram')->label('IG')->toggleable(),
             Tables\Columns\TextColumn::make('tiktok')->label('TikTok')->toggleable(isToggledHiddenByDefault: true),
             Tables\Columns\SelectColumn::make('status')->label('Status')->options(self::STATUS),

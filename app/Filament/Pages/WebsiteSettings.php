@@ -82,7 +82,7 @@ class WebsiteSettings extends Page implements HasForms
             ->columns(2)
             ->reorderableWithButtons()
             ->collapsible()
-            ->itemLabel(fn (array $s) => $s['title'] ?? null)
+            ->itemLabel(fn (array $state): ?string => $state['title'] ?? null)
             ->defaultItems(0);
     }
 
@@ -286,7 +286,7 @@ class WebsiteSettings extends Page implements HasForms
                                         ->columns(2)
                                         ->reorderableWithButtons()
                                         ->collapsible()
-                                        ->itemLabel(fn (array $s) => $s['name'] ?? null)
+                                        ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
                                         ->defaultItems(0)
                                         ->columnSpanFull(),
                                 ])->columns(2),
@@ -591,7 +591,7 @@ class WebsiteSettings extends Page implements HasForms
                                         ->columns(4)
                                         ->reorderableWithButtons()
                                         ->collapsible()
-                                        ->itemLabel(fn (array $s) => $s['title'] ?? null)
+                                        ->itemLabel(fn (array $state): ?string => $state['title'] ?? null)
                                         ->defaultItems(0)
                                         ->columnSpanFull(),
                                 ])->columns(2),

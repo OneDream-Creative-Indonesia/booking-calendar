@@ -7,4 +7,7 @@
             <x-filament::button tag="a" href="/" target="_blank" color="gray" icon="heroicon-m-arrow-top-right-on-square">Lihat Website</x-filament::button>
         </div>
     </form>
+    <script>
+        try { fetch('/', { cache: 'reload', credentials: 'same-origin' }).catch(function(){}); } catch (e) {}
+    </script>
 </x-filament-panels::page>

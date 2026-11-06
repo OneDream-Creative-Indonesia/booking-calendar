@@ -28,8 +28,28 @@ class BookingController extends Controller
     {
         return view('background');
     }
-       public function home()
+    public function home(Request $request)
     {
+        // Sebelumnya route '/' menggunakan Route::redirect('/', '/booking', 301) yang ter-cache permanen oleh browser.
+        // Jika pengunjung membuka domain utama tanpa Referer pada awal sesi, bersihkan cache 301 browser untuk '/'
+        // lalu kembalikan ke halaman utama website ('/').
+        $referer = (string) $request->headers->get('referer', '');
+        if ($referer === '' && ! $request->query('direct') && ! $request->session()->has('_301_root_cleared')) {
+            $request->session()->put('_301_root_cleared', true);
+
+            return response(
+                '<!doctype html><html><head><meta charset="utf-8"><script>' .
+                'fetch("/",{cache:"reload",credentials:"same-origin"}).finally(function(){window.location.replace("/");});' .
+                '</script></head><body></body></html>',
+                200,
+                [
+                    'Content-Type' => 'text/html; charset=UTF-8',
+                    'Clear-Site-Data' => '"cache"',
+                    'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+                ]
+            );
+        }
+
         return view('home');
     }
 

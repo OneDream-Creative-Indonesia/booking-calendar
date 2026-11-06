@@ -56,7 +56,7 @@ class SiteGalleryItemResource extends Resource
                 ->extraImgAttributes(['style' => 'object-fit:cover;border-radius:10px']),
             Tables\Columns\TextColumn::make('group')->label('Kategori Halaman')->badge()
                 ->color(fn ($state) => $state === 'booth' ? 'warning' : 'info')
-                ->formatStateUsing(fn ($s) => $s === 'booth' ? 'Snap Fun Booth (Event)' : 'Snap Fun Studio'),
+                ->formatStateUsing(fn ($state) => $state === 'booth' ? 'Snap Fun Booth (Event)' : 'Snap Fun Studio'),
             Tables\Columns\TextColumn::make('sort')->label('Urutan')->sortable(),
             Tables\Columns\ToggleColumn::make('is_active')->label('Aktif'),
         ])->defaultSort('sort')->reorderable('sort')
