@@ -12,6 +12,7 @@ use App\Models\SiteFaq;
 use App\Models\SiteGalleryItem;
 use App\Models\SitePromo;
 use App\Models\SiteSetting;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
@@ -626,6 +627,81 @@ class Site
     }
 
     /**
+     * Pastikan tabel-tabel CMS Website tersedia secara otomatis di server produksi (mis. Hostinger Git Deploy)
+     * tanpa mengganggu tabel Website Booking.
+     */
+    public static function ensureTablesExist(): void
+    {
+        try {
+            if (! Schema::hasTable('site_settings')) {
+                Schema::create('site_settings', function (Blueprint $table) {
+                    $table->id();
+                    $table->string('key')->unique();
+                    $table->longText('value')->nullable();
+                    $table->timestamps();
+                });
+            }
+
+            if (! Schema::hasTable('site_promos')) {
+                Schema::create('site_promos', function (Blueprint $table) {
+                    $table->id();
+                    $table->string('title');
+                    $table->string('badge')->nullable();
+                    $table->text('description')->nullable();
+                    $table->string('image')->nullable();
+                    $table->string('link_label')->nullable();
+                    $table->string('link_url')->nullable();
+                    $table->date('starts_at')->nullable();
+                    $table->date('ends_at')->nullable();
+                    $table->boolean('is_active')->default(true);
+                    $table->unsignedInteger('sort')->default(0);
+                    $table->timestamps();
+                });
+            }
+
+            if (! Schema::hasTable('site_gallery_items')) {
+                Schema::create('site_gallery_items', function (Blueprint $table) {
+                    $table->id();
+                    $table->string('group')->default('studio');
+                    $table->string('image');
+                    $table->string('caption')->nullable();
+                    $table->boolean('is_active')->default(true);
+                    $table->unsignedInteger('sort')->default(0);
+                    $table->timestamps();
+                });
+            }
+
+            if (! Schema::hasTable('site_faqs')) {
+                Schema::create('site_faqs', function (Blueprint $table) {
+                    $table->id();
+                    $table->string('question');
+                    $table->text('answer');
+                    $table->boolean('is_active')->default(true);
+                    $table->unsignedInteger('sort')->default(0);
+                    $table->timestamps();
+                });
+            }
+
+            if (! Schema::hasTable('sirkel_registrations')) {
+                Schema::create('sirkel_registrations', function (Blueprint $table) {
+                    $table->id();
+                    $table->string('name');
+                    $table->unsignedSmallInteger('age')->nullable();
+                    $table->string('city')->nullable();
+                    $table->string('whatsapp');
+                    $table->string('instagram')->nullable();
+                    $table->string('tiktok')->nullable();
+                    $table->text('reason')->nullable();
+                    $table->string('status')->default('baru');
+                    $table->timestamps();
+                });
+            }
+        } catch (\Throwable $e) {
+            // Abaikan jika koneksi DB belum siap
+        }
+    }
+
+    /**
      * Pastikan data awal Company Profile sudah terisi di tabel CMS saat pertama kali dijalankan,
      * serta membersihkan emoticon lama dari versi sebelumnya.
      */
@@ -637,6 +713,7 @@ class Site
         }
         $checked = true;
 
+        self::ensureTablesExist();
         self::syncDefaultAssetsToPublicDisk();
 
         try {
