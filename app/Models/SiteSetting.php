@@ -28,9 +28,17 @@ class SiteSetting extends Model
 
     public static function get(string $key, mixed $default = null): mixed
     {
-        $v = static::all_()[$key] ?? null;
+        $all = static::all_();
+        if (! array_key_exists($key, $all)) {
+            return $default;
+        }
 
-        return ($v === null || $v === '' || $v === []) ? $default : $v;
+        $v = $all[$key];
+        if (is_array($v)) {
+            return $v;
+        }
+
+        return ($v === null || $v === '') ? $default : $v;
     }
 
     public static function put(string $key, mixed $value): void

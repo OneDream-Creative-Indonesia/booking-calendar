@@ -29,19 +29,46 @@ class SitePromoResource extends Resource
 
     public static function form(Form $form): Form
     {
-        Site::syncDefaultAssetsToPublicDisk();
+        Site::ensureSeeded();
 
         return $form->schema([
-            Forms\Components\TextInput::make('title')->label('Judul Promo')->required()->maxLength(120),
-            Forms\Components\TextInput::make('badge')->label('Label / Badge (cth: DISKON 20% / TERBATAS)')->maxLength(40),
-            Forms\Components\Textarea::make('description')->label('Deskripsi Singkat Promo')->rows(3)->columnSpanFull(),
-            Forms\Components\FileUpload::make('image')->label('Gambar Banner / Poster Promo (Opsional)')->image()->disk('public')->directory('site/promo')->imageEditor()->columnSpanFull(),
-            Forms\Components\TextInput::make('link_label')->label('Teks Tombol')->placeholder('Booking Sekarang')->default('Booking Sekarang'),
-            Forms\Components\TextInput::make('link_url')->label('Link Tombol')->placeholder('/booking atau https://...')->default('/booking'),
+            Forms\Components\FileUpload::make('image')
+                ->label('Gambar Background Slide Promo')
+                ->helperText('Gambar ini akan menjadi background banner pada slider promo otomatis di Beranda. Anda bisa mengisi teks di bawah untuk ditampilkan di atas background, atau kosongkan judul/deskripsi jika gambar poster sudah memuat tulisan lengkap.')
+                ->image()
+                ->disk('web_public')
+                ->directory('img/site/promo')
+                ->imageEditor()
+                ->deletable(true)
+                ->openable()
+                ->downloadable()
+                ->maxSize(15360)
+                ->required()
+                ->columnSpanFull(),
+            Forms\Components\TextInput::make('title')
+                ->label('Judul Promo (Opsional)')
+                ->placeholder('Kosongkan jika desain gambar sudah memuat judul')
+                ->maxLength(120)
+                ->dehydrateStateUsing(fn ($state): string => (string) ($state ?? '')),
+            Forms\Components\TextInput::make('badge')
+                ->label('Label / Badge (Opsional, cth: DISKON 20% / TERBATAS)')
+                ->maxLength(40),
+            Forms\Components\Textarea::make('description')
+                ->label('Deskripsi Singkat Promo (Opsional)')
+                ->rows(2)
+                ->columnSpanFull(),
+            Forms\Components\TextInput::make('link_label')
+                ->label('Teks Tombol CTA')
+                ->placeholder('Booking Sekarang')
+                ->default('Booking Sekarang'),
+            Forms\Components\TextInput::make('link_url')
+                ->label('Link Tujuan Saat diklik')
+                ->placeholder('/booking atau https://...')
+                ->default('/booking'),
             Forms\Components\DatePicker::make('starts_at')->label('Tanggal Mulai Tayang')->helperText('Kosongkan = langsung tayang'),
             Forms\Components\DatePicker::make('ends_at')->label('Tanggal Berakhir')->helperText('Kosongkan = tampil terus tanpa batas tanggal'),
-            Forms\Components\TextInput::make('sort')->label('Urutan')->numeric()->default(0),
-            Forms\Components\Toggle::make('is_active')->label('Tampilkan di Beranda')->default(true),
+            Forms\Components\TextInput::make('sort')->label('Urutan Slide')->numeric()->default(0),
+            Forms\Components\Toggle::make('is_active')->label('Tampilkan di Slider Beranda')->default(true),
         ])->columns(2);
     }
 
@@ -51,15 +78,20 @@ class SitePromoResource extends Resource
 
         return $table->columns([
             Tables\Columns\ImageColumn::make('image')
-                ->label('Poster')
+                ->label('Background Slide')
                 ->getStateUsing(fn ($record) => Site::url($record->image))
-                ->height(56)
-                ->width(56)
-                ->defaultImageUrl(asset('img/Pinpin-01.png'))
-                ->circular(),
-            Tables\Columns\TextColumn::make('title')->label('Judul Promo')->searchable()->weight('bold'),
+                ->height(68)
+                ->width(120)
+                ->extraImgAttributes(['style' => 'object-fit:cover;border-radius:10px'])
+                ->defaultImageUrl(asset('img/site/why-photo.jpg')),
+            Tables\Columns\TextColumn::make('title')
+                ->label('Judul Promo')
+                ->placeholder('(Hanya Gambar Background)')
+                ->searchable()
+                ->weight('bold'),
             Tables\Columns\TextColumn::make('badge')->label('Badge')->badge()->color('danger'),
             Tables\Columns\TextColumn::make('ends_at')->label('Berakhir')->date('d M Y')->placeholder('Tanpa batas'),
+            Tables\Columns\TextColumn::make('sort')->label('Urutan')->sortable(),
             Tables\Columns\ToggleColumn::make('is_active')->label('Aktif'),
         ])->defaultSort('sort')->reorderable('sort')
             ->actions([Tables\Actions\EditAction::make(), Tables\Actions\DeleteAction::make()])

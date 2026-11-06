@@ -82,7 +82,12 @@
         <div class="grid g3" style="margin-top:32px">
             @foreach(Site::get('why_us') as $i => $w)
                 <div class="card">
-                    <span class="num">{{ $i + 1 }}</span>
+                    <div class="why-head">
+                        <span class="num">{{ $i + 1 }}</span>
+                        @if(!empty($w['tag']))
+                            <span class="why-tag">{{ $w['tag'] }}</span>
+                        @endif
+                    </div>
                     <h3>{{ $w['title'] ?? '' }}</h3>
                     <p>{{ $w['text'] ?? '' }}</p>
                 </div>
@@ -92,7 +97,7 @@
 </section>
 
 <section class="band-y">
-    <div class="container" style="max-width:840px">
+    <div class="container" style="max-width:860px">
         <div class="center" style="margin-bottom:28px">
             <span class="eyebrow" style="background:#fff">{{ Site::get('about_faq_eyebrow') }}</span>
             <h2 class="title">{{ Site::get('about_faq_title') }}</h2>
@@ -105,12 +110,16 @@
                 </details>
             @endforeach
         </div>
-        <p class="center" style="margin-top:24px;font-weight:700">
-            {{ Site::get('about_faq_prompt') }}
-            <a style="text-decoration:underline;color:var(--blue)" target="_blank" rel="noopener" href="{{ Site::wa((string) Site::get('about_faq_wa_text')) }}">
-                <i class="fa-brands fa-whatsapp"></i> {{ Site::get('about_faq_cta_label') }}
+        <div class="wa-cta-banner">
+            <div>
+                <h3>{{ Site::get('about_faq_prompt') }}</h3>
+                <p>Tim Snap Fun & Pinpin siap jawab pertanyaanmu seputar Studio, Photobox, maupun Event Booth.</p>
+            </div>
+            <a class="btn-wa-lg" target="_blank" rel="noopener" href="{{ Site::wa((string) Site::get('about_faq_wa_text')) }}">
+                <i class="fa-brands fa-whatsapp"></i>
+                <span>{{ Site::get('about_faq_cta_label') }}</span>
             </a>
-        </p>
+        </div>
     </div>
 </section>
 @endsection

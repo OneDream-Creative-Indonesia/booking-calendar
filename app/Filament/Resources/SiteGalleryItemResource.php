@@ -37,8 +37,8 @@ class SiteGalleryItemResource extends Resource
                 'booth' => 'Snap Fun Booth (Dokumentasi Event)',
             ])->required()->default('studio'),
             Forms\Components\TextInput::make('sort')->label('Urutan Tampil')->numeric()->default(0),
-            Forms\Components\FileUpload::make('image')->label('Foto Galeri')->image()->required()->disk('public')
-                ->directory('site/gallery')->imageEditor()->maxSize(15360)->columnSpanFull(),
+            Forms\Components\FileUpload::make('image')->label('Foto Galeri')->image()->required()->disk('web_public')
+                ->directory('img/site/gallery')->deletable(true)->openable()->downloadable()->imageEditor()->maxSize(15360)->columnSpanFull(),
             Forms\Components\Toggle::make('is_active')->label('Tampilkan di Website')->default(true),
         ])->columns(2);
     }

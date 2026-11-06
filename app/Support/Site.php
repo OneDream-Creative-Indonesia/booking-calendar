@@ -55,6 +55,7 @@ class Site
             'maps_url' => '',
             'maps_embed_url' => '',
             'wa_float_enabled' => true,
+            'wa_float_label' => 'Chat Pinpin',
             'wa_float_text' => 'Halo Pinpin, aku mau tanya tentang Snap Fun!',
 
             'footer_tagline' => 'Self Photo Studio, Photobox & Photobooth. Dari Kota Serang untuk semua momen serumu.',
@@ -120,14 +121,40 @@ class Site
 
             'home_why_eyebrow' => 'Kenapa Harus Snap Fun?',
             'home_why_title' => 'Bikin foto jadi seru & anti awkward',
-            'home_why_subtitle' => 'Playground kreatif tempat kamu pegang kendali penuh atas keseruannya.',
+            'home_why_subtitle' => 'Playground kreatif tempat kamu pegang kendali penuh atas keseruannya, baik di Studio, Photobox, maupun Event.',
+            'why_us_show_mascot' => false,
             'why_us_image' => null,
             'why_us' => [
-                ['title' => 'Standar Studio', 'text' => 'Equipment yang kami pakai itu standar studio. Wajah auto glowing, nggak bakal gelap atau grainy.'],
-                ['title' => 'Hasil Cetak Berkualitas', 'text' => 'Hasil cetak berkualitas, tajam, tebal, dan anti luntur.'],
-                ['title' => 'Background Beragam', 'text' => 'Pilihan background beragam: ada tirai merah, tirai abu, tirai biru, American School, dan banyak lagi.'],
-                ['title' => 'Frame Custom', 'text' => 'Layout/frame foto bakal kami desain khusus ngikutin tema event atau sesi spesial kalian. Jadi lebih memorable.'],
-                ['title' => 'Crew Asik', 'text' => 'Crewnya asik-asik banget. Nggak cuma namanya doang yang Fun, tapi crew Snap Fun semuanya asik banget.'],
+                [
+                    'tag' => 'Self Photo Studio',
+                    'title' => '100% Self-Shutter & Anti Canggung',
+                    'text' => 'Bebas pencet remote shutter sendiri di ruang privat tanpa diarahkan fotografer, jadi ekspresi lebih lepas dan natural.',
+                ],
+                [
+                    'tag' => 'Semua Layanan',
+                    'title' => 'Lighting & Kamera Standar Studio',
+                    'text' => 'Equipment pencahayaan dan kamera profesional yang bikin wajah auto glowing, jernih, nggak bakal gelap atau grainy.',
+                ],
+                [
+                    'tag' => 'Studio & Booth',
+                    'title' => 'Cetak Instan & Softfile Lengkap',
+                    'text' => 'Hasil cetak berkualitas tinggi, tajam, tebal, dan anti luntur dalam hitungan detik, lengkap dengan semua file digital.',
+                ],
+                [
+                    'tag' => 'Snap Fun Studio',
+                    'title' => 'Pilihan Background & Grid Beragam',
+                    'text' => 'Tersedia berbagai pilihan warna tirai, background tematik, photo grid, hingga gantungan kunci akrilik sesuai gayamu.',
+                ],
+                [
+                    'tag' => 'Custom Design',
+                    'title' => 'Bebas Request Custom Frame',
+                    'text' => 'Bisa registrasi desain frame eksklusif untuk ulang tahun, graduation, idol/fandom, anniversary, maupun tema acara.',
+                ],
+                [
+                    'tag' => 'Studio · Booth · Express',
+                    'title' => 'Ekosistem Foto Paling Fun di Banten',
+                    'text' => 'Mulai dari sesi foto bareng bestie di markas Studio Kota Serang, photobooth event, hingga photobox self-service.',
+                ],
             ],
 
             'home_events_eyebrow' => 'Event Bersama Snap Fun',
@@ -721,7 +748,7 @@ class Site
                 return;
             }
 
-            if (! $force && SiteSetting::get('_cms_seeded_v3') === '1') {
+            if (! $force && SiteSetting::get('_cms_seeded_v4') === '1') {
                 return;
             }
 
@@ -732,6 +759,11 @@ class Site
                 $existing = SiteSetting::query()->where('key', $key)->first();
                 if (! $existing || $force) {
                     SiteSetting::put($key, $val);
+                } elseif ($key === 'why_us') {
+                    $curWhy = SiteSetting::get('why_us', []);
+                    if (is_array($curWhy) && count($curWhy) === 5 && (($curWhy[4]['title'] ?? '') === 'Crew Asik')) {
+                        SiteSetting::put('why_us', $val);
+                    }
                 } elseif (is_string($val) && is_string($existing->value)) {
                     // Bersihkan emoticon pada teks setting yang sudah ada di DB
                     $cleaned = self::stripEmoji($existing->value);
@@ -742,19 +774,48 @@ class Site
                 }
             }
 
-            if (Schema::hasTable('site_promos') && (SitePromo::count() === 0 || $force)) {
-                if ($force) {
-                    SitePromo::query()->delete();
+            if (Schema::hasTable('site_promos')) {
+                $needsDefaultPromos = SitePromo::count() === 0 || $force;
+                if (! $needsDefaultPromos && SitePromo::count() === 1) {
+                    $firstPromo = SitePromo::first();
+                    if ($firstPromo && empty($firstPromo->image) && $firstPromo->title === 'Promo Spesial Seru-seruan Bareng Pinpin!') {
+                        $needsDefaultPromos = true;
+                    }
                 }
-                SitePromo::create([
-                    'title' => 'Promo Spesial Seru-seruan Bareng Pinpin!',
-                    'badge' => 'Promo Spesial',
-                    'description' => 'Ajak bestie, pasangan, atau keluargamu dan abadikan momen tanpa batas di Snap Fun Studio Kota Serang.',
-                    'link_label' => 'Booking Sekarang',
-                    'link_url' => '/booking',
-                    'is_active' => true,
-                    'sort' => 1,
-                ]);
+
+                if ($needsDefaultPromos) {
+                    SitePromo::query()->delete();
+                    SitePromo::create([
+                        'title' => 'Promo Spesial Seru-seruan Bareng Pinpin!',
+                        'badge' => 'Promo Studio',
+                        'description' => 'Ajak bestie, pasangan, atau keluargamu dan abadikan momen tanpa batas di Snap Fun Studio Kota Serang.',
+                        'image' => 'img/site/why-photo.jpg',
+                        'link_label' => 'Booking Sekarang',
+                        'link_url' => '/booking',
+                        'is_active' => true,
+                        'sort' => 1,
+                    ]);
+                    SitePromo::create([
+                        'title' => 'Gratis Request Custom Frame Spesialmu!',
+                        'badge' => 'Highlight Studio',
+                        'description' => 'Rayakan ulang tahun, graduation, atau comeback idol favorit dengan desain frame eksklusif di Snap Fun Studio.',
+                        'image' => 'img/site/doc-1.jpg',
+                        'link_label' => 'Lihat Snap Fun Studio',
+                        'link_url' => '/produk/snap-fun-studio',
+                        'is_active' => true,
+                        'sort' => 2,
+                    ]);
+                    SitePromo::create([
+                        'title' => 'Hadirkan Snap Fun Booth di Event Kamu!',
+                        'badge' => 'Promo Event & Booth',
+                        'description' => 'Tersedia sistem Sewa Tenant, Sponsorship pelajar/mahasiswa, hingga Bagi Hasil untuk bikin acaramu makin pecah.',
+                        'image' => 'img/site/booth-banner.jpg',
+                        'link_label' => 'Info Snap Fun Booth',
+                        'link_url' => '/produk/snap-fun-booth',
+                        'is_active' => true,
+                        'sort' => 3,
+                    ]);
+                }
             }
 
             if (Schema::hasTable('site_faqs') && (SiteFaq::count() === 0 || $force)) {
@@ -786,7 +847,7 @@ class Site
                 }
             }
 
-            SiteSetting::put('_cms_seeded_v3', '1');
+            SiteSetting::put('_cms_seeded_v4', '1');
         } catch (\Throwable $e) {
             // Abaikan jika database belum siap/migrasi belum dijalankan
         }

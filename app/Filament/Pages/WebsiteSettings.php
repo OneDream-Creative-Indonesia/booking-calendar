@@ -109,13 +109,19 @@ class WebsiteSettings extends Page implements HasForms
                                         ->label('Logo Header / Navbar (Opsional)')
                                         ->helperText('Kosongkan untuk memakai logo bawaan Snap Fun.')
                                         ->image()
-                                        ->disk('public')
+                                        -> disk('web_public')
+                        ->deletable(true)
+                        ->openable()
+                        ->downloadable()
                                         ->directory('site/brand'),
                                     Forms\Components\FileUpload::make('footer_logo')
                                         ->label('Logo Footer (Opsional)')
                                         ->helperText('Kosongkan untuk memakai logo putih bawaan Snap Fun.')
                                         ->image()
-                                        ->disk('public')
+                                        -> disk('web_public')
+                        ->deletable(true)
+                        ->openable()
+                        ->downloadable()
                                         ->directory('site/brand'),
                                 ])->columns(2),
 
@@ -149,7 +155,8 @@ class WebsiteSettings extends Page implements HasForms
                                     Forms\Components\TextInput::make('maps_url')->label('Link Google Maps (Tombol Buka Maps)')->url(),
                                     Forms\Components\TextInput::make('maps_embed_url')->label('Link Embed Iframe Google Maps (Opsional)')->helperText('Isi URL src="https://www.google.com/maps/embed?..." jika ingin menampilkan peta interaktif.'),
                                     Forms\Components\Toggle::make('wa_float_enabled')->label('Tampilkan Tombol WhatsApp Mengambang di Pojok Kanan Bawah')->default(true),
-                                    Forms\Components\TextInput::make('wa_float_text')->label('Pesan Otomatis Tombol WA Mengambang')->required(),
+                                    Forms\Components\TextInput::make('wa_float_label')->label('Teks Label Tombol WA Mengambang')->placeholder('Chat Pinpin'),
+                                    Forms\Components\TextInput::make('wa_float_text')->label('Pesan Otomatis Tombol WA Mengambang')->required()->columnSpanFull(),
                                 ])->columns(2),
 
                             Forms\Components\Section::make('Konten Footer')
@@ -183,7 +190,10 @@ class WebsiteSettings extends Page implements HasForms
                                         ->label('Gambar Maskot / Ilustrasi Hero (Opsional)')
                                         ->helperText('Kosongkan untuk memakai ilustrasi Pinpin bawaan.')
                                         ->image()
-                                        ->disk('public')
+                                        -> disk('web_public')
+                        ->deletable(true)
+                        ->openable()
+                        ->downloadable()
                                         ->directory('site/hero')
                                         ->columnSpanFull(),
                                     self::itemsRepeater('hero_highlights', 'Poin Highlight di Bawah Hero', 'Judul Singkat', 'Keterangan')->columnSpanFull(),
@@ -213,7 +223,10 @@ class WebsiteSettings extends Page implements HasForms
                                         ->label('Gambar Showcase Custom Frame (Opsional)')
                                         ->helperText('Kosongkan untuk memakai showcase frame bawaan Company Profile.')
                                         ->image()
-                                        ->disk('public')
+                                        -> disk('web_public')
+                        ->deletable(true)
+                        ->openable()
+                        ->downloadable()
                                         ->directory('site/custom-frame'),
                                     self::itemsRepeater('custom_frame_points', 'Poin Keunggulan Custom Frame Studio', 'Judul Poin', 'Keterangan')->columnSpanFull(),
                                     Forms\Components\Fieldset::make('Pengaturan Pop Up Form Registrasi Custom Frame (Terhubung ke WhatsApp)')->schema([
@@ -252,22 +265,54 @@ class WebsiteSettings extends Page implements HasForms
                                     ])->columns(3),
                                 ])->columns(2),
 
-                            Forms\Components\Section::make('Section Kenapa Harus Snap Fun?')
+                            Forms\Components\Section::make('Section Kenapa Harus Snap Fun? (Bisa Di-custom untuk Studio, Photobox & Booth)')
+                                ->description('Seluruh kartu di bagian ini dapat disesuaikan, ditambah, atau dihapus sesuai layanan Snap Fun (tidak terbatas pada Snap Fun Booth).')
                                 ->schema([
                                     Forms\Components\TextInput::make('home_why_eyebrow')->label('Label Eyebrow')->required(),
                                     Forms\Components\TextInput::make('home_why_title')->label('Judul Section')->required(),
                                     Forms\Components\TextInput::make('home_why_subtitle')->label('Sub-judul Section')->columnSpanFull(),
-                                    Forms\Components\FileUpload::make('why_us_image')
-                                        ->label('Ilustrasi Karakter Pendamping (Opsional)')
-                                        ->helperText('Kosongkan untuk menampilkan karakter merah bawaan Compro.')
-                                        ->image()
-                                        ->disk('public')
-                                        ->directory('site/why')
+                                    Forms\Components\Repeater::make('why_us')
+                                        ->label('Daftar Kartu Keunggulan (Kenapa Harus Snap Fun?)')
+                                        ->schema([
+                                            Forms\Components\TextInput::make('tag')
+                                                ->label('Label Kategori / Layanan (Opsional)')
+                                                ->placeholder('cth: Self Photo Studio / Semua Layanan / Custom Design'),
+                                            Forms\Components\TextInput::make('title')
+                                                ->label('Judul Keunggulan')
+                                                ->required(),
+                                            Forms\Components\Textarea::make('text')
+                                                ->label('Deskripsi Keunggulan')
+                                                ->rows(2)
+                                                ->columnSpanFull(),
+                                        ])
+                                        ->columns(2)
+                                        ->reorderableWithButtons()
+                                        ->collapsible()
+                                        ->collapsed(false)
+                                        ->cloneable()
+                                        ->deletable(true)
+                                        ->addable(true)
+                                        ->addActionLabel('+ Tambah Kartu Keunggulan')
+                                        ->itemLabel(fn (array $state): ?string => ! empty($state['tag']) ? (($state['title'] ?? '') . ' — ' . $state['tag']) : ($state['title'] ?? null))
+                                        ->defaultItems(0)
                                         ->columnSpanFull(),
-                                    self::itemsRepeater('why_us', 'Daftar Alasan Kenapa Harus Snap Fun')->columnSpanFull(),
+                                    Forms\Components\Toggle::make('why_us_show_mascot')
+                                        ->label('Tampilkan Kartu Ilustrasi Maskot Tambahan di Grid')
+                                        ->default(false)
+                                        ->columnSpanFull(),
+                                    Forms\Components\FileUpload::make('why_us_image')
+                                        ->label('Ilustrasi Karakter Pendamping (Jika Toggle Maskot Diaktifkan)')
+                                        ->image()
+                                        ->disk('web_public')
+                                        ->directory('img/site/why')
+                                        ->deletable(true)
+                                        ->openable()
+                                        ->downloadable()
+                                        ->columnSpanFull(),
                                 ])->columns(2),
 
                             Forms\Components\Section::make('Section Showcase Event Bersama Snap Fun')
+                                ->description('Anda dapat menghapus logo/event yang sudah ada, mengganti logo, atau menambahkan event baru kapan saja.')
                                 ->schema([
                                     Forms\Components\TextInput::make('home_events_eyebrow')->label('Label Eyebrow Event')->required(),
                                     Forms\Components\TextInput::make('home_events_title')->label('Judul Section Event')->required(),
@@ -276,16 +321,27 @@ class WebsiteSettings extends Page implements HasForms
                                     Forms\Components\Repeater::make('events')
                                         ->label('Daftar Nama & Logo Event yang Pernah Bekerja Sama')
                                         ->schema([
-                                            Forms\Components\TextInput::make('name')->label('Nama Event')->required(),
+                                            Forms\Components\TextInput::make('name')
+                                                ->label('Nama Event')
+                                                ->required(),
                                             Forms\Components\FileUpload::make('logo')
-                                                ->label('Logo Event (Opsional)')
+                                                ->label('Logo Event (Klik × untuk Hapus / Upload Baru)')
                                                 ->image()
-                                                ->disk('public')
-                                                ->directory('site/events'),
+                                                ->disk('web_public')
+                                                ->directory('img/site/events')
+                                                ->imagePreviewHeight('90')
+                                                ->deletable(true)
+                                                ->openable()
+                                                ->downloadable(),
                                         ])
                                         ->columns(2)
                                         ->reorderableWithButtons()
                                         ->collapsible()
+                                        ->collapsed(false)
+                                        ->cloneable()
+                                        ->deletable(true)
+                                        ->addable(true)
+                                        ->addActionLabel('+ Tambah Event & Logo Baru')
                                         ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
                                         ->defaultItems(0)
                                         ->columnSpanFull(),
@@ -324,7 +380,10 @@ class WebsiteSettings extends Page implements HasForms
                                         ->label('Gambar Maskot / Ilustrasi Halaman Tentang (Opsional)')
                                         ->helperText('Kosongkan untuk memakai ilustrasi Pinpin bawaan.')
                                         ->image()
-                                        ->disk('public')
+                                        -> disk('web_public')
+                        ->deletable(true)
+                        ->openable()
+                        ->downloadable()
                                         ->directory('site/about')
                                         ->columnSpanFull(),
                                 ])->columns(2),
@@ -372,7 +431,10 @@ class WebsiteSettings extends Page implements HasForms
                                     Forms\Components\FileUpload::make('studio_hero_image')
                                         ->label('Gambar Hero Halaman Studio (Opsional)')
                                         ->image()
-                                        ->disk('public')
+                                        -> disk('web_public')
+                        ->deletable(true)
+                        ->openable()
+                        ->downloadable()
                                         ->directory('site/studio')
                                         ->columnSpanFull(),
                                 ])->columns(2),
@@ -421,7 +483,10 @@ class WebsiteSettings extends Page implements HasForms
                                     Forms\Components\FileUpload::make('booth_hero_image')
                                         ->label('Gambar Pendamping Header Booth (Opsional)')
                                         ->image()
-                                        ->disk('public')
+                                        -> disk('web_public')
+                        ->deletable(true)
+                        ->openable()
+                        ->downloadable()
                                         ->directory('site/booth')
                                         ->columnSpanFull(),
                                 ])->columns(2),
@@ -442,7 +507,10 @@ class WebsiteSettings extends Page implements HasForms
                                         ->label('Gambar Showcase Frame Custom (Opsional)')
                                         ->helperText('Kosongkan untuk menampilkan showcase photostrip bawaan Company Profile.')
                                         ->image()
-                                        ->disk('public')
+                                        -> disk('web_public')
+                        ->deletable(true)
+                        ->openable()
+                        ->downloadable()
                                         ->directory('site/booth')
                                         ->columnSpanFull(),
                                 ])->columns(2),
@@ -455,7 +523,10 @@ class WebsiteSettings extends Page implements HasForms
                                     Forms\Components\FileUpload::make('booth_systems_image')
                                         ->label('Gambar Maskot Pendamping Sistem Kerja Sama (Opsional)')
                                         ->image()
-                                        ->disk('public')
+                                        -> disk('web_public')
+                        ->deletable(true)
+                        ->openable()
+                        ->downloadable()
                                         ->directory('site/booth')
                                         ->columnSpanFull(),
                                     self::itemsRepeater('booth_systems', '3 Sistem Kerja Sama (Sewa Tenant, Sponsorship, Bagi Hasil)')->columnSpanFull(),
@@ -469,7 +540,10 @@ class WebsiteSettings extends Page implements HasForms
                                         ->label('Foto Banner Booth di Lokasi (Opsional)')
                                         ->helperText('Kosongkan untuk menampilkan foto Pop Up Self Photo Booth dari Company Profile.')
                                         ->image()
-                                        ->disk('public')
+                                        -> disk('web_public')
+                        ->deletable(true)
+                        ->openable()
+                        ->downloadable()
                                         ->directory('site/booth')
                                         ->columnSpanFull(),
                                     self::itemsRepeater('booth_requirements', 'Daftar Kebutuhan di Lokasi (Space, Listrik, Meja+Kursi)')->columnSpanFull(),
@@ -506,7 +580,10 @@ class WebsiteSettings extends Page implements HasForms
                                     Forms\Components\FileUpload::make('express_image')
                                         ->label('Gambar Ilustrasi / Maskot Express (Opsional)')
                                         ->image()
-                                        ->disk('public')
+                                        -> disk('web_public')
+                        ->deletable(true)
+                        ->openable()
+                        ->downloadable()
                                         ->directory('site/express')
                                         ->columnSpanFull(),
                                     self::itemsRepeater('express_highlights', 'Poin Keunggulan Konsep Snap Fun Express')->columnSpanFull(),
@@ -529,7 +606,10 @@ class WebsiteSettings extends Page implements HasForms
                                     Forms\Components\FileUpload::make('sirkel_image')
                                         ->label('Gambar Ilustrasi Sirkel (Opsional)')
                                         ->image()
-                                        ->disk('public')
+                                        -> disk('web_public')
+                        ->deletable(true)
+                        ->openable()
+                        ->downloadable()
                                         ->directory('site/sirkel')
                                         ->columnSpanFull(),
                                     self::itemsRepeater('sirkel_benefits', 'Daftar Benefit Menjadi Sirkel')->columnSpanFull(),
@@ -603,7 +683,10 @@ class WebsiteSettings extends Page implements HasForms
                                     Forms\Components\FileUpload::make('contact_image')
                                         ->label('Gambar Maskot Pendamping Kontak (Opsional)')
                                         ->image()
-                                        ->disk('public')
+                                        -> disk('web_public')
+                        ->deletable(true)
+                        ->openable()
+                        ->downloadable()
                                         ->directory('site/contact')
                                         ->columnSpanFull(),
                                 ]),

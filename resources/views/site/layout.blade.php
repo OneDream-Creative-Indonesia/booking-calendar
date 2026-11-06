@@ -15,7 +15,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Righteous&family=Sniglet:wght@400;800&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <link rel="stylesheet" href="{{ asset('css/site.css') }}?v=3">
+    <link rel="stylesheet" href="{{ asset('css/site.css') }}?v=4">
 </head>
 <body>
 @php $is = fn (...$r) => request()->routeIs(...$r) ? 'active' : ''; @endphp
@@ -177,6 +177,7 @@
 @if(Site::bool('wa_float_enabled'))
     <a class="wa-float" href="{{ Site::wa((string) Site::get('wa_float_text')) }}" target="_blank" rel="noopener" aria-label="WhatsApp" title="Chat Pinpin via WhatsApp">
         <i class="fa-brands fa-whatsapp"></i>
+        <span>{{ Site::get('wa_float_label', 'Chat Pinpin') }}</span>
     </a>
 @endif
 

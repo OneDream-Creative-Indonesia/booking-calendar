@@ -12,8 +12,8 @@
                     <i class="fa-solid fa-calendar-check"></i>
                     <span>{{ Site::get('hero_btn1_label') }}</span>
                 </a>
-                <a class="btn btn-white" target="_blank" rel="noopener" href="{{ Site::wa((string) Site::get('hero_btn2_wa_text')) }}">
-                    <i class="fa-brands fa-whatsapp"></i>
+                <a class="btn btn-green" target="_blank" rel="noopener" href="{{ Site::wa((string) Site::get('hero_btn2_wa_text')) }}">
+                    <i class="fa-brands fa-whatsapp" style="font-size:1.15rem"></i>
                     <span>{{ Site::get('hero_btn2_label') }}</span>
                 </a>
             </div>
@@ -48,30 +48,120 @@
                 <p class="lead" style="margin-top:10px">{{ Site::get('home_promo_subtitle') }}</p>
             @endif
         </div>
-        <div class="grid g2" style="margin-top:32px">
-            @forelse($promos as $p)
-                <div class="card y promo" @if($promos->count() === 1) style="grid-column:1/-1" @endif>
-                    @if($p->image)<img src="{{ Site::url($p->image) }}" alt="{{ $p->title }}">@endif
-                    <div>
-                        @if($p->badge)<span class="pb">{{ $p->badge }}</span>@endif
-                        <h3 style="margin-top:8px;color:var(--blue-d)">{{ $p->title }}</h3>
-                        @if($p->description)<p style="color:var(--blue-d);margin-top:4px">{{ $p->description }}</p>@endif
-                        @if($p->ends_at)<small style="display:block;margin-top:6px"><b>Berlaku s.d. {{ $p->ends_at->translatedFormat('d F Y') }}</b></small>@endif
+
+        @if($promos->isNotEmpty())
+            <div class="promo-slider" id="promoSlider">
+                @if($promos->count() > 1)
+                    <button type="button" class="promo-arrow prev" aria-label="Promo Sebelumnya" onclick="promoSlideStep(-1)">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <button type="button" class="promo-arrow next" aria-label="Promo Berikutnya" onclick="promoSlideStep(1)">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                @endif
+
+                <div class="promo-viewport">
+                    <div class="promo-track" id="promoTrack">
+                        @foreach($promos as $p)
+                            @php
+                                $bgUrl = $p->image ? Site::url($p->image) : asset('img/site/why-photo.jpg');
+                                $hasText = !empty($p->title) || !empty($p->badge) || !empty($p->description);
+                            @endphp
+                            <div class="promo-slide {{ $hasText ? '' : 'image-only' }}" style="background-image: url('{{ $bgUrl }}')">
+                                <div class="promo-slide-inner">
+                                    <div class="promo-slide-copy">
+                                        @if($p->badge)
+                                            <span class="pb">{{ $p->badge }}</span>
+                                        @endif
+                                        @if($p->title)
+                                            <h3>{{ $p->title }}</h3>
+                                        @endif
+                                        @if($p->description)
+                                            <p>{{ $p->description }}</p>
+                                        @endif
+                                        @if($p->ends_at)
+                                            <span class="promo-exp">
+                                                <i class="fa-regular fa-clock"></i>
+                                                <span>Berlaku s.d. {{ $p->ends_at->translatedFormat('d F Y') }}</span>
+                                            </span>
+                                        @endif
+                                    </div>
+                                    @if($p->link_url)
+                                        <div>
+                                            <a class="btn btn-yellow" href="{{ $p->link_url }}">
+                                                <span>{{ $p->link_label ?: 'Booking Sekarang' }}</span>
+                                                <i class="fa-solid fa-arrow-right"></i>
+                                            </a>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
-                    @if($p->link_url)
-                        <a class="btn btn-blue btn-sm" href="{{ $p->link_url }}">
-                            <span>{{ $p->link_label ?: 'Lihat Promo' }}</span>
-                            <i class="fa-solid fa-arrow-right"></i>
-                        </a>
-                    @endif
                 </div>
-            @empty
-                <div class="empty" style="grid-column:1/-1">
-                    {{ Site::get('home_promo_empty') }}
-                    <a href="{{ Site::instagramUrl() }}" target="_blank" rel="noopener" style="text-decoration:underline">Cek &#64;{{ ltrim((string) Site::get('instagram'), '@') }}</a>
-                </div>
-            @endforelse
-        </div>
+
+                @if($promos->count() > 1)
+                    <div class="promo-dots" id="promoDots">
+                        @foreach($promos as $idx => $p)
+                            <button type="button" class="promo-dot {{ $idx === 0 ? 'active' : '' }}" aria-label="Slide {{ $idx + 1 }}" onclick="promoSlideGo({{ $idx }})"></button>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+
+            @if($promos->count() > 1)
+                <script>
+                (function() {
+                    var current = 0;
+                    var total = {{ $promos->count() }};
+                    var track = document.getElementById('promoTrack');
+                    var dotsWrap = document.getElementById('promoDots');
+                    var slider = document.getElementById('promoSlider');
+                    var timer = null;
+
+                    function render() {
+                        if (!track) return;
+                        track.style.transform = 'translateX(-' + (current * 100) + '%)';
+                        if (dotsWrap) {
+                            var dots = dotsWrap.querySelectorAll('.promo-dot');
+                            for (var i = 0; i < dots.length; i++) {
+                                dots[i].classList.toggle('active', i === current);
+                            }
+                        }
+                    }
+
+                    window.promoSlideGo = function(index) {
+                        current = (index + total) % total;
+                        render();
+                        restart();
+                    };
+
+                    window.promoSlideStep = function(delta) {
+                        window.promoSlideGo(current + delta);
+                    };
+
+                    function restart() {
+                        if (timer) clearInterval(timer);
+                        timer = setInterval(function() {
+                            current = (current + 1) % total;
+                            render();
+                        }, 4500);
+                    }
+
+                    if (slider) {
+                        slider.addEventListener('mouseenter', function() { if (timer) clearInterval(timer); });
+                        slider.addEventListener('mouseleave', restart);
+                    }
+                    restart();
+                })();
+                </script>
+            @endif
+        @else
+            <div class="empty" style="margin-top:32px">
+                {{ Site::get('home_promo_empty') }}
+                <a href="{{ Site::instagramUrl() }}" target="_blank" rel="noopener" style="text-decoration:underline">Cek &#64;{{ ltrim((string) Site::get('instagram'), '@') }}</a>
+            </div>
+        @endif
     </div>
 </section>
 
@@ -187,14 +277,21 @@
         <div class="grid g3" style="margin-top:36px;align-items:stretch">
             @foreach(Site::get('why_us') as $i => $w)
                 <div class="card">
-                    <span class="num">{{ $i + 1 }}</span>
+                    <div class="why-head">
+                        <span class="num">{{ $i + 1 }}</span>
+                        @if(!empty($w['tag']))
+                            <span class="why-tag">{{ $w['tag'] }}</span>
+                        @endif
+                    </div>
                     <h3>{{ $w['title'] ?? '' }}</h3>
                     <p>{{ $w['text'] ?? '' }}</p>
                 </div>
             @endforeach
-            <div class="card y" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:18px">
-                <img src="{{ Site::img('why_us_image', 'img/site/red-mascot.png') }}" alt="Karakter Snap Fun" style="max-height:170px;width:auto;object-fit:contain">
-            </div>
+            @if(Site::bool('why_us_show_mascot'))
+                <div class="card y" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:18px">
+                    <img src="{{ Site::img('why_us_image', 'img/Pinpin-01.png') }}" alt="Karakter Snap Fun" style="max-height:170px;width:auto;object-fit:contain">
+                </div>
+            @endif
         </div>
     </div>
 </section>
