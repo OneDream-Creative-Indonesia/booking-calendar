@@ -103,3 +103,4 @@ return [
     */
     'pagination_theme' => 'tailwind',
 ];
+

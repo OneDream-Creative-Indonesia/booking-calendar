@@ -34,7 +34,16 @@ Route::prefix('gdrive')->group(function () {
 // 🧍 ROUTES: PUBLIC BOOKING PAGE
 // =====================================================
 
-Route::redirect('/', '/booking', 301);
+use App\Http\Controllers\SiteController;
+Route::get('/', [SiteController::class, 'home'])->name('site.home');
+Route::get('/tentang', [SiteController::class, 'about'])->name('site.about');
+Route::get('/produk/snap-fun-studio', [SiteController::class, 'studio'])->name('site.studio');
+Route::get('/produk/snap-fun-booth', [SiteController::class, 'booth'])->name('site.booth');
+Route::get('/produk/snap-fun-express', [SiteController::class, 'express'])->name('site.express');
+Route::get('/sirkel', [SiteController::class, 'sirkel'])->name('site.sirkel');
+Route::post('/sirkel', [SiteController::class, 'sirkelStore'])->middleware('throttle:6,1')->name('site.sirkel.store');
+Route::post('/custom-frame-register', [SiteController::class, 'customFrameStore'])->middleware('throttle:10,1')->name('site.custom-frame.store');
+Route::get('/kontak', [SiteController::class, 'contact'])->name('site.contact');
 Route::get('/booking', [BookingController::class, 'home']); // Custom frontend booking view
 Route::get('/grid', function() {
      return view('qrcode');
@@ -257,3 +266,11 @@ Route::get('/booking/success/{album_id}', function($album_id) {
 
     return view('booking-success', ['album' => $album]);
 })->name('booking.success');
+
+Route::get('/storage/{path}', function (string $path) {
+    abort_if(str_contains($path, '..'), 404);
+    $full = storage_path('app/public/' . ltrim($path, '/'));
+    abort_unless(is_file($full), 404);
+
+    return response()->file($full);
+})->where('path', '.*');

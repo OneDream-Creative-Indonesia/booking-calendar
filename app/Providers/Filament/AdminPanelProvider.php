@@ -95,6 +95,7 @@ class AdminPanelProvider extends PanelProvider
                 'Studio', 
                 'Photobooth',        
                 'Operational',
+                'Website CMS',
             ])
             ->authMiddleware([
                 Authenticate::class,
