@@ -30,7 +30,48 @@ class BookingController extends Controller
     }
     public function home()
     {
-        return view('home');
+        try {
+            \App\Support\Site::ensureSeeded();
+        } catch (\Throwable $e) {
+        }
+
+        $promos = collect();
+        try {
+            $promos = \Illuminate\Support\Facades\Cache::remember(
+                'site_promos_running',
+                180,
+                fn () => \App\Models\SitePromo::running()->get()
+            );
+        } catch (\Throwable $e) {
+            $promos = collect();
+        }
+
+        $initialPackages = collect();
+        try {
+            $rawPackages = \App\Models\Package::with(['media', 'backgrounds.media'])->orderBy('id')->get();
+            if ($rawPackages->isEmpty()) {
+                $rawPackages = \App\Support\Site::bookingPackages();
+            }
+            $initialPackages = PackageController::formatPackages($rawPackages);
+        } catch (\Throwable $e) {
+            try {
+                $initialPackages = PackageController::formatPackages(\App\Support\Site::bookingPackages());
+            } catch (\Throwable $e2) {
+                $initialPackages = collect();
+            }
+        }
+
+        $waNumber = '6285117607254';
+        try {
+            $waNumber = preg_replace('/\D+/', '', (string) \App\Support\Site::get('wa_number', '6285117607254')) ?: '6285117607254';
+        } catch (\Throwable $e) {
+        }
+
+        return view('home', [
+            'promos' => $promos,
+            'initialPackages' => $initialPackages,
+            'waNumber' => $waNumber,
+        ]);
     }
 
     public function submitBooking(Request $request)
@@ -86,13 +127,15 @@ class BookingController extends Controller
                 $basePrice = $package->price;
                 $extraPricePerPerson = (int) $package->extras_people;
                 // Harga tambahan per orang
-                $includedPeople = match ($package->id) {
-                    2 => 2, // package 2 include 2 orang
-                    default => 1 // package 1 & 3 include 1 orang
-                };
+                $includedPeople = !empty($package->included_people)
+                    ? (int) $package->included_people
+                    : match ($package->id) {
+                        2 => 2, // package 2 include 2 orang
+                        default => 1 // package 1 & 3 include 1 orang
+                    };
                 // Hitung total base price berdasarkan jumlah orang
                 $totalPrice = $basePrice;
-                if ($request->people_count > 1) {
+                if ($request->people_count > $includedPeople) {
                     $totalPrice += ($request->people_count - $includedPeople) * $extraPricePerPerson;
                 }
 
@@ -114,7 +157,7 @@ class BookingController extends Controller
                 ]);
 
                 // Validasi harga
-                if ($request->price != $finalPrice) {
+                if (abs((int) $request->price - (int) $finalPrice) > 1) {
                     return response()->json([
                         'message' => 'Harga tidak valid. Cek kembali perhitungan.',
                     ], 400);
@@ -181,11 +224,19 @@ class BookingController extends Controller
                 ], 404);
             }
 
-            $backgrounds = $package->backgrounds->map(function ($bg) {
+            $fallbacks = [
+                asset('img/group(3).png'),
+                asset('img/group(4).png'),
+                asset('img/group(2).png'),
+                asset('img/group(1).png'),
+            ];
+
+            $backgrounds = $package->backgrounds->values()->map(function ($bg, $idx) use ($fallbacks) {
+                $url = $bg->getFirstMediaUrl('image');
                 return [
                     'id' => $bg->id,
                     'name' => $bg->name,
-                    'image_url' => $bg->getFirstMediaUrl('image'),
+                    'image_url' => $url ?: $fallbacks[$idx % count($fallbacks)],
                 ];
             });
 

@@ -21,3 +21,5 @@ yarn-error.log
 /public_html/
 /snapfun.onedream.id.zip
 /storage/framework/cache/*.php
+.DS_Store
+*.DS_Store

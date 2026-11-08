@@ -101,7 +101,7 @@ class BookingResource extends Resource
                     ->required(),
                 
                 Forms\Components\Toggle::make('confirmation')
-                    ->label('Confirmed'),
+                    ->label('Izin Gunakan Foto untuk Konten'),
 
                 Forms\Components\Repeater::make('bookingAddons')
                     ->relationship()
@@ -290,6 +290,13 @@ class BookingResource extends Resource
                 TextColumn::make('total_harga_semua')
                     ->label('Total Harga')
                     ->getStateUsing(fn ($record) => 'Rp ' . number_format($record->price + $record->bookingAddons->sum('subtotal'), 0, ',', '.'))
+                    ->sortable(),
+
+                TextColumn::make('confirmation')
+                    ->label('Izin Konten')
+                    ->badge()
+                    ->formatStateUsing(fn ($state) => $state ? 'Boleh' : 'Tidak')
+                    ->color(fn ($state) => $state ? 'success' : 'gray')
                     ->sortable(),
 
                 TextColumn::make('whatsapp')->sortable()->searchable()->label('WhatsApp')->toggleable(isToggledHiddenByDefault: true),
