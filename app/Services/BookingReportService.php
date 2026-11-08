@@ -52,7 +52,7 @@ class BookingReportService
             'No', 'ID Booking', 'Tanggal', 'Waktu', 'Nama', 'WhatsApp', 'Email', 'Jenis Booking (Paket)',
             'Background', 'Jumlah Orang', 'Kode Voucher', 'Item Add-on', 'Catatan Keychain',
             'Harga Paket', 'Harga Add-on', 'Total Harga', 'DP Paket',
-            'Status', 'Konfirmasi', 'Dibuat Pada',
+            'Status', 'Izin Konten', 'Dibuat Pada',
         ]];
 
         foreach ($bookings->values() as $i => $b) {
@@ -79,7 +79,7 @@ class BookingReportService
                 (int) self::total($b),
                 (int) ($b->package?->downpayment ?? 0),
                 ucfirst((string) $b->status),
-                $b->confirmation ? 'Ya' : 'Tidak',
+                $b->confirmation ? 'Diizinkan' : 'Tidak Diizinkan',
                 optional($b->created_at)->format('Y-m-d H:i'),
             ];
         }

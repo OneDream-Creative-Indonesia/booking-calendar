@@ -139,6 +139,11 @@ class MonthlyRecap extends Page implements HasForms, HasTable
                 Tables\Columns\TextColumn::make('addon_total')->label('Harga Add-on')
                     ->state(fn (Booking $r) => BookingReportService::rupiah(BookingReportService::addonTotal($r)))
                     ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('confirmation')->label('Izin Konten')
+                    ->formatStateUsing(fn ($state) => $state ? 'Diizinkan' : 'Tidak Diizinkan')
+                    ->badge()
+                    ->color(fn ($state) => $state ? 'success' : 'gray')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('keychain_notes')->label('Catatan Keychain')->placeholder('-')->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')->label('Dibuat')->dateTime('d M Y H:i')->toggleable(isToggledHiddenByDefault: true),
             ])

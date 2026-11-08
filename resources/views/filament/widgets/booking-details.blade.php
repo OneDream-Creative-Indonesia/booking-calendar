@@ -1,17 +1,21 @@
 @php
+    $isAllowed = (bool) ($booking->confirmation ?? false);
+    $izinStatus = $isAllowed ? 'Diizinkan' : 'Tidak Diizinkan';
+
     // Menyusun format teks yang akan di-copy
     $copyText = "Booking Information\n" .
-        "Name: " . $booking->name . "\n" .
-        "Paket: " . $booking->package->title . "\n" .
-        "WhatsApp: " . $booking->whatsapp . "\n" .
-        "Background: " . $booking->background->name . "\n" .
-        "Jumlah Orang: " . $booking->people_count . "\n" .
-        "Total Harga: " . $booking->price . "\n" .
-        "Voucher: " . ($booking->voucher->code_voucher ?? '-') . "\n\n" .
+        "Name: " . ($booking->name ?? '-') . "\n" .
+        "Paket: " . ($booking->package?->title ?? '-') . "\n" .
+        "WhatsApp: " . ($booking->whatsapp ?? '-') . "\n" .
+        "Background: " . ($booking->background?->name ?? '-') . "\n" .
+        "Jumlah Orang: " . ($booking->people_count ?? 1) . "\n" .
+        "Total Harga: " . ($booking->price ?? 0) . "\n" .
+        "Voucher: " . ($booking->voucher->code_voucher ?? '-') . "\n" .
+        "Izin Konten: " . $izinStatus . "\n\n" .
         "Schedule\n" .
-        "Date: " . $booking->date . "\n" .
-        "Time: " . $booking->time . "\n" .
-        "Status: " . $booking->status;
+        "Date: " . ($booking->date ?? '-') . "\n" .
+        "Time: " . ($booking->time ?? '-') . "\n" .
+        "Status: " . ($booking->status ?? '-');
 @endphp
 
 <div x-data="{ 
@@ -27,12 +31,24 @@
         <x-filament::card>
             <h2 class="text-lg font-semibold">Booking Information</h2>
             <p><strong>Name:</strong> {{ $booking->name }}</p>
-            <p><strong>Paket:</strong> {{ $booking->package->title }}</p>
+            <p><strong>Paket:</strong> {{ $booking->package?->title ?? '-' }}</p>
             <p><strong>WhatsApp:</strong> {{ $booking->whatsapp }}</p>
-            <p><strong>Background:</strong> {{ $booking->background->name }}</p>
+            <p><strong>Background:</strong> {{ $booking->background?->name ?? '-' }}</p>
             <p><strong>Jumlah Orang:</strong> {{ $booking->people_count }}</p>
             <p><strong>Total Harga:</strong> {{ $booking->price }}</p>
             <p><strong>Voucher:</strong> {{ $booking->voucher->code_voucher ?? '-' }}</p>
+            <p class="flex items-center gap-2">
+                <strong>Izin Konten:</strong>
+                @if($isAllowed)
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                        Diizinkan
+                    </span>
+                @else
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                        Tidak Diizinkan
+                    </span>
+                @endif
+            </p>
         </x-filament::card>
 
         <x-filament::card>
