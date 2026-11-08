@@ -716,19 +716,25 @@
 
       const card = document.createElement('div');
       card.className = 'rise press';
-      card.style.cssText = `animation-delay:${delay}s;background:#fff;border-radius:22px;padding:10px;box-shadow:0 6px 18px rgba(23,89,202,.08);cursor:pointer`;
+      card.style.cssText = `animation-delay:${delay}s;background:#fff;border-radius:20px;padding:12px;box-shadow:0 6px 18px rgba(23,89,202,.08);cursor:pointer;display:flex;align-items:center;gap:14px`;
       card.onclick = () => openPackageDetail(pkg.id);
 
       card.innerHTML = `
-        <div style="height:112px;border-radius:16px;background:#D7E0F2 url('${imgUrl}') center/cover no-repeat;margin-bottom:10px"></div>
-        <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:8px;padding:2px 6px 4px">
-          <div style="min-width:0">
-            <div style="font-size:18px;font-weight:700;color:#111;line-height:1.15">${escapeHtml(pkg.title)}</div>
-            <div style="font-size:11px;color:#666;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(shortDesc)}</div>
+        <img src="${imgUrl}" alt="${escapeHtml(pkg.title)}" loading="lazy" style="width:100px;height:100px;border-radius:16px;object-fit:cover;flex-shrink:0;background:#D7E0F2;display:block">
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;justify-content:space-between;min-height:100px;padding:2px 0">
+          <div>
+            <div style="font-size:16px;font-weight:700;color:#111;line-height:1.25;margin-bottom:4px">${escapeHtml(pkg.title)}</div>
+            <div style="font-size:11px;color:#666;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${escapeHtml(shortDesc)}</div>
           </div>
-          <div style="text-align:right;flex-shrink:0">
-            <div style="font-size:17px;font-weight:700;color:#CE004F">${formatRupiah(pkg.price)}</div>
-            <div style="font-size:10px;color:#777">/sesi</div>
+          <div style="display:flex;align-items:baseline;justify-content:space-between;margin-top:8px;gap:8px">
+            <div>
+              <span style="font-size:16px;font-weight:800;color:#CE004F">${formatRupiah(pkg.price)}</span>
+              <span style="font-size:10px;color:#777">/sesi</span>
+            </div>
+            <span style="font-size:11px;font-weight:700;color:#1759CA;display:inline-flex;align-items:center;gap:3px;flex-shrink:0">
+              Pilih
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+            </span>
           </div>
         </div>
       `;
