@@ -27,7 +27,7 @@
             @if(Site::get('express_badge'))
                 <span class="badge">{{ Site::get('express_badge') }}</span>
             @endif
-            <img src="{{ Site::img('express_image', 'img/Pinpin-05.png') }}" alt="{{ Site::get('express_title') }}">
+            <img src="{{ Site::img('express_image', 'img/Pinpin-05.png') }}" alt="{{ Site::get('express_title') }}" width="380" height="380" fetchpriority="high" decoding="async">
         </div>
     </div>
 </section>

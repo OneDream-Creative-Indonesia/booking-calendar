@@ -25,7 +25,7 @@
         </div>
         <div class="hero-art">
             <div class="blob"></div>
-            <img src="{{ Site::img('studio_hero_image', 'img/Pinpin-01.png') }}" alt="{{ Site::get('studio_title') }}">
+            <img src="{{ Site::img('studio_hero_image', 'img/Pinpin-01.png') }}" alt="{{ Site::get('studio_title') }}" width="380" height="380" fetchpriority="high" decoding="async">
         </div>
     </div>
 </section>
@@ -125,7 +125,7 @@
                 @endphp
                 <div class="card" style="padding:16px;text-align:center;display:flex;flex-direction:column">
                     @if($bgMediaUrl)
-                        <img class="bg-thumb" src="{{ $bgMediaUrl }}" alt="{{ $bg->name }}" loading="lazy">
+                        <img class="bg-thumb" src="{{ $bgMediaUrl }}" alt="{{ $bg->name }}" width="300" height="400" loading="lazy" decoding="async">
                     @else
                         <div class="bg-thumb" style="background:{{ $fallbackColor }}">
                             {{ $bg->name }}
@@ -267,7 +267,7 @@
                 </div>
                 <div>
                     <div class="cf-preview">
-                        <img src="{{ Site::img('custom_frame_image', 'img/site/custom-frames.png') }}" alt="Custom Frame Snap Fun Studio" loading="lazy">
+                        <img src="{{ Site::img('custom_frame_image', 'img/site/custom-frames.png') }}" alt="Custom Frame Snap Fun Studio" width="680" height="461" loading="lazy" decoding="async">
                     </div>
                 </div>
             </div>
@@ -290,7 +290,7 @@
                 <div class="gallery">
                     @foreach($gallery as $g)
                         <div class="gallery-item">
-                            <img src="{{ Site::url($g->image) }}" alt="Galeri Snap Fun Studio" loading="lazy">
+                            <img src="{{ Site::url($g->image) }}" alt="Galeri Snap Fun Studio" width="400" height="300" loading="lazy" decoding="async">
                         </div>
                     @endforeach
                 </div>

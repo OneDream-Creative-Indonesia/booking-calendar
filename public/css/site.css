@@ -92,7 +92,13 @@ header.nav {
   justify-content: space-between;
   height: 76px;
 }
-.nav-logo img { height: 54px; width: auto; object-fit: contain; }
+.nav-logo img { height: 54px; width: 54px; object-fit: contain; aspect-ratio: 1; }
+.fa-solid, .fa-brands, .fa-regular {
+  display: inline-block;
+  min-width: 1em;
+  text-align: center;
+  font-display: swap;
+}
 .menu { display: flex; align-items: center; gap: 6px; list-style: none; margin: 0; padding: 0; }
 .menu > li { position: relative; }
 .menu a.link {
@@ -166,7 +172,7 @@ header.nav {
 .hero h1 { font-size: clamp(2.4rem, 5.4vw, 4.1rem); color: var(--blue); }
 .hero .lead { margin: 18px 0 28px; }
 .cta { display: flex; flex-wrap: wrap; gap: 14px; }
-.hero-art { position: relative; display: grid; place-items: center; }
+.hero-art { position: relative; display: grid; place-items: center; min-height: 320px; }
 .hero-art .blob {
   position: absolute;
   width: 86%;
@@ -179,6 +185,9 @@ header.nav {
 .hero-art img {
   position: relative;
   width: min(380px, 82%);
+  height: auto;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
   animation: float 4s ease-in-out infinite;
   filter: drop-shadow(0 14px 0 rgba(1, 1, 61, 0.15));
 }
@@ -458,6 +467,8 @@ header.nav {
 .cf-preview img {
   width: 100%;
   height: auto;
+  aspect-ratio: 680 / 461;
+  object-fit: cover;
   border-radius: 14px;
 }
 @media (max-width: 768px) {
@@ -684,6 +695,7 @@ header.nav {
   min-height: 130px;
 }
 .event-card img {
+  height: 76px;
   max-height: 76px;
   width: auto;
   max-width: 90%;
@@ -777,6 +789,8 @@ header.nav {
 }
 .booth-banner img {
   width: 100%;
+  height: auto;
+  aspect-ratio: 1400 / 415;
   max-height: 360px;
   object-fit: cover;
 }

@@ -22,7 +22,7 @@
             </ul>
             <div class="hero-art" style="margin-top:32px;max-width:300px">
                 <div class="blob"></div>
-                <img src="{{ Site::img('sirkel_image', 'img/Pinpin-01.png') }}" alt="Sirkel Snap Fun">
+                <img src="{{ Site::img('sirkel_image', 'img/Pinpin-01.png') }}" alt="Sirkel Snap Fun" width="300" height="300" loading="lazy" decoding="async">
             </div>
         </div>
         <div class="card">

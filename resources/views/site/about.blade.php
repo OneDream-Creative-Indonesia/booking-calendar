@@ -21,7 +21,7 @@
         </div>
         <div class="hero-art">
             <div class="blob"></div>
-            <img src="{{ Site::img('about_image', 'img/Pinpin-05.png') }}" alt="Pinpin">
+            <img src="{{ Site::img('about_image', 'img/Pinpin-05.png') }}" alt="Pinpin" width="380" height="380" fetchpriority="high" decoding="async">
         </div>
     </div>
 </section>

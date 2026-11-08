@@ -20,7 +20,7 @@
         </div>
         <div class="hero-art">
             <div class="blob"></div>
-            <img src="{{ Site::img('booth_hero_image', 'img/Pinpin-01.png') }}" alt="{{ Site::get('booth_title') }}">
+            <img src="{{ Site::img('booth_hero_image', 'img/Pinpin-01.png') }}" alt="{{ Site::get('booth_title') }}" width="380" height="380" fetchpriority="high" decoding="async">
         </div>
     </div>
 </section>
@@ -57,7 +57,7 @@
             </div>
         </div>
         <div>
-            <img src="{{ Site::img('booth_frames_image', 'img/site/custom-frames.png') }}" alt="Customizable Frame Snap Fun" style="border-radius:18px;border:3px solid var(--blue-d);box-shadow:0 8px 0 var(--blue-d);background:#fff;padding:12px" loading="lazy">
+            <img src="{{ Site::img('booth_frames_image', 'img/site/custom-frames.png') }}" alt="Customizable Frame Snap Fun" width="680" height="461" style="border-radius:18px;border:3px solid var(--blue-d);box-shadow:0 8px 0 var(--blue-d);background:#fff;padding:12px;height:auto" loading="lazy" decoding="async">
         </div>
     </div>
 </section>
@@ -71,7 +71,7 @@
         </div>
         <div class="grid g4" style="margin-top:34px;align-items:stretch">
             <div class="card" style="display:flex;align-items:center;justify-content:center;padding:16px;background:#fff">
-                <img src="{{ Site::img('booth_systems_image', 'img/site/pinpin-blush.png') }}" alt="Pinpin" style="max-height:210px;width:auto;object-fit:contain" loading="lazy">
+                <img src="{{ Site::img('booth_systems_image', 'img/site/pinpin-blush.png') }}" alt="Pinpin" width="166" height="210" style="max-height:210px;width:auto;object-fit:contain" loading="lazy" decoding="async">
             </div>
             @foreach(Site::get('booth_systems') as $s)
                 <div class="card y" style="display:flex;flex-direction:column;justify-content:center">
@@ -91,7 +91,7 @@
         </div>
 
         <div class="booth-banner">
-            <img src="{{ Site::img('booth_req_banner', 'img/site/booth-banner.jpg') }}" alt="Pop Up Self Photo Booth Snap Fun" loading="lazy">
+            <img src="{{ Site::img('booth_req_banner', 'img/site/booth-banner.jpg') }}" alt="Pop Up Self Photo Booth Snap Fun" width="1400" height="415" loading="lazy" decoding="async">
         </div>
 
         <div class="grid g3">
@@ -112,7 +112,7 @@
                 @foreach(Site::get('events') as $e)
                     <div class="event-card">
                         @if(!empty($e['logo']))
-                            <img src="{{ Site::url($e['logo']) }}" alt="{{ $e['name'] ?? '' }}" loading="lazy">
+                            <img src="{{ Site::url($e['logo']) }}" alt="{{ $e['name'] ?? '' }}" width="180" height="76" loading="lazy" decoding="async">
                         @endif
                         <span>{{ $e['name'] ?? '' }}</span>
                     </div>
@@ -134,7 +134,7 @@
                 <div class="gallery">
                     @foreach($gallery as $g)
                         <div class="gallery-item">
-                            <img src="{{ Site::url($g->image) }}" alt="Dokumentasi Event Snap Fun Booth" loading="lazy">
+                            <img src="{{ Site::url($g->image) }}" alt="Dokumentasi Event Snap Fun Booth" width="350" height="230" loading="lazy" decoding="async">
                         </div>
                     @endforeach
                 </div>

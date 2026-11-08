@@ -7,9 +7,11 @@
     <title>Booking Studio Foto - Snap Fun</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.14/index.global.min.js'></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css"></noscript>
+    <script defer src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.14/index.global.min.js'></script>
     <!-- Favicon dasar -->
     <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon-16x16.png">
@@ -361,10 +363,10 @@
                     <div class="package-summary">
                         <h2 id="summary-title">Snap Photobox</h2>   
                         <div class="character-art-desktop">
-                            <img src="{{ asset('img/Pinpin-05.png') }}" alt="" style="height:300px;">
+                            <img src="{{ asset('img/Pinpin-05.png') }}" alt="" width="300" height="300" loading="lazy" decoding="async" style="height:300px;width:auto">
                              </div>
                         <div class="character-art-mobile">
-                            <img src="{{ asset('img/Pinpin-05.png') }}" alt="" style="height:200px;">
+                            <img src="{{ asset('img/Pinpin-05.png') }}" alt="" width="200" height="200" loading="lazy" decoding="async" style="height:200px;width:auto">
                         </div>
                         <ul id="package-detail-list"></ul>
                     </div>
@@ -491,7 +493,7 @@
 
             <section id="page-sukses" class="page">
                 <div class="success-container">
-                    <div class="success-icon"><img src="{{ asset('img/Pinpin-01.png') }}" alt="" style="height:170px"></div>
+                    <div class="success-icon"><img src="{{ asset('img/Pinpin-01.png') }}" alt="" width="170" height="170" loading="lazy" decoding="async" style="height:170px;width:auto"></div>
                     <h1>Booking kamu udah masuk!</h1>
                     <h4 id="totalPriceQRIS" style="margin-top: 1rem; text-align: center;"></h4>
                     <h4 id="dpPriceQRIS" style="margin-top: 0.5rem; text-align: center; color: #555;"></h4>

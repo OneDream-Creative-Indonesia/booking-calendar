@@ -1,5 +1,8 @@
 @extends('site.layout')
 @php use App\Support\Site; @endphp
+@section('preload')
+    <link rel="preload" as="image" href="{{ Site::img('hero_image', 'img/Pinpin-01.png') }}" fetchpriority="high">
+@endsection
 @section('content')
 <section class="hero">
     <div class="container hero-grid">
@@ -33,7 +36,7 @@
             @if(Site::get('hero_badge'))
                 <span class="badge">{{ Site::get('hero_badge') }}</span>
             @endif
-            <img src="{{ Site::img('hero_image', 'img/Pinpin-01.png') }}" alt="Pinpin, maskot Snap Fun">
+            <img src="{{ Site::img('hero_image', 'img/Pinpin-01.png') }}" alt="Pinpin, maskot Snap Fun" width="380" height="380" fetchpriority="high" decoding="async">
         </div>
     </div>
     <div class="wave"><svg viewBox="0 0 1200 46" preserveAspectRatio="none"><path d="M0 46V20C150 0 300 40 450 24s300-30 450-8 200 18 300 4v26z" fill="#fff"/></svg></div>
@@ -207,7 +210,7 @@
                 </div>
                 <div>
                     <div class="cf-preview">
-                        <img src="{{ Site::img('custom_frame_image', 'img/site/custom-frames.png') }}" alt="Custom Frame Snap Fun Studio" loading="lazy">
+                        <img src="{{ Site::img('custom_frame_image', 'img/site/custom-frames.png') }}" alt="Custom Frame Snap Fun Studio" width="680" height="461" loading="lazy" decoding="async">
                     </div>
                 </div>
             </div>
@@ -289,7 +292,7 @@
             @endforeach
             @if(Site::bool('why_us_show_mascot'))
                 <div class="card y" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:18px">
-                    <img src="{{ Site::img('why_us_image', 'img/Pinpin-01.png') }}" alt="Karakter Snap Fun" style="max-height:170px;width:auto;object-fit:contain">
+                    <img src="{{ Site::img('why_us_image', 'img/Pinpin-01.png') }}" alt="Karakter Snap Fun" width="170" height="170" loading="lazy" decoding="async" style="max-height:170px;width:auto;object-fit:contain">
                 </div>
             @endif
         </div>
@@ -304,7 +307,7 @@
             @foreach(Site::get('events') as $e)
                 <div class="event-card">
                     @if(!empty($e['logo']))
-                        <img src="{{ Site::url($e['logo']) }}" alt="{{ $e['name'] ?? '' }}" loading="lazy">
+                        <img src="{{ Site::url($e['logo']) }}" alt="{{ $e['name'] ?? '' }}" width="180" height="76" loading="lazy" decoding="async">
                     @endif
                     <span>{{ $e['name'] ?? '' }}</span>
                 </div>

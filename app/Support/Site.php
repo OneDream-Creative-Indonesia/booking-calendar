@@ -14,6 +14,7 @@ use App\Models\SitePromo;
 use App\Models\SiteSetting;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 
@@ -435,49 +436,51 @@ class Site
      */
     public static function bookingPackages(): Collection
     {
-        try {
-            if (Schema::hasTable('packages')) {
-                $pkgs = Package::with('backgrounds')->orderBy('id')->get();
-                if ($pkgs->isNotEmpty()) {
-                    return $pkgs;
+        return Cache::remember('site_booking_packages', 180, function () {
+            try {
+                if (Schema::hasTable('packages')) {
+                    $pkgs = Package::with('backgrounds')->orderBy('id')->get();
+                    if ($pkgs->isNotEmpty()) {
+                        return $pkgs;
+                    }
                 }
+            } catch (\Throwable $e) {
             }
-        } catch (\Throwable $e) {
-        }
 
-        // Fallback selaras dengan struktur Package di website booking jika tabel kosong
-        return collect([
-            (object) [
-                'id' => 1,
-                'title' => 'Self Photo Studio',
-                'price' => 50000,
-                'duration_minutes' => 15,
-                'downpayment' => 25000,
-                'extras_people' => 15000,
-                'description' => "Maksimal 2 orang (bisa tambah orang)\nGratis cetak foto ukuran 4R / Strip\nSemua softfile digital via Google Drive",
-                'backgrounds' => collect([(object) ['name' => 'Tirai Merah'], (object) ['name' => 'Tirai Biru'], (object) ['name' => 'Tirai Abu']]),
-            ],
-            (object) [
-                'id' => 2,
-                'title' => 'Group / Bestie Package',
-                'price' => 85000,
-                'duration_minutes' => 25,
-                'downpayment' => 40000,
-                'extras_people' => 15000,
-                'description' => "Cocok untuk grup & sahabat\nTermasuk cetak foto + pilihan Photo Grid\nSemua softfile original tanpa batas jepretan",
-                'backgrounds' => collect([(object) ['name' => 'American School'], (object) ['name' => 'Tirai Merah'], (object) ['name' => 'Tirai Biru']]),
-            ],
-            (object) [
-                'id' => 3,
-                'title' => 'Photobox & Keychain Package',
-                'price' => 65000,
-                'duration_minutes' => 15,
-                'downpayment' => 30000,
-                'extras_people' => 15000,
-                'description' => "Bebas pilih layout frame & Custom Frame\nTermasuk cetak Photostrip + Keychain Akrilik\nSemua softfile foto & GIF digital",
-                'backgrounds' => collect([(object) ['name' => 'Tirai Biru'], (object) ['name' => 'Tirai Merah']]),
-            ],
-        ]);
+            // Fallback selaras dengan struktur Package di website booking jika tabel kosong
+            return collect([
+                (object) [
+                    'id' => 1,
+                    'title' => 'Self Photo Studio',
+                    'price' => 50000,
+                    'duration_minutes' => 15,
+                    'downpayment' => 25000,
+                    'extras_people' => 15000,
+                    'description' => "Maksimal 2 orang (bisa tambah orang)\nGratis cetak foto ukuran 4R / Strip\nSemua softfile digital via Google Drive",
+                    'backgrounds' => collect([(object) ['name' => 'Tirai Merah'], (object) ['name' => 'Tirai Biru'], (object) ['name' => 'Tirai Abu']]),
+                ],
+                (object) [
+                    'id' => 2,
+                    'title' => 'Group / Bestie Package',
+                    'price' => 85000,
+                    'duration_minutes' => 25,
+                    'downpayment' => 40000,
+                    'extras_people' => 15000,
+                    'description' => "Cocok untuk grup & sahabat\nTermasuk cetak foto + pilihan Photo Grid\nSemua softfile original tanpa batas jepretan",
+                    'backgrounds' => collect([(object) ['name' => 'American School'], (object) ['name' => 'Tirai Merah'], (object) ['name' => 'Tirai Biru']]),
+                ],
+                (object) [
+                    'id' => 3,
+                    'title' => 'Photobox & Keychain Package',
+                    'price' => 65000,
+                    'duration_minutes' => 15,
+                    'downpayment' => 30000,
+                    'extras_people' => 15000,
+                    'description' => "Bebas pilih layout frame & Custom Frame\nTermasuk cetak Photostrip + Keychain Akrilik\nSemua softfile foto & GIF digital",
+                    'backgrounds' => collect([(object) ['name' => 'Tirai Biru'], (object) ['name' => 'Tirai Merah']]),
+                ],
+            ]);
+        });
     }
 
     /**
@@ -485,22 +488,24 @@ class Site
      */
     public static function bookingBackgrounds(): Collection
     {
-        try {
-            if (Schema::hasTable('backgrounds')) {
-                $bgs = Background::with(['media', 'packages'])->orderBy('id')->get();
-                if ($bgs->isNotEmpty()) {
-                    return $bgs;
+        return Cache::remember('site_booking_backgrounds', 180, function () {
+            try {
+                if (Schema::hasTable('backgrounds')) {
+                    $bgs = Background::with(['media', 'packages'])->orderBy('id')->get();
+                    if ($bgs->isNotEmpty()) {
+                        return $bgs;
+                    }
                 }
+            } catch (\Throwable $e) {
             }
-        } catch (\Throwable $e) {
-        }
 
-        return collect([
-            (object) ['id' => 1, 'name' => 'Tirai Merah', 'color' => '#CE004F', 'image_url' => null, 'packages' => collect([(object) ['title' => 'Self Photo Studio']])],
-            (object) ['id' => 2, 'name' => 'Tirai Abu', 'color' => '#64748b', 'image_url' => null, 'packages' => collect([(object) ['title' => 'Self Photo Studio']])],
-            (object) ['id' => 3, 'name' => 'Tirai Biru', 'color' => '#1759CA', 'image_url' => null, 'packages' => collect([(object) ['title' => 'Self Photo Studio']])],
-            (object) ['id' => 4, 'name' => 'American School', 'color' => '#F6A820', 'image_url' => null, 'packages' => collect([(object) ['title' => 'Group / Bestie Package']])],
-        ]);
+            return collect([
+                (object) ['id' => 1, 'name' => 'Tirai Merah', 'color' => '#CE004F', 'image_url' => null, 'packages' => collect([(object) ['title' => 'Self Photo Studio']])],
+                (object) ['id' => 2, 'name' => 'Tirai Abu', 'color' => '#64748b', 'image_url' => null, 'packages' => collect([(object) ['title' => 'Self Photo Studio']])],
+                (object) ['id' => 3, 'name' => 'Tirai Biru', 'color' => '#1759CA', 'image_url' => null, 'packages' => collect([(object) ['title' => 'Self Photo Studio']])],
+                (object) ['id' => 4, 'name' => 'American School', 'color' => '#F6A820', 'image_url' => null, 'packages' => collect([(object) ['title' => 'Group / Bestie Package']])],
+            ]);
+        });
     }
 
     /**
@@ -508,14 +513,16 @@ class Site
      */
     public static function bookingAddons(): Collection
     {
-        try {
-            if (Schema::hasTable('addons')) {
-                return Addon::orderBy('id')->get();
+        return Cache::remember('site_booking_addons', 180, function () {
+            try {
+                if (Schema::hasTable('addons')) {
+                    return Addon::orderBy('id')->get();
+                }
+            } catch (\Throwable $e) {
             }
-        } catch (\Throwable $e) {
-        }
 
-        return collect();
+            return collect();
+        });
     }
 
     /**
@@ -523,14 +530,16 @@ class Site
      */
     public static function bookingPhotoGrids(): Collection
     {
-        try {
-            if (Schema::hasTable('photo_grids')) {
-                return PhotoGrid::orderBy('id')->get();
+        return Cache::remember('site_booking_photo_grids', 180, function () {
+            try {
+                if (Schema::hasTable('photo_grids')) {
+                    return PhotoGrid::orderBy('id')->get();
+                }
+            } catch (\Throwable $e) {
             }
-        } catch (\Throwable $e) {
-        }
 
-        return collect();
+            return collect();
+        });
     }
 
     /**
@@ -538,14 +547,16 @@ class Site
      */
     public static function bookingKeychains(): Collection
     {
-        try {
-            if (Schema::hasTable('keychains')) {
-                return Keychain::orderBy('id')->get();
+        return Cache::remember('site_booking_keychains', 180, function () {
+            try {
+                if (Schema::hasTable('keychains')) {
+                    return Keychain::orderBy('id')->get();
+                }
+            } catch (\Throwable $e) {
             }
-        } catch (\Throwable $e) {
-        }
 
-        return collect();
+            return collect();
+        });
     }
 
     /**
@@ -553,14 +564,16 @@ class Site
      */
     public static function bookingOperationalHours(): Collection
     {
-        try {
-            if (Schema::hasTable('operational_hours')) {
-                return OperationalHour::orderBy('id')->get();
+        return Cache::remember('site_booking_operational_hours', 180, function () {
+            try {
+                if (Schema::hasTable('operational_hours')) {
+                    return OperationalHour::orderBy('id')->get();
+                }
+            } catch (\Throwable $e) {
             }
-        } catch (\Throwable $e) {
-        }
 
-        return collect();
+            return collect();
+        });
     }
 
     public static function defaultFaqs(): array
@@ -607,13 +620,15 @@ class Site
     {
         self::ensureSeeded();
 
-        $rows = [];
-        try {
-            $rows = SiteFaq::where('is_active', true)->orderBy('sort')->orderBy('id')->get(['question', 'answer'])->toArray();
-        } catch (\Throwable $e) {
-        }
+        return Cache::remember('site_faqs_active', 300, function () {
+            $rows = [];
+            try {
+                $rows = SiteFaq::where('is_active', true)->orderBy('sort')->orderBy('id')->get(['question', 'answer'])->toArray();
+            } catch (\Throwable $e) {
+            }
 
-        return $rows ?: self::defaultFaqs();
+            return $rows ?: self::defaultFaqs();
+        });
     }
 
     /**
@@ -739,6 +754,10 @@ class Site
             return;
         }
         $checked = true;
+
+        if (! $force && SiteSetting::get('_cms_seeded_v4') === '1') {
+            return;
+        }
 
         self::ensureTablesExist();
         self::syncDefaultAssetsToPublicDisk();

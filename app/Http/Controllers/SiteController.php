@@ -7,6 +7,7 @@ use App\Models\SiteGalleryItem;
 use App\Models\SitePromo;
 use App\Support\Site;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
 
 class SiteController extends Controller
@@ -16,7 +17,7 @@ class SiteController extends Controller
         Site::ensureSeeded();
 
         return view('site.home', [
-            'promos' => $this->safe(fn () => SitePromo::running()->get(), collect()),
+            'promos' => $this->safe(fn () => Cache::remember('site_promos_running', 180, fn () => SitePromo::running()->get()), collect()),
             'packages' => Site::bookingPackages(),
             'operationalHours' => Site::bookingOperationalHours(),
         ]);
@@ -135,18 +136,20 @@ class SiteController extends Controller
     protected function gallery(string $group)
     {
         return $this->safe(function () use ($group) {
-            if (! Schema::hasTable('site_gallery_items')) {
-                return collect(Site::defaultGalleryItems())
-                    ->where('group', $group)
-                    ->map(fn ($item) => (object) $item)
-                    ->values();
-            }
+            return Cache::remember('site_gallery_' . $group, 300, function () use ($group) {
+                if (! Schema::hasTable('site_gallery_items')) {
+                    return collect(Site::defaultGalleryItems())
+                        ->where('group', $group)
+                        ->map(fn ($item) => (object) $item)
+                        ->values();
+                }
 
-            return SiteGalleryItem::where('group', $group)
-                ->where('is_active', true)
-                ->orderBy('sort')
-                ->orderBy('id')
-                ->get();
+                return SiteGalleryItem::where('group', $group)
+                    ->where('is_active', true)
+                    ->orderBy('sort')
+                    ->orderBy('id')
+                    ->get();
+            });
         }, collect(Site::defaultGalleryItems())->where('group', $group)->map(fn ($item) => (object) $item)->values());
     }
 

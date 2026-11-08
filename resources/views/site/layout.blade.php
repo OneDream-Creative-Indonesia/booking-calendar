@@ -13,16 +13,19 @@
     <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Righteous&family=Sniglet:wght@400;800&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <link rel="stylesheet" href="{{ asset('css/site.css') }}?v=4">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    @yield('preload')
+    <link href="https://fonts.googleapis.com/css2?family=Sniglet:wght@400;800&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/site.css') }}?v=5">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"></noscript>
 </head>
 <body>
 @php $is = fn (...$r) => request()->routeIs(...$r) ? 'active' : ''; @endphp
 <header class="nav">
     <div class="container nav-in">
         <a href="{{ route('site.home') }}" class="nav-logo">
-            <img src="{{ Site::img('nav_logo', 'img/logo/Logo Snapfun-01.png') }}" alt="{{ Site::get('site_name') }}">
+            <img src="{{ Site::img('nav_logo', 'img/logo/Logo Snapfun-01.png') }}" alt="{{ Site::get('site_name') }}" width="54" height="54" fetchpriority="high" decoding="async">
         </a>
         <button class="burger" aria-label="Menu" onclick="document.getElementById('menu').classList.toggle('open')">
             <i class="fa-solid fa-bars"></i>
@@ -59,7 +62,7 @@
     <div class="container">
         <div class="fgrid">
             <div>
-                <img src="{{ Site::img('footer_logo', 'img/logo/Logo Snapfun-02.png') }}" alt="{{ Site::get('site_name') }}" style="height:68px;margin-bottom:12px">
+                <img src="{{ Site::img('footer_logo', 'img/logo/Logo Snapfun-02.png') }}" alt="{{ Site::get('site_name') }}" width="68" height="68" loading="lazy" decoding="async" style="height:68px;width:auto;margin-bottom:12px">
                 <p>{{ Site::get('footer_tagline') }}@if(Site::get('footer_subtext'))<br><small>{{ Site::get('footer_subtext') }}</small>@endif</p>
             </div>
             <div>

@@ -94,7 +94,7 @@
             </div>
             <div class="hero-art">
                 <div class="blob"></div>
-                <img src="{{ Site::img('contact_image', 'img/Pinpin-01.png') }}" alt="Pinpin">
+                <img src="{{ Site::img('contact_image', 'img/Pinpin-01.png') }}" alt="Pinpin" width="380" height="380" loading="lazy" decoding="async">
             </div>
         </div>
     </div>
