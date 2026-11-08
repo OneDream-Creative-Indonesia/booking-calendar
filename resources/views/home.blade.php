@@ -48,6 +48,23 @@
   .detail-sheet-enter{animation:detailSheetRise .55s cubic-bezier(.22,1,.36,1) both}
   .bg-pop-enter{animation:bgPopSlow .55s cubic-bezier(.22,1,.36,1) both}
 
+  /* Fixed Bottom Action Bar */
+  .bottom-bar-fixed {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 440px;
+    background: #fff;
+    border-radius: 24px 24px 0 0;
+    padding: 14px 20px calc(14px + env(safe-area-inset-bottom, 0px));
+    box-shadow: 0 -6px 20px rgba(23,89,202,.12);
+    border-top: 1px solid #EEF2FA;
+    z-index: 50;
+    box-sizing: border-box;
+  }
+
   .press{transition:transform .2s,box-shadow .2s}
   .press:hover{transform:translateY(-3px)}
   .press:active,button:active{transform:scale(.97)}
@@ -185,7 +202,7 @@
     </div>
 
     <!-- CONTENT SHEET -->
-    <div id="detail-pkg-sheet" class="detail-sheet-enter" style="position:relative;margin-top:-28px;background:#fff;border-radius:28px 28px 0 0;padding:22px 20px 130px;flex:1;box-shadow:0 -4px 20px rgba(23,89,202,.06)">
+    <div id="detail-pkg-sheet" class="detail-sheet-enter" style="position:relative;margin-top:-28px;background:#fff;border-radius:28px 28px 0 0;padding:22px 20px 120px;flex:1;box-shadow:0 -4px 20px rgba(23,89,202,.06)">
       <h1 id="detail-pkg-title" style="font-size:24px;font-weight:700;letter-spacing:-.02em;margin:0 0 14px">-</h1>
 
       <div id="detail-pkg-attributes" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px">
@@ -198,8 +215,8 @@
       </ul>
     </div>
 
-    <!-- STICKY BOTTOM BAR -->
-    <div style="position:sticky;bottom:0;background:#fff;border-radius:24px 24px 0 0;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 -6px 18px rgba(23,89,202,.10);border-top:1px solid #EEF2FA;z-index:20">
+    <!-- FIXED BOTTOM BAR -->
+    <div class="bottom-bar-fixed" style="display:flex;align-items:center;justify-content:space-between;gap:12px">
       <div>
         <div style="font-size:11px;color:#666">Harga</div>
         <div id="detail-pkg-price" style="font-size:20px;font-weight:800;color:#CE004F">Rp0</div>
@@ -215,7 +232,7 @@
        SCREEN 2: PILIH BACKGROUND (Langkah 2 dari 4)
        ===================================================================== -->
   <section id="screen-2" class="screen">
-    <div style="padding:16px 20px 130px;flex:1">
+    <div style="padding:16px 20px 120px;flex:1">
       <!-- HEADER + PROGRESS -->
       <div style="margin-bottom:16px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
@@ -241,8 +258,8 @@
       </div>
     </div>
 
-    <!-- STICKY BOTTOM BAR -->
-    <div style="position:sticky;bottom:0;background:#fff;border-radius:24px 24px 0 0;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 -6px 18px rgba(23,89,202,.10);z-index:20">
+    <!-- FIXED BOTTOM BAR -->
+    <div class="bottom-bar-fixed" style="display:flex;align-items:center;justify-content:space-between;gap:12px">
       <div style="min-width:0">
         <div id="step2-pkg-name" style="font-size:12px;font-weight:700;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">-</div>
         <div id="step2-pkg-price" style="font-size:18px;font-weight:800;color:#CE004F">Rp0</div>
@@ -258,7 +275,7 @@
        SCREEN 3: PILIH TANGGAL & WAKTU (Langkah 3 dari 4)
        ===================================================================== -->
   <section id="screen-3" class="screen">
-    <div style="padding:16px 20px 130px;flex:1">
+    <div style="padding:16px 20px 120px;flex:1">
       <!-- HEADER + PROGRESS -->
       <div style="margin-bottom:16px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
@@ -336,8 +353,8 @@
       </div>
     </div>
 
-    <!-- STICKY BOTTOM BAR -->
-    <div style="position:sticky;bottom:0;background:#fff;border-radius:24px 24px 0 0;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 -6px 18px rgba(23,89,202,.10);z-index:20">
+    <!-- FIXED BOTTOM BAR -->
+    <div class="bottom-bar-fixed" style="display:flex;align-items:center;justify-content:space-between;gap:12px">
       <div style="min-width:0">
         <div id="step3-schedule-summary" style="font-size:12px;font-weight:700;color:#111">Pilih tanggal &amp; jam</div>
         <div id="step3-pkg-price" style="font-size:18px;font-weight:800;color:#CE004F">Rp0</div>
@@ -353,7 +370,7 @@
        SCREEN 4: KONFIRMASI BOOKING KAMU (Langkah 4 dari 4)
        ===================================================================== -->
   <section id="screen-4" class="screen">
-    <div style="padding:16px 20px 235px;flex:1">
+    <div style="padding:16px 20px 250px;flex:1">
       <!-- HEADER + PROGRESS -->
       <div style="margin-bottom:14px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
@@ -480,8 +497,8 @@
       </div>
     </div>
 
-    <!-- STICKY BOTTOM PRICE BREAKDOWN & SUBMIT -->
-    <div style="position:sticky;bottom:0;background:#fff;border-radius:24px 24px 0 0;padding:14px 20px 16px;box-shadow:0 -6px 20px rgba(23,89,202,.12);z-index:20">
+    <!-- FIXED BOTTOM PRICE BREAKDOWN & SUBMIT -->
+    <div class="bottom-bar-fixed">
       <div style="display:flex;justify-content:space-between;font-size:12px;color:#555;margin-bottom:4px">
         <span id="breakdown-base-label">Paket (1 orang)</span>
         <span id="breakdown-base-price">Rp0</span>
