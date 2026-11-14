@@ -80,14 +80,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
-                    <div class="flex flex-wrap items-center gap-2 mb-2">
-                        <span class="inline-flex items-center gap-1.5 bg-emerald-400/20 border border-emerald-300/40 text-emerald-200 text-xs font-bold px-3 py-1 rounded-full">
-                            <span class="w-2 h-2 rounded-full bg-emerald-400 live-dot"></span>
-                            LIVE REALTIME PANITIA
-                        </span>
-                        <span id="event-status-badge" class="inline-flex items-center text-xs font-bold px-2.5 py-1 rounded-full {{ $event->is_active ? 'bg-[#FEDD03] text-slate-900' : 'bg-white/20 text-white' }}">
-                            {{ $event->is_active ? 'Pendaftaran Aktif' : 'Pendaftaran Ditutup' }}
-                        </span>
+                    <div class="flex flex-wrap items-center gap-2 mb-1.5">
                         <span class="text-xs text-blue-100">
                             Update terakhir: <strong id="last-updated-time" class="text-white">{{ $initialData['updated_at'] ?? now()->format('H:i:s') }}</strong>
                         </span>
