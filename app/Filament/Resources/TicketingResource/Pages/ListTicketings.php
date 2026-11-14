@@ -226,6 +226,7 @@ class ListTicketings extends Page
             ->visible(fn () => auth()->user()?->can('update_ticketing') ?? false)
             ->modalHeading('Edit Event & Harga')
             ->fillForm(function (array $arguments): array {
+                \App\Http\Controllers\PanitiaDashboardController::ensureColumnsExist();
                 $event = Event::find($arguments['id'] ?? null);
                 return $event ? [
                     'nama_event' => $event->nama_event,
@@ -233,6 +234,8 @@ class ListTicketings extends Page
                     'strip_price' => (int) ($event->strip_price ?? 0),
                     'is_additional_active' => (bool) ($event->is_additional_active ?? false),
                     'additional_price' => (int) ($event->additional_price ?? 0),
+                    'revenue_share_percent' => (float) ($event->revenue_share_percent ?? 0),
+                    'panitia_pin' => $event->panitia_pin ?? '',
                     'video_path' => $event->video_path ?? null,
                 ] : [];
             })
@@ -271,13 +274,29 @@ class ListTicketings extends Page
                     ->default(0)
                     ->visible(fn (Get $get): bool => (bool) $get('is_additional_active'))
                     ->required(fn (Get $get): bool => (bool) $get('is_additional_active')),
+                TextInput::make('revenue_share_percent')
+                    ->label('Bagi Hasil Panitia (%)')
+                    ->numeric()
+                    ->minValue(0)
+                    ->maxValue(100)
+                    ->suffix('%')
+                    ->default(0)
+                    ->helperText('Persentase bagi hasil untuk panitia pada Live Dashboard Panitia.'),
+                TextInput::make('panitia_pin')
+                    ->label('Kode PIN Akses Panitia (Opsional)')
+                    ->maxLength(32)
+                    ->placeholder('Kosongkan jika link panitia bisa dibuka langsung tanpa PIN')
+                    ->helperText('Jika diisi, panitia harus memasukkan PIN ini saat membuka link dashboard.'),
             ])
             ->action(function (array $data, array $arguments): void {
                 $eventId = $arguments['id'] ?? null;
                 if ($eventId) {
+                    \App\Http\Controllers\PanitiaDashboardController::ensureColumnsExist();
                     $stripPrice = (float) preg_replace('/[^0-9]/', '', (string) ($data['strip_price'] ?? 0));
                     $isAdditional = (bool) ($data['is_additional_active'] ?? false);
                     $additionalPrice = $isAdditional ? (float) preg_replace('/[^0-9]/', '', (string) ($data['additional_price'] ?? 0)) : 0;
+                    $sharePercent = max(0, min(100, (float) ($data['revenue_share_percent'] ?? 0)));
+                    $panitiaPin = trim((string) ($data['panitia_pin'] ?? '')) ?: null;
 
                     if (!Schema::hasColumn('events', 'video_path')) {
                         Schema::table('events', function ($table) {
@@ -285,12 +304,20 @@ class ListTicketings extends Page
                         });
                     }
 
+                    $existingEvent = Event::find($eventId);
+                    $slug = ($existingEvent && !empty($existingEvent->slug))
+                        ? $existingEvent->slug
+                        : Str::slug($data['nama_event']);
+
                     DB::table('events')->where('id', $eventId)->update([
                         'nama_event' => $data['nama_event'],
+                        'slug' => $slug,
                         'tanggal_event' => $data['tanggal_event'],
                         'strip_price' => $stripPrice,
                         'is_additional_active' => $isAdditional ? 1 : 0,
                         'additional_price' => $additionalPrice,
+                        'revenue_share_percent' => $sharePercent,
+                        'panitia_pin' => $panitiaPin,
                         'video_path' => $data['video_path'] ?? null,
                         'updated_at' => now(),
                     ]);
@@ -395,11 +422,26 @@ class ListTicketings extends Page
                         ->visible(fn (Get $get): bool => (bool) $get('is_additional_active'))
                         ->required(fn (Get $get): bool => (bool) $get('is_additional_active')),
 
+                    TextInput::make('revenue_share_percent')
+                        ->label('Bagi Hasil Panitia (%)')
+                        ->numeric()
+                        ->minValue(0)
+                        ->maxValue(100)
+                        ->suffix('%')
+                        ->default(0)
+                        ->helperText('Persentase bagi hasil untuk panitia pada Live Dashboard Panitia.'),
+
+                    TextInput::make('panitia_pin')
+                        ->label('Kode PIN Akses Panitia (Opsional)')
+                        ->maxLength(32)
+                        ->placeholder('Kosongkan jika link panitia bisa dibuka langsung tanpa PIN'),
+
                     Toggle::make('is_active')
                         ->label('Buka Pendaftaran?')
                         ->default(true),
                 ])
                 ->action(function (array $data) {
+                    \App\Http\Controllers\PanitiaDashboardController::ensureColumnsExist();
                     $folderName = $data['nama_event'] . ' - ' . $data['tanggal_event'];
                     $eventSlug = Str::slug($data['nama_event']);
                     
@@ -428,6 +470,8 @@ class ListTicketings extends Page
                             $stripPrice = (float) preg_replace('/[^0-9]/', '', (string) ($data['strip_price'] ?? 0));
                             $isAdditional = (bool) ($data['is_additional_active'] ?? false);
                             $additionalPrice = $isAdditional ? (float) preg_replace('/[^0-9]/', '', (string) ($data['additional_price'] ?? 0)) : 0;
+                            $sharePercent = max(0, min(100, (float) ($data['revenue_share_percent'] ?? 0)));
+                            $panitiaPin = trim((string) ($data['panitia_pin'] ?? '')) ?: null;
 
                             if (!Schema::hasColumn('events', 'video_path')) {
                                 Schema::table('events', function ($table) {
@@ -445,6 +489,8 @@ class ListTicketings extends Page
                                 'strip_price' => $stripPrice,
                                 'is_additional_active' => $isAdditional,
                                 'additional_price' => $additionalPrice,
+                                'revenue_share_percent' => $sharePercent,
+                                'panitia_pin' => $panitiaPin,
                                 'video_path' => $data['video_path'] ?? null,
                             ]);
                             Event::reguard();
@@ -453,6 +499,8 @@ class ListTicketings extends Page
                                 'strip_price' => $stripPrice,
                                 'is_additional_active' => $isAdditional ? 1 : 0,
                                 'additional_price' => $additionalPrice,
+                                'revenue_share_percent' => $sharePercent,
+                                'panitia_pin' => $panitiaPin,
                                 'video_path' => $data['video_path'] ?? null,
                             ]);
 

@@ -19,6 +19,7 @@ use App\Http\Controllers\{
     AdminFrameController,
     PhotoLinkController,
     GoogleDriveAuthController,
+    PanitiaDashboardController,
 };
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Http\Request;
@@ -171,6 +172,14 @@ Route::get('/antrian/{slug?}', function($slug = null) {
 
     return view('antrian', compact('event', 'videoUrl'));
 });
+
+// =====================================================
+// 📊 ROUTES: LIVE DASHBOARD & PREVIEW DATA PANITIA
+// =====================================================
+Route::get('/panitia/{slug}/export', [PanitiaDashboardController::class, 'exportCsv'])->name('panitia.export');
+Route::post('/panitia/{slug}/unlock', [PanitiaDashboardController::class, 'unlock'])->name('panitia.unlock');
+Route::get('/panitia/{slug?}', [PanitiaDashboardController::class, 'show'])->name('panitia.dashboard');
+Route::get('/api/panitia/realtime/{slug?}', [PanitiaDashboardController::class, 'realtimeData'])->name('panitia.realtime');
 Route::get('/api/antrian/get_queue', function() {
     try {
         // [OTOMATIS] Cek & Buat kolom 'status' jika belum ada di tabel ticketings

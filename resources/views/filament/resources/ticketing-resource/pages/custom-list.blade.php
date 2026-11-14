@@ -1,4 +1,5 @@
 <x-filament-panels::page>
+<div wire:poll.5s>
 @php
     $canUpdateTicket = auth()->user()?->can('update_ticketing');
     $canDeleteTicket = auth()->user()?->can('delete_ticketing');
@@ -17,14 +18,23 @@
     <!-- LOOPING SEMUA EVENT -->
     @foreach($this->events as $event)
         @php
-            $totalOrang = $event->ticketings->sum('jumlah');
-            $totalCetak = $event->ticketings->sum('cetak');
-            $totalAdditional = $event->ticketings->sum('additional');
+            $totalOrang = (int) $event->ticketings->sum('jumlah');
+            $totalCetak = (int) $event->ticketings->sum('cetak');
+            $totalAdditional = (int) $event->ticketings->sum('additional');
+            $totalTransaksi = $event->ticketings->count();
             
             $hargaStrip = (float) ($event->strip_price ?? 0);
             $hargaAdd = $event->is_additional_active ? (float) ($event->additional_price ?? 0) : 0;
             
-            $totalPendapatan = ($hargaStrip * $totalCetak) + ($hargaAdd * $totalAdditional);
+            $pendapatanStrip = $hargaStrip * $totalCetak;
+            $pendapatanAdd = $hargaAdd * $totalAdditional;
+            $totalPendapatan = $pendapatanStrip + $pendapatanAdd;
+
+            $sharePercent = (float) ($event->revenue_share_percent ?? 0);
+            $bagiHasilPanitia = $sharePercent > 0 ? round($totalPendapatan * ($sharePercent / 100)) : 0;
+            $panitiaSlug = $event->slug ?: $event->id;
+            $panitiaUrl = url('/panitia/' . $panitiaSlug);
+            $panitiaPin = trim((string) ($event->panitia_pin ?? ''));
         @endphp
 
         <div class="bg-white dark:bg-gray-900 shadow-sm ring-1 ring-gray-950/5 dark:ring-white/10 rounded-xl overflow-hidden mb-6">
@@ -42,6 +52,12 @@
                             Harga Strip: Rp {{ number_format($hargaStrip, 0, ',', '.') }}
                             @if($event->is_additional_active)
                                 | Additional: Rp {{ number_format($hargaAdd, 0, ',', '.') }}
+                            @endif
+                            @if($sharePercent > 0)
+                                | Bagi Hasil Panitia: {{ $sharePercent }}%
+                            @endif
+                            @if($panitiaPin !== '')
+                                | PIN Panitia: <span class="font-semibold text-primary-600 dark:text-primary-400">{{ $panitiaPin }}</span>
                             @endif
                         </p>
                     </div>
@@ -100,6 +116,40 @@
                         Antrean
                     </x-filament::button>
 
+                    <!-- TOMBOL LIVE PREVIEW PANITIA -->
+                    <x-filament::button 
+                        href="{{ $panitiaUrl }}" 
+                        tag="a" 
+                        target="_blank" 
+                        color="warning" 
+                        size="sm"
+                        icon="heroicon-o-presentation-chart-line"
+                    >
+                        Live Panitia
+                    </x-filament::button>
+
+                    <!-- TOMBOL SALIN LINK PANITIA -->
+                    <div x-data>
+                        <x-filament::button 
+                            type="button"
+                            color="gray" 
+                            size="sm"
+                            icon="heroicon-o-link"
+                            outlined
+                            x-on:click="
+                                navigator.clipboard.writeText(@js($panitiaUrl));
+                                new FilamentNotification()
+                                    .title('Link Live Panitia berhasil disalin!')
+                                    .body(@js($panitiaUrl . ($panitiaPin ? ' (PIN: ' . $panitiaPin . ')' : '')))
+                                    .success()
+                                    .duration(3000)
+                                    .send();
+                            "
+                        >
+                            Salin Link Panitia
+                        </x-filament::button>
+                    </div>
+
 @if($canDeleteTicket)
                     <!-- TOMBOL HAPUS EVENT -->
                     <x-filament::button 
@@ -116,6 +166,36 @@
 
                 </div>
 
+            </div>
+
+            <!-- DASHBOARD RINGKASAN REALTIME PER EVENT -->
+            <div class="p-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-white/10 grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div class="p-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200/70 dark:border-white/10">
+                    <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Jumlah Pengunjung</div>
+                    <div class="text-xl font-extrabold text-gray-900 dark:text-white mt-1">{{ $totalOrang }} <span class="text-xs font-medium text-gray-500">Orang</span></div>
+                    <div class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">{{ $totalTransaksi }} Registrasi Antrean</div>
+                </div>
+                <div class="p-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200/70 dark:border-white/10">
+                    <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Jumlah Cetak</div>
+                    <div class="text-xl font-extrabold text-gray-900 dark:text-white mt-1">{{ $totalCetak }} <span class="text-xs font-medium text-gray-500">Strip</span></div>
+                    <div class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">Rp {{ number_format($pendapatanStrip, 0, ',', '.') }}</div>
+                </div>
+                <div class="p-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200/70 dark:border-white/10">
+                    <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Jumlah Additional</div>
+                    <div class="text-xl font-extrabold text-gray-900 dark:text-white mt-1">{{ $totalAdditional }} <span class="text-xs font-medium text-gray-500">Add</span></div>
+                    <div class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">Rp {{ number_format($pendapatanAdd, 0, ',', '.') }}</div>
+                </div>
+                <div class="p-3 rounded-xl bg-primary-50/60 dark:bg-primary-950/30 border border-primary-200 dark:border-primary-800">
+                    <div class="text-xs font-semibold text-primary-600 dark:text-primary-400 uppercase">Total Pendapatan</div>
+                    <div class="text-xl font-extrabold text-primary-600 dark:text-primary-400 mt-1">Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</div>
+                    @if($sharePercent > 0)
+                        <div class="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5">
+                            Bagi Hasil Panitia ({{ $sharePercent }}%): Rp {{ number_format($bagiHasilPanitia, 0, ',', '.') }}
+                        </div>
+                    @else
+                        <div class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">Update Realtime Otomatis</div>
+                    @endif
+                </div>
             </div>
             
             <!-- TABEL ANTREAN -->
@@ -358,6 +438,7 @@
             </div>
         </div>
     @endforeach
+</div>
 
     <x-filament-actions::modals />
 </x-filament-panels::page>
