@@ -74,6 +74,32 @@ class ListTicketings extends Page
     }
 
     // ==========================================
+    // FUNGSI PILIH BACKGROUND (1 ATAU 2, HANYA SATU & BISA ON/OFF)
+    // ==========================================
+    public function selectBackground($ticketId, $choice)
+    {
+        // Role event_viewer, event, dan super_admin dapat memilih / menonaktifkan pilihan background
+        abort_unless(auth()->user()?->can('view_any_ticketing'), 403, 'Anda tidak memiliki hak untuk mengubah background.');
+
+        $choice = (int) $choice;
+        if (!in_array($choice, [1, 2], true)) {
+            return;
+        }
+
+        \App\Http\Controllers\PanitiaDashboardController::ensureColumnsExist();
+
+        $ticket = Ticketing::find($ticketId);
+        if ($ticket) {
+            $current = (int) ($ticket->bg_choice ?? 0);
+            $newValue = ($current === $choice) ? null : $choice;
+
+            DB::table('ticketings')
+                ->where('id', $ticketId)
+                ->update(['bg_choice' => $newValue]);
+        }
+    }
+
+    // ==========================================
     // FUNGSI TAMBAH (+) & KURANG (-) ORANG, CETAK, ADDITIONAL
     // ==========================================
     public function updateCounter($ticketId, $column, $change)
@@ -145,6 +171,7 @@ class ListTicketings extends Page
                 'Jumlah Orang',
                 'Jumlah Cetak',
                 'Jumlah Additional',
+                'Background',
                 'Pembayaran',
                 'Pendapatan',
                 'Status',
@@ -165,6 +192,7 @@ class ListTicketings extends Page
                     (int) $ticket->jumlah,
                     (int) $ticket->cetak,
                     (int) ($ticket->additional ?? 0),
+                    $ticket->bg_choice ? ('BG ' . $ticket->bg_choice) : '-',
                     strtoupper($ticket->transaction_type ?? '-'),
                     $pendapatan,
                     $ticket->status ?? 'menunggu',
@@ -233,6 +261,7 @@ class ListTicketings extends Page
                     'strip_price' => (int) ($event->strip_price ?? 0),
                     'is_additional_active' => (bool) ($event->is_additional_active ?? false),
                     'additional_price' => (int) ($event->additional_price ?? 0),
+                    'is_background_active' => (bool) ($event->is_background_active ?? true),
                     'revenue_share_percent' => (float) ($event->revenue_share_percent ?? 0),
                     'panitia_pin' => $event->panitia_pin ?? '',
                     'video_path' => $event->video_path ?? null,
@@ -273,6 +302,9 @@ class ListTicketings extends Page
                     ->default(0)
                     ->visible(fn (Get $get): bool => (bool) $get('is_additional_active'))
                     ->required(fn (Get $get): bool => (bool) $get('is_additional_active')),
+                Toggle::make('is_background_active')
+                    ->label('Aktifkan Pilihan Background (1 & 2)?')
+                    ->default(true),
                 TextInput::make('revenue_share_percent')
                     ->label('Bagi Hasil Panitia (%)')
                     ->numeric()
@@ -294,6 +326,7 @@ class ListTicketings extends Page
                     $stripPrice = (float) preg_replace('/[^0-9]/', '', (string) ($data['strip_price'] ?? 0));
                     $isAdditional = (bool) ($data['is_additional_active'] ?? false);
                     $additionalPrice = $isAdditional ? (float) preg_replace('/[^0-9]/', '', (string) ($data['additional_price'] ?? 0)) : 0;
+                    $isBackground = (bool) ($data['is_background_active'] ?? true);
                     $sharePercent = max(0, min(100, (float) ($data['revenue_share_percent'] ?? 0)));
                     $panitiaPin = trim((string) ($data['panitia_pin'] ?? '')) ?: null;
 
@@ -315,6 +348,7 @@ class ListTicketings extends Page
                         'strip_price' => $stripPrice,
                         'is_additional_active' => $isAdditional ? 1 : 0,
                         'additional_price' => $additionalPrice,
+                        'is_background_active' => $isBackground ? 1 : 0,
                         'revenue_share_percent' => $sharePercent,
                         'panitia_pin' => $panitiaPin,
                         'video_path' => $data['video_path'] ?? null,
@@ -421,6 +455,10 @@ class ListTicketings extends Page
                         ->visible(fn (Get $get): bool => (bool) $get('is_additional_active'))
                         ->required(fn (Get $get): bool => (bool) $get('is_additional_active')),
 
+                    Toggle::make('is_background_active')
+                        ->label('Aktifkan Pilihan Background (1 & 2)?')
+                        ->default(true),
+
                     TextInput::make('revenue_share_percent')
                         ->label('Bagi Hasil Panitia (%)')
                         ->numeric()
@@ -469,6 +507,7 @@ class ListTicketings extends Page
                             $stripPrice = (float) preg_replace('/[^0-9]/', '', (string) ($data['strip_price'] ?? 0));
                             $isAdditional = (bool) ($data['is_additional_active'] ?? false);
                             $additionalPrice = $isAdditional ? (float) preg_replace('/[^0-9]/', '', (string) ($data['additional_price'] ?? 0)) : 0;
+                            $isBackground = (bool) ($data['is_background_active'] ?? true);
                             $sharePercent = max(0, min(100, (float) ($data['revenue_share_percent'] ?? 0)));
                             $panitiaPin = trim((string) ($data['panitia_pin'] ?? '')) ?: null;
 
@@ -488,6 +527,7 @@ class ListTicketings extends Page
                                 'strip_price' => $stripPrice,
                                 'is_additional_active' => $isAdditional,
                                 'additional_price' => $additionalPrice,
+                                'is_background_active' => $isBackground,
                                 'revenue_share_percent' => $sharePercent,
                                 'panitia_pin' => $panitiaPin,
                                 'video_path' => $data['video_path'] ?? null,
@@ -498,6 +538,7 @@ class ListTicketings extends Page
                                 'strip_price' => $stripPrice,
                                 'is_additional_active' => $isAdditional ? 1 : 0,
                                 'additional_price' => $additionalPrice,
+                                'is_background_active' => $isBackground ? 1 : 0,
                                 'revenue_share_percent' => $sharePercent,
                                 'panitia_pin' => $panitiaPin,
                                 'video_path' => $data['video_path'] ?? null,

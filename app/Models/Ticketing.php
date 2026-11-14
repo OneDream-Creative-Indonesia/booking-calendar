@@ -13,6 +13,8 @@ class Ticketing extends Model
         'email',
         'jumlah',
         'cetak',
+        'additional',
+        'bg_choice',
         'telpon',
         'transaction_type',
         'queue_number',

@@ -14,7 +14,7 @@ class PanitiaDashboardController extends Controller
     public static function ensureColumnsExist(): void
     {
         try {
-            if (\Illuminate\Support\Facades\Cache::get('panitia_events_cols_v1')) {
+            if (\Illuminate\Support\Facades\Cache::get('panitia_events_cols_v2')) {
                 return;
             }
             if (Schema::hasTable('events')) {
@@ -28,8 +28,20 @@ class PanitiaDashboardController extends Controller
                         $table->decimal('revenue_share_percent', 5, 2)->default(0);
                     });
                 }
-                \Illuminate\Support\Facades\Cache::forever('panitia_events_cols_v1', true);
+                if (!Schema::hasColumn('events', 'is_background_active')) {
+                    Schema::table('events', function ($table) {
+                        $table->boolean('is_background_active')->default(true);
+                    });
+                }
             }
+            if (Schema::hasTable('ticketings')) {
+                if (!Schema::hasColumn('ticketings', 'bg_choice')) {
+                    Schema::table('ticketings', function ($table) {
+                        $table->unsignedTinyInteger('bg_choice')->nullable();
+                    });
+                }
+            }
+            \Illuminate\Support\Facades\Cache::forever('panitia_events_cols_v2', true);
         } catch (\Throwable $e) {
             // Ignore if DB is read-only or not yet migrated
         }

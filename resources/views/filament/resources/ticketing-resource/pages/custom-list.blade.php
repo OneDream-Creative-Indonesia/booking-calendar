@@ -34,6 +34,7 @@
             $panitiaSlug = $event->slug ?: $event->id;
             $panitiaUrl = url('/panitia/' . $panitiaSlug);
             $panitiaPin = trim((string) ($event->panitia_pin ?? ''));
+            $isBgActive = (bool) ($event->is_background_active ?? true);
         @endphp
 
         <div class="bg-white dark:bg-gray-900 shadow-sm ring-1 ring-gray-950/5 dark:ring-white/10 rounded-xl overflow-hidden mb-6">
@@ -204,12 +205,13 @@
                         <tr>
                             <th class="p-3 w-10"></th>
                             <th class="p-3">Nama</th>
+                            <th class="p-3 text-center">Antrian</th>
                             <th class="p-3 text-center">Orang</th>
                             <th class="p-3 text-center">Cetak</th>
-                            <th class="p-3 text-center">Additional</th>
-                            <th class="p-3">No HP</th>
-                            <th class="p-3">Pembayaran</th>
-                            <th class="p-3">Antrian</th>
+                            <th class="p-3 text-center">Add</th>
+                            @if($isBgActive)
+                                <th class="p-3 text-center">Background</th>
+                            @endif
                             <th class="p-3 text-center">Foto</th>
                             <th class="p-3 text-center">Export</th>
                             <th class="p-3 text-center">Print</th>
@@ -246,11 +248,16 @@
                                             <svg x-show="!copied" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                                             </svg>
-                                            <svg x-show="copied" x-cloak class="w-4 h-4 text-success-600" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                                            <svg x-show="copied" x-cloak class="w-4 h-4" style="color: #16a34a;" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
                                             </svg>
                                         </button>
                                     </div>
+                                </td>
+
+                                <!-- KOLOM ANTRIAN -->
+                                <td class="p-3 text-center text-gray-700 dark:text-gray-300 font-bold">
+                                    {{ $ticket->queue_number }}
                                 </td>
                                 
                                 <!-- KOLOM ORANG (+ / -) -->
@@ -291,7 +298,7 @@
                                     </div>
                                 </td>
 
-                                <!-- KOLOM ADDITIONAL (+ / -) -->
+                                <!-- KOLOM ADD (+ / -) -->
                                 <td class="p-3 text-center">
                                     <div class="inline-flex items-center justify-center gap-1.5">
                                         @if($canUpdateTicket)
@@ -310,9 +317,31 @@
                                     </div>
                                 </td>
 
-                                <td class="p-3 text-gray-600 dark:text-gray-400">{{ $ticket->telpon }}</td>
-                                <td class="p-3 text-gray-600 dark:text-gray-400 uppercase">{{ $ticket->transaction_type }}</td>
-                                <td class="p-3 text-gray-600 dark:text-gray-400 font-bold">{{ $ticket->queue_number }}</td>
+                                <!-- KOLOM BACKGROUND (1 & 2, HANYA BISA PILIH SATU, ROLE EVENT_VIEWER BISA AKSES) -->
+                                @if($isBgActive)
+                                <td class="p-3 text-center">
+                                    <div class="inline-flex items-center justify-center gap-3" x-data="{ bg: {{ (int) ($ticket->bg_choice ?? 0) }} }">
+                                        <label class="inline-flex items-center gap-1 cursor-pointer select-none">
+                                            <input
+                                                type="checkbox"
+                                                x-bind:checked="bg === 1"
+                                                x-on:click="bg = (bg === 1 ? 0 : 1); $wire.selectBackground({{ $ticket->id }}, 1)"
+                                                class="rounded border-gray-300 text-primary-600 focus:ring-primary-600 w-4 h-4 cursor-pointer"
+                                            >
+                                            <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">1</span>
+                                        </label>
+                                        <label class="inline-flex items-center gap-1 cursor-pointer select-none">
+                                            <input
+                                                type="checkbox"
+                                                x-bind:checked="bg === 2"
+                                                x-on:click="bg = (bg === 2 ? 0 : 2); $wire.selectBackground({{ $ticket->id }}, 2)"
+                                                class="rounded border-gray-300 text-primary-600 focus:ring-primary-600 w-4 h-4 cursor-pointer"
+                                            >
+                                            <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">2</span>
+                                        </label>
+                                    </div>
+                                </td>
+                                @endif
                                 
                                 <td class="p-3 text-center">
                                     <input type="checkbox" wire:click="toggleStatus({{ $ticket->id }}, 'is_foto')" {{ $ticket->is_foto ? 'checked' : '' }} class="rounded border-gray-300 text-green-600 focus:ring-green-600 w-5 h-5 cursor-pointer">
@@ -324,7 +353,7 @@
                                     <input type="checkbox" @if($canUpdateTicket) wire:click="toggleStatus({{ $ticket->id }}, 'is_print')" @else disabled @endif {{ $ticket->is_print ? 'checked' : '' }} class="rounded border-gray-300 text-purple-600 focus:ring-purple-600 w-5 h-5 {{ $canUpdateTicket ? 'cursor-pointer' : 'cursor-not-allowed opacity-60' }}">
                                 </td>
                                 
-                                <!-- KOLOM AKSI (ICON BUTTONS) -->
+                                <!-- KOLOM AKSI (ICON BUTTONS BERWARNA) -->
                                 <td class="p-3 text-center">
                                     <div class="flex items-center justify-center gap-1.5">
                                         <!-- ICON PANGGIL ANTREAN -->
@@ -333,11 +362,12 @@
                                                 type="button"
                                                 x-show="status === 'menunggu'"
                                                 title="Panggil Antrean"
+                                                style="color: #0284c7;"
                                                 x-on:click="
                                                     status = 'dipanggil';
                                                     $wire.panggilAntrean({{ $ticket->id }});
                                                 "
-                                                class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-sky-600 hover:bg-sky-50 dark:text-sky-400 dark:hover:bg-sky-950/50 transition cursor-pointer"
+                                                class="inline-flex items-center justify-center w-8 h-8 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 transition cursor-pointer"
                                             >
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z"/>
@@ -348,7 +378,8 @@
                                                 x-show="status !== 'menunggu'"
                                                 x-cloak
                                                 title="Sudah Dipanggil"
-                                                class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-emerald-600 dark:text-emerald-400 opacity-75"
+                                                style="color: #16a34a;"
+                                                class="inline-flex items-center justify-center w-8 h-8 rounded-lg"
                                             >
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -361,7 +392,8 @@
                                         <a
                                             href="{{ url('/admin/ticketings/' . $ticket->id . '/edit') }}"
                                             title="Edit Data"
-                                            class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-amber-600 hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-amber-950/50 transition"
+                                            style="color: #d97706;"
+                                            class="inline-flex items-center justify-center w-8 h-8 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 transition"
                                         >
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/>
@@ -374,9 +406,10 @@
                                         <button
                                             type="button"
                                             title="Hapus Data"
+                                            style="color: #dc2626;"
                                             wire:click="deleteTicket({{ $ticket->id }})"
                                             wire:confirm="Yakin ingin menghapus antrean {{ $ticket->nama }}?"
-                                            class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/50 transition cursor-pointer"
+                                            class="inline-flex items-center justify-center w-8 h-8 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 transition cursor-pointer"
                                         >
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
@@ -388,7 +421,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="12" class="p-6 text-center text-gray-500">Belum ada antrean di event ini.</td>
+                                <td colspan="{{ $isBgActive ? 11 : 10 }}" class="p-6 text-center text-gray-500">Belum ada antrean di event ini.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -396,7 +429,7 @@
                     <!-- FOOTER TOTAL DI BAGIAN BAWAH LIST -->
                     <tfoot class="bg-gray-50 dark:bg-white/5 border-t-2 border-gray-200 dark:border-white/10 font-bold text-gray-800 dark:text-gray-200">
                         <tr>
-                            <td colspan="2" class="p-3 text-right uppercase text-xs tracking-wider text-gray-500 dark:text-gray-400">
+                            <td colspan="3" class="p-3 text-right uppercase text-xs tracking-wider text-gray-500 dark:text-gray-400">
                                 Total Keseluruhan:
                             </td>
                             <td class="p-3 text-center">
@@ -408,7 +441,7 @@
                             <td class="p-3 text-center">
                                 {{ $totalAdditional }} Add
                             </td>
-                            <td colspan="7" class="p-3 text-right">
+                            <td colspan="{{ $isBgActive ? 5 : 4 }}" class="p-3 text-right">
                                 <span class="text-xs font-normal text-gray-500 dark:text-gray-400 mr-2">
                                     Total Pendapatan:
                                 </span>
