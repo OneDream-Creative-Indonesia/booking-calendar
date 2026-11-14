@@ -14,6 +14,9 @@ class PanitiaDashboardController extends Controller
     public static function ensureColumnsExist(): void
     {
         try {
+            if (\Illuminate\Support\Facades\Cache::get('panitia_events_cols_v1')) {
+                return;
+            }
             if (Schema::hasTable('events')) {
                 if (!Schema::hasColumn('events', 'panitia_pin')) {
                     Schema::table('events', function ($table) {
@@ -25,6 +28,7 @@ class PanitiaDashboardController extends Controller
                         $table->decimal('revenue_share_percent', 5, 2)->default(0);
                     });
                 }
+                \Illuminate\Support\Facades\Cache::forever('panitia_events_cols_v1', true);
             }
         } catch (\Throwable $e) {
             // Ignore if DB is read-only or not yet migrated
@@ -33,8 +37,6 @@ class PanitiaDashboardController extends Controller
 
     protected function resolveEvent(?string $slug): ?Event
     {
-        self::ensureColumnsExist();
-
         if ($slug) {
             $event = Event::where('slug', $slug)->orderBy('id', 'desc')->first();
             if (!$event && is_numeric($slug)) {

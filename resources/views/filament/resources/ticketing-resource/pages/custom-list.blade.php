@@ -1,5 +1,4 @@
 <x-filament-panels::page>
-<div wire:poll.5s>
 @php
     $canUpdateTicket = auth()->user()?->can('update_ticketing');
     $canDeleteTicket = auth()->user()?->can('delete_ticketing');
@@ -46,7 +45,7 @@
                     <input type="checkbox" wire:click="toggleSelectAll({{ $event->id }})" class="rounded border-gray-300 text-primary-600 shadow-sm focus:ring-primary-600 cursor-pointer w-4 h-4">
                     <div>
                         <h3 class="text-lg font-bold text-gray-800 dark:text-gray-200">
-                            {{ $event->nama_event }} - {{ \Carbon\Carbon::parse($event->tanggal_event)->translatedFormat('d F Y') }}
+                            {{ $event->nama_event }} - {{ $event->tanggal_event ? \Carbon\Carbon::parse($event->tanggal_event)->translatedFormat('d F Y') : '-' }}
                         </h3>
                         <p class="text-xs text-gray-500 dark:text-gray-400">
                             Harga Strip: Rp {{ number_format($hargaStrip, 0, ',', '.') }}
@@ -129,26 +128,26 @@
                     </x-filament::button>
 
                     <!-- TOMBOL SALIN LINK PANITIA -->
-                    <div x-data>
-                        <x-filament::button 
-                            type="button"
-                            color="gray" 
-                            size="sm"
-                            icon="heroicon-o-link"
-                            outlined
-                            x-on:click="
-                                navigator.clipboard.writeText(@js($panitiaUrl));
-                                new FilamentNotification()
-                                    .title('Link Live Panitia berhasil disalin!')
-                                    .body(@js($panitiaUrl . ($panitiaPin ? ' (PIN: ' . $panitiaPin . ')' : '')))
-                                    .success()
-                                    .duration(3000)
-                                    .send();
-                            "
-                        >
-                            Salin Link Panitia
-                        </x-filament::button>
-                    </div>
+                    <x-filament::button 
+                        type="button"
+                        color="gray" 
+                        size="sm"
+                        icon="heroicon-o-link"
+                        outlined
+                        data-url="{{ $panitiaUrl }}"
+                        data-info="{{ $panitiaUrl . ($panitiaPin ? ' (PIN: ' . $panitiaPin . ')' : '') }}"
+                        x-on:click="
+                            navigator.clipboard.writeText($el.dataset.url);
+                            new FilamentNotification()
+                                .title('Link Live Panitia berhasil disalin!')
+                                .body($el.dataset.info)
+                                .success()
+                                .duration(3000)
+                                .send();
+                        "
+                    >
+                        Salin Link Panitia
+                    </x-filament::button>
 
 @if($canDeleteTicket)
                     <!-- TOMBOL HAPUS EVENT -->
@@ -230,11 +229,12 @@
                                         <span>{{ $ticket->nama }}</span>
                                         <button
                                             type="button"
+                                            data-nama="{{ $ticket->nama }}"
                                             x-on:click="
-                                                navigator.clipboard.writeText(@js($ticket->nama));
+                                                navigator.clipboard.writeText($el.dataset.nama);
                                                 copied = true;
                                                 new FilamentNotification()
-                                                    .title('Nama disalin: ' + @js($ticket->nama))
+                                                    .title('Nama disalin: ' + $el.dataset.nama)
                                                     .success()
                                                     .duration(1500)
                                                     .send();
@@ -243,17 +243,12 @@
                                             class="text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition cursor-pointer p-1 rounded-md hover:bg-gray-100 dark:hover:bg-white/10"
                                             title="Salin Nama"
                                         >
-                                            <x-filament::icon
-                                                x-show="!copied"
-                                                icon="heroicon-o-clipboard-document"
-                                                class="w-4 h-4"
-                                            />
-                                            <x-filament::icon
-                                                x-show="copied"
-                                                x-cloak
-                                                icon="heroicon-o-check"
-                                                class="w-4 h-4 text-success-600"
-                                            />
+                                            <svg x-show="!copied" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                            </svg>
+                                            <svg x-show="copied" x-cloak class="w-4 h-4 text-success-600" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                            </svg>
                                         </button>
                                     </div>
                                 </td>
@@ -262,23 +257,17 @@
                                 <td class="p-3 text-center">
                                     <div class="inline-flex items-center justify-center gap-1.5">
                                         @if($canUpdateTicket)
-                                        <x-filament::icon-button
-                                            icon="heroicon-m-minus"
-                                            color="gray"
-                                            size="xs"
-                                            wire:click="updateCounter({{ $ticket->id }}, 'jumlah', -1)"
-                                        />
+                                        <button type="button" wire:click="updateCounter({{ $ticket->id }}, 'jumlah', -1)" class="inline-flex items-center justify-center w-6 h-6 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-white/10 transition cursor-pointer">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18 12H6"/></svg>
+                                        </button>
                                         @endif
                                         <span class="w-6 text-center font-semibold text-gray-800 dark:text-gray-200">
                                             {{ $ticket->jumlah ?? 0 }}
                                         </span>
                                         @if($canUpdateTicket)
-                                        <x-filament::icon-button
-                                            icon="heroicon-m-plus"
-                                            color="gray"
-                                            size="xs"
-                                            wire:click="updateCounter({{ $ticket->id }}, 'jumlah', 1)"
-                                        />
+                                        <button type="button" wire:click="updateCounter({{ $ticket->id }}, 'jumlah', 1)" class="inline-flex items-center justify-center w-6 h-6 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-white/10 transition cursor-pointer">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"/></svg>
+                                        </button>
                                         @endif
                                     </div>
                                 </td>
@@ -287,23 +276,17 @@
                                 <td class="p-3 text-center">
                                     <div class="inline-flex items-center justify-center gap-1.5">
                                         @if($canUpdateTicket)
-                                        <x-filament::icon-button
-                                            icon="heroicon-m-minus"
-                                            color="gray"
-                                            size="xs"
-                                            wire:click="updateCounter({{ $ticket->id }}, 'cetak', -1)"
-                                        />
+                                        <button type="button" wire:click="updateCounter({{ $ticket->id }}, 'cetak', -1)" class="inline-flex items-center justify-center w-6 h-6 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-white/10 transition cursor-pointer">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18 12H6"/></svg>
+                                        </button>
                                         @endif
                                         <span class="w-6 text-center font-semibold text-gray-800 dark:text-gray-200">
                                             {{ $ticket->cetak ?? 0 }}
                                         </span>
                                         @if($canUpdateTicket)
-                                        <x-filament::icon-button
-                                            icon="heroicon-m-plus"
-                                            color="gray"
-                                            size="xs"
-                                            wire:click="updateCounter({{ $ticket->id }}, 'cetak', 1)"
-                                        />
+                                        <button type="button" wire:click="updateCounter({{ $ticket->id }}, 'cetak', 1)" class="inline-flex items-center justify-center w-6 h-6 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-white/10 transition cursor-pointer">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"/></svg>
+                                        </button>
                                         @endif
                                     </div>
                                 </td>
@@ -312,23 +295,17 @@
                                 <td class="p-3 text-center">
                                     <div class="inline-flex items-center justify-center gap-1.5">
                                         @if($canUpdateTicket)
-                                        <x-filament::icon-button
-                                            icon="heroicon-m-minus"
-                                            color="gray"
-                                            size="xs"
-                                            wire:click="updateCounter({{ $ticket->id }}, 'additional', -1)"
-                                        />
+                                        <button type="button" wire:click="updateCounter({{ $ticket->id }}, 'additional', -1)" class="inline-flex items-center justify-center w-6 h-6 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-white/10 transition cursor-pointer">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18 12H6"/></svg>
+                                        </button>
                                         @endif
                                         <span class="w-6 text-center font-semibold text-gray-800 dark:text-gray-200">
                                             {{ $ticket->additional ?? 0 }}
                                         </span>
                                         @if($canUpdateTicket)
-                                        <x-filament::icon-button
-                                            icon="heroicon-m-plus"
-                                            color="gray"
-                                            size="xs"
-                                            wire:click="updateCounter({{ $ticket->id }}, 'additional', 1)"
-                                        />
+                                        <button type="button" wire:click="updateCounter({{ $ticket->id }}, 'additional', 1)" class="inline-flex items-center justify-center w-6 h-6 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-white/10 transition cursor-pointer">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6"/></svg>
+                                        </button>
                                         @endif
                                     </div>
                                 </td>
@@ -352,52 +329,59 @@
                                     <div class="flex items-center justify-center gap-1.5">
                                         <!-- ICON PANGGIL ANTREAN -->
                                         <div x-data="{ status: '{{ $ticket->status }}' }">
-                                            <div x-show="status === 'menunggu'">
-                                                <x-filament::icon-button
-                                                    icon="heroicon-o-speaker-wave"
-                                                    color="info"
-                                                    size="sm"
-                                                    tooltip="Panggil Antrean"
-                                                    x-on:click="
-                                                        status = 'dipanggil';
-                                                        $wire.panggilAntrean({{ $ticket->id }});
-                                                    "
-                                                />
-                                            </div>
+                                            <button
+                                                type="button"
+                                                x-show="status === 'menunggu'"
+                                                title="Panggil Antrean"
+                                                x-on:click="
+                                                    status = 'dipanggil';
+                                                    $wire.panggilAntrean({{ $ticket->id }});
+                                                "
+                                                class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-sky-600 hover:bg-sky-50 dark:text-sky-400 dark:hover:bg-sky-950/50 transition cursor-pointer"
+                                            >
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z"/>
+                                                </svg>
+                                            </button>
 
-                                            <div x-show="status !== 'menunggu'" x-cloak>
-                                                <x-filament::icon-button
-                                                    icon="heroicon-o-check-circle"
-                                                    color="success"
-                                                    size="sm"
-                                                    tooltip="Sudah Dipanggil"
-                                                    disabled
-                                                />
-                                            </div>
+                                            <span
+                                                x-show="status !== 'menunggu'"
+                                                x-cloak
+                                                title="Sudah Dipanggil"
+                                                class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-emerald-600 dark:text-emerald-400 opacity-75"
+                                            >
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                </svg>
+                                            </span>
                                         </div>
 
 @if($canUpdateTicket)
                                         <!-- ICON EDIT TIAP LIST -->
-                                        <x-filament::icon-button
-                                            href="{{ \App\Filament\Resources\TicketingResource::getUrl('edit', ['record' => $ticket->id]) }}"
-                                            tag="a"
-                                            icon="heroicon-o-pencil-square"
-                                            color="warning"
-                                            size="sm"
-                                            tooltip="Edit Data"
-                                        />
+                                        <a
+                                            href="{{ url('/admin/ticketings/' . $ticket->id . '/edit') }}"
+                                            title="Edit Data"
+                                            class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-amber-600 hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-amber-950/50 transition"
+                                        >
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/>
+                                            </svg>
+                                        </a>
 @endif
 
 @if($canDeleteTicket)
                                         <!-- ICON HAPUS TIAP LIST -->
-                                        <x-filament::icon-button
-                                            icon="heroicon-o-trash"
-                                            color="danger"
-                                            size="sm"
-                                            tooltip="Hapus Data"
+                                        <button
+                                            type="button"
+                                            title="Hapus Data"
                                             wire:click="deleteTicket({{ $ticket->id }})"
                                             wire:confirm="Yakin ingin menghapus antrean {{ $ticket->nama }}?"
-                                        />
+                                            class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/50 transition cursor-pointer"
+                                        >
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
+                                            </svg>
+                                        </button>
 @endif
                                     </div>
                                 </td>
@@ -438,7 +422,6 @@
             </div>
         </div>
     @endforeach
-</div>
 
     <x-filament-actions::modals />
 </x-filament-panels::page>

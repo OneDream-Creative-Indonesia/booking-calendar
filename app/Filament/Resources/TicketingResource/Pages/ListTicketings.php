@@ -226,7 +226,6 @@ class ListTicketings extends Page
             ->visible(fn () => auth()->user()?->can('update_ticketing') ?? false)
             ->modalHeading('Edit Event & Harga')
             ->fillForm(function (array $arguments): array {
-                \App\Http\Controllers\PanitiaDashboardController::ensureColumnsExist();
                 $event = Event::find($arguments['id'] ?? null);
                 return $event ? [
                     'nama_event' => $event->nama_event,
