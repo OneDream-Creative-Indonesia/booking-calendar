@@ -97,12 +97,12 @@
                         {{ $event->nama_event }}
                     </h1>
                     <p class="text-sm text-blue-100 mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
-                        <span>📅 <span id="event-date">{{ $initialData['event']['tanggal_event'] ?? '-' }}</span></span>
+                        <span id="event-date">{{ $initialData['event']['tanggal_event'] ?? '-' }}</span>
                         <span>•</span>
-                        <span>💵 Harga Strip: <strong id="info-strip-price" class="text-white">Rp {{ number_format((float)($event->strip_price ?? 0), 0, ',', '.') }}</strong></span>
+                        <span>Harga Strip: <strong id="info-strip-price" class="text-white">Rp {{ number_format((float)($event->strip_price ?? 0), 0, ',', '.') }}</strong></span>
                         @if($event->is_additional_active)
                             <span>•</span>
-                            <span>➕ Harga Additional: <strong id="info-add-price" class="text-white">Rp {{ number_format((float)($event->additional_price ?? 0), 0, ',', '.') }}</strong></span>
+                            <span>Harga Additional: <strong id="info-add-price" class="text-white">Rp {{ number_format((float)($event->additional_price ?? 0), 0, ',', '.') }}</strong></span>
                         @endif
                     </p>
                 </div>
@@ -113,9 +113,6 @@
                         onclick="fetchRealtimeData(true)"
                         class="inline-flex items-center gap-2 bg-white/15 hover:bg-white/25 text-white text-xs sm:text-sm font-bold px-4 py-2.5 rounded-xl border border-white/20 transition cursor-pointer"
                     >
-                        <svg id="refresh-icon" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                        </svg>
                         Refresh
                     </button>
 
@@ -123,9 +120,6 @@
                         href="{{ route('panitia.export', ['slug' => $slugKey]) }}"
                         class="inline-flex items-center gap-2 bg-[#FEDD03] hover:bg-yellow-300 text-slate-900 text-xs sm:text-sm font-extrabold px-4 py-2.5 rounded-xl shadow-md transition"
                     >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                        </svg>
                         Export CSV
                     </a>
                 </div>
@@ -139,82 +133,54 @@
              ========================================== -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <!-- 1. JUMLAH PENGUNJUNG -->
-            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 flex items-start justify-between">
-                <div>
-                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Jumlah Pengunjung</span>
-                    <div class="mt-2 flex items-baseline gap-1.5">
-                        <span id="stat-pengunjung" class="text-3xl font-extrabold text-slate-900">{{ $initialData['stats']['total_pengunjung'] ?? 0 }}</span>
-                        <span class="text-sm font-semibold text-slate-500">Orang</span>
-                    </div>
-                    <p class="text-xs text-slate-500 mt-2">
-                        Dari <strong id="stat-transaksi" class="text-slate-700">{{ $initialData['stats']['total_transaksi'] ?? 0 }}</strong> grup/antrean terdaftar
-                    </p>
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Jumlah Pengunjung</span>
+                <div class="mt-2 flex items-baseline gap-1.5">
+                    <span id="stat-pengunjung" class="text-3xl font-extrabold text-slate-900">{{ $initialData['stats']['total_pengunjung'] ?? 0 }}</span>
+                    <span class="text-sm font-semibold text-slate-500">Orang</span>
                 </div>
-                <div class="w-12 h-12 rounded-2xl bg-blue-50 text-[#1759CA] flex items-center justify-center flex-shrink-0">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    </svg>
-                </div>
+                <p class="text-xs text-slate-500 mt-2">
+                    Dari <strong id="stat-transaksi" class="text-slate-700">{{ $initialData['stats']['total_transaksi'] ?? 0 }}</strong> grup/antrean terdaftar
+                </p>
             </div>
 
             <!-- 2. JUMLAH CETAK -->
-            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 flex items-start justify-between">
-                <div>
-                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Jumlah Cetak</span>
-                    <div class="mt-2 flex items-baseline gap-1.5">
-                        <span id="stat-cetak" class="text-3xl font-extrabold text-slate-900">{{ $initialData['stats']['total_cetak'] ?? 0 }}</span>
-                        <span class="text-sm font-semibold text-slate-500">Strip</span>
-                    </div>
-                    <p class="text-xs text-slate-500 mt-2">
-                        Senilai <strong id="stat-pendapatan-cetak" class="text-slate-700">Rp {{ number_format($initialData['stats']['pendapatan_cetak'] ?? 0, 0, ',', '.') }}</strong>
-                    </p>
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Jumlah Cetak</span>
+                <div class="mt-2 flex items-baseline gap-1.5">
+                    <span id="stat-cetak" class="text-3xl font-extrabold text-slate-900">{{ $initialData['stats']['total_cetak'] ?? 0 }}</span>
+                    <span class="text-sm font-semibold text-slate-500">Strip</span>
                 </div>
-                <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center flex-shrink-0">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
-                    </svg>
-                </div>
+                <p class="text-xs text-slate-500 mt-2">
+                    Senilai <strong id="stat-pendapatan-cetak" class="text-slate-700">Rp {{ number_format($initialData['stats']['pendapatan_cetak'] ?? 0, 0, ',', '.') }}</strong>
+                </p>
             </div>
 
             <!-- 3. JUMLAH ADDITIONAL -->
-            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 flex items-start justify-between">
-                <div>
-                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Jumlah Additional</span>
-                    <div class="mt-2 flex items-baseline gap-1.5">
-                        <span id="stat-additional" class="text-3xl font-extrabold text-slate-900">{{ $initialData['stats']['total_additional'] ?? 0 }}</span>
-                        <span class="text-sm font-semibold text-slate-500">Item</span>
-                    </div>
-                    <p class="text-xs text-slate-500 mt-2">
-                        Senilai <strong id="stat-pendapatan-additional" class="text-slate-700">Rp {{ number_format($initialData['stats']['pendapatan_additional'] ?? 0, 0, ',', '.') }}</strong>
-                    </p>
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Jumlah Additional</span>
+                <div class="mt-2 flex items-baseline gap-1.5">
+                    <span id="stat-additional" class="text-3xl font-extrabold text-slate-900">{{ $initialData['stats']['total_additional'] ?? 0 }}</span>
+                    <span class="text-sm font-semibold text-slate-500">Item</span>
                 </div>
-                <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                    </svg>
-                </div>
+                <p class="text-xs text-slate-500 mt-2">
+                    Senilai <strong id="stat-pendapatan-additional" class="text-slate-700">Rp {{ number_format($initialData['stats']['pendapatan_additional'] ?? 0, 0, ',', '.') }}</strong>
+                </p>
             </div>
 
             <!-- 4. TOTAL PENDAPATAN -->
-            <div class="bg-white rounded-2xl p-5 shadow-sm border-2 border-[#CE004F]/20 flex items-start justify-between">
-                <div>
-                    <span class="text-xs font-bold uppercase tracking-wider text-[#CE004F]">Total Pendapatan</span>
-                    <div class="mt-2">
-                        <span id="stat-total-pendapatan" class="text-2xl sm:text-3xl font-extrabold text-[#CE004F]">
-                            Rp {{ number_format($initialData['stats']['total_pendapatan'] ?? 0, 0, ',', '.') }}
-                        </span>
-                    </div>
-                    <p class="text-xs text-slate-500 mt-2 flex flex-wrap items-center gap-x-2">
-                        <span>QRIS: <strong id="stat-qris-nominal" class="text-slate-700">Rp {{ number_format($initialData['stats']['pendapatan_qris'] ?? 0, 0, ',', '.') }}</strong></span>
-                        <span>•</span>
-                        <span>Tunai: <strong id="stat-tunai-nominal" class="text-slate-700">Rp {{ number_format($initialData['stats']['pendapatan_tunai'] ?? 0, 0, ',', '.') }}</strong></span>
-                    </p>
+            <div class="bg-white rounded-2xl p-5 shadow-sm border-2 border-[#CE004F]/20">
+                <span class="text-xs font-bold uppercase tracking-wider text-[#CE004F]">Total Pendapatan</span>
+                <div class="mt-2">
+                    <span id="stat-total-pendapatan" class="text-2xl sm:text-3xl font-extrabold text-[#CE004F]">
+                        Rp {{ number_format($initialData['stats']['total_pendapatan'] ?? 0, 0, ',', '.') }}
+                    </span>
                 </div>
-                <div class="w-12 h-12 rounded-2xl bg-rose-50 text-[#CE004F] flex items-center justify-center flex-shrink-0">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                </div>
+                <p class="text-xs text-slate-500 mt-2 flex flex-wrap items-center gap-x-2">
+                    <span>QRIS: <strong id="stat-qris-nominal" class="text-slate-700">Rp {{ number_format($initialData['stats']['pendapatan_qris'] ?? 0, 0, ',', '.') }}</strong></span>
+                    <span>•</span>
+                    <span>Tunai: <strong id="stat-tunai-nominal" class="text-slate-700">Rp {{ number_format($initialData['stats']['pendapatan_tunai'] ?? 0, 0, ',', '.') }}</strong></span>
+                </p>
             </div>
         </div>
 
@@ -222,45 +188,36 @@
              PANEL BAGI HASIL & PROGRESS ANTREAN
              ========================================== -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <!-- KALKULATOR / INFO BAGI HASIL PANITIA -->
+            <!-- INFO BAGI HASIL PANITIA (READ-ONLY DARI DASHBOARD ADMIN) -->
             <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 lg:col-span-2">
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4 border-b border-slate-100">
                     <div>
-                        <h2 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
-                            <span>🤝 Estimasi Bagi Hasil (Revenue Share)</span>
+                        <h2 class="text-base font-extrabold text-slate-900">
+                            Estimasi Bagi Hasil (Revenue Share)
                         </h2>
                         <p class="text-xs text-slate-500">Perhitungan otomatis berdasarkan total pendapatan realtime</p>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <label for="share-percent-input" class="text-xs font-bold text-slate-600">Porsi Panitia (%):</label>
-                        <input
-                            id="share-percent-input"
-                            type="number"
-                            min="0"
-                            max="100"
-                            step="0.5"
-                            value="{{ (float)($initialData['stats']['bagi_hasil_percent'] ?? 0) > 0 ? (float)$initialData['stats']['bagi_hasil_percent'] : 20 }}"
-                            oninput="recalculateShare()"
-                            class="w-20 px-3 py-1.5 text-sm font-bold text-center rounded-xl border border-slate-300 focus:border-[#1759CA] outline-none"
-                        >
+                    <div class="inline-flex items-center gap-1.5 bg-slate-100 text-slate-700 text-xs font-bold px-3.5 py-2 rounded-xl self-start sm:self-auto">
+                        <span>Porsi Panitia:</span>
+                        <span id="badge-share-panitia" class="text-[#1759CA] font-extrabold">{{ (float)($initialData['stats']['bagi_hasil_percent'] ?? 0) }}%</span>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
                     <div class="bg-emerald-50/70 border border-emerald-200/80 rounded-xl p-4">
                         <div class="text-xs font-bold text-emerald-800 uppercase tracking-wider">
-                            Porsi Panitia (<span id="label-share-panitia">20</span>%)
+                            Porsi Panitia (<span id="label-share-panitia">{{ (float)($initialData['stats']['bagi_hasil_percent'] ?? 0) }}</span>%)
                         </div>
                         <div id="val-share-panitia" class="text-2xl font-extrabold text-emerald-700 mt-1">
-                            Rp 0
+                            Rp {{ number_format($initialData['stats']['bagi_hasil_panitia'] ?? 0, 0, ',', '.') }}
                         </div>
                     </div>
                     <div class="bg-blue-50/70 border border-blue-200/80 rounded-xl p-4">
                         <div class="text-xs font-bold text-blue-800 uppercase tracking-wider">
-                            Porsi Snap Fun (<span id="label-share-snapfun">80</span>%)
+                            Porsi Snap Fun (<span id="label-share-snapfun">{{ max(0, 100 - (float)($initialData['stats']['bagi_hasil_percent'] ?? 0)) }}</span>%)
                         </div>
                         <div id="val-share-snapfun" class="text-2xl font-extrabold text-[#1759CA] mt-1">
-                            Rp 0
+                            Rp {{ number_format($initialData['stats']['bagi_hasil_snapfun'] ?? 0, 0, ',', '.') }}
                         </div>
                     </div>
                 </div>
@@ -269,7 +226,7 @@
             <!-- STATUS PROGRES ANTREAN -->
             <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 flex flex-col justify-between">
                 <div>
-                    <h2 class="text-base font-extrabold text-slate-900">📊 Status Operasional</h2>
+                    <h2 class="text-base font-extrabold text-slate-900">Status Operasional</h2>
                     <p class="text-xs text-slate-500 mb-4">Progres layanan di booth saat ini</p>
                 </div>
                 <div class="grid grid-cols-2 gap-3 text-center">
@@ -381,14 +338,15 @@
 
         function recalculateShare() {
             const totalRev = Number(stateData?.stats?.total_pendapatan || 0);
-            const inputEl = document.getElementById('share-percent-input');
-            let pct = parseFloat(inputEl?.value || '0');
+            let pct = parseFloat(stateData?.stats?.bagi_hasil_percent ?? 0);
             if (isNaN(pct) || pct < 0) pct = 0;
             if (pct > 100) pct = 100;
 
             const panitiaAmt = Math.round(totalRev * (pct / 100));
             const snapfunAmt = totalRev - panitiaAmt;
 
+            const badgeEl = document.getElementById('badge-share-panitia');
+            if (badgeEl) badgeEl.textContent = pct + '%';
             document.getElementById('label-share-panitia').textContent = pct;
             document.getElementById('label-share-snapfun').textContent = Math.max(0, +(100 - pct).toFixed(2));
             document.getElementById('val-share-panitia').textContent = formatRupiah(panitiaAmt);
